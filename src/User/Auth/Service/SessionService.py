@@ -6,6 +6,8 @@ from src.Utils.env import get_env_var
 
 from src.User.Repository.UserRepository import UserRepository
 from src.User.Schema.UserResponseSchema import UserResponseSchema
+from src.User.Auth.Schema.UserSessionListSchema import UserSessionListSchema
+
 from src.Model.User import User
 from src.Model.UserSession import Session
 
@@ -19,7 +21,7 @@ import jwt
 from passlib.context import CryptContext
 from uuid import UUID
 
-OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl="token")
+TOKEN_SCHEME = Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="token"))]
 
 class SessionService(metaclass=singleton):
     def __init__(self):
@@ -62,7 +64,7 @@ class SessionService(metaclass=singleton):
         content = {"sub": str(id)}
         return jwt.encode(content, self.SECRET_KEY, algorithm=self.ALGORITHM)
 
-    def get_current_user(self, token: Annotated[str, Depends(OAUTH2_SCHEME)]) -> User:
+    def get_current_user(self, token: TOKEN_SCHEME) -> UserResponseSchema:
         credentialsException = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Não foi possível validar as credenciais de usuário, tente entrar novamente",
@@ -83,3 +85,10 @@ class SessionService(metaclass=singleton):
             raise credentialsException
 
         return UserResponseSchema.model_validate(model_to_dict(user))
+
+    def get_user_sessions(self, token: TOKEN_SCHEME) -> UserSessionListSchema:
+        user = self.get_current_user(token)
+        return UserSessionListSchema.model_validate({
+            "user": user,
+            "sessions": self.sessionRepository.find_all_by_user(user)
+        })
