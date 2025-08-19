@@ -4,8 +4,12 @@ from slowapi.util import get_remote_address
 
 from typing import Annotated
 
-from src.User.Schema import UserResponseSchema
+from src.User.Schema.UserResponseSchema import UserResponseSchema
+
+from src.User.Auth.Schema.RevokeSessionSchema import RevokeSessionSchema
 from src.User.Auth.Schema.UserSessionListSchema import UserSessionListSchema
+from src.User.Auth.Schema.TokenResponseSchema import TokenResponseSchema
+
 from src.User.Auth.Service.SessionService import TOKEN_SCHEME
 from src.User.Auth.Service.SessionService import SessionService
 
@@ -18,24 +22,26 @@ AUTH_ROUTER = APIRouter(
     ]
 )
 
-# TODO See later why returning 'UserResponseSchema' raises a error
-@AUTH_ROUTER.get("/test")
-def test_token(token: TOKEN_SCHEME):
+@AUTH_ROUTER.get("/user")
+def test_token(token: TOKEN_SCHEME) -> UserResponseSchema:
     return sessionService.get_current_user(token)
+
+@AUTH_ROUTER.post("/revoke", status_code=status.HTTP_204_NO_CONTENT)
+def revoke_token(token: TOKEN_SCHEME, token_to_revoke: RevokeSessionSchema) -> None:
+    sessionService.revoke_session(token, token_to_revoke)
 
 @AUTH_ROUTER.get("/sessions")
 def retrive_sessions(token: TOKEN_SCHEME) -> UserSessionListSchema:
     return sessionService.get_user_sessions(token)
 
-# TODO Move logic to service and give a proper schema
 @AUTH_ROUTER.post("/", status_code=status.HTTP_201_CREATED)
-def generate_token(request: Request, formdata: Annotated[OAuth2PasswordRequestForm, Depends()]) -> dict:
+def generate_token(request: Request, formdata: Annotated[OAuth2PasswordRequestForm, Depends()]) -> TokenResponseSchema:
     userIP = get_remote_address(request)
     
     session = sessionService.create_session(
-        userMail=formdata.username, userPassword=formdata.password, userIP=userIP
+        formdata.username, formdata.password, userIP
     )
 
     token = sessionService.generate_jwt_token(session.id)
 
-    return {"access_token": token, "token_type": "bearer"}
+    return TokenResponseSchema.model_validate({"access_token": token, "token_type": "bearer"})
