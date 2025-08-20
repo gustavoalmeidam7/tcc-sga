@@ -26,7 +26,7 @@ class UserService(metaclass=singleton):
 
         createdUser = self.userRepository.create(userModel)
 
-        return UserResponseSchema.from_user_model(createdUser)
+        return UserResponseSchema.model_validate(createdUser)
     
     def delete_by_id(self, id: int) -> None:
         self.userRepository.delete_by_id(id)
@@ -41,7 +41,7 @@ class UserService(metaclass=singleton):
         pagesize = max(1, min(pagesize, 50))
         page = max(1, page)
 
-        return list(map(UserResponseSchema.from_user_model, self.userRepository.find_all_with_page(page, pagesize)))
+        return list(map(UserResponseSchema.model_validate, self.userRepository.find_all_with_page(page, pagesize)))
 
     # TODO Arrumar dps
     def __get_user__(self, id: int) -> 'User':
