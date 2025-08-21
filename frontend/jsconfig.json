@@ -1,13 +1,9 @@
 {
-  "compilerOptions": {
-    "allowJs": true,
-    "checkJs": true,
-    "jsx": "react-jsx",
-    "noEmit": true,
+    "compilerOptions": {
+    "target": "es2020",
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }
-  },
-  "include": ["src"]
+  }
 }
