@@ -1,0 +1,85 @@
+﻿
+.main-wrap {
+    display: flex;
+    min-height: 100vh;
+    align-items: stretch
+}
+
+.esq {
+    flex: 1;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem
+}
+
+.esq h1 {
+    color: #77ffc0;
+    font-size: clamp(1.4rem, 2.5vw, 2rem);
+    line-height: 1.2
+}
+
+.dir {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem
+}
+
+.login.card {
+    width: 420px;
+    max-width: 92%
+}
+
+.login .textfield {
+    width: 100%;
+    display: flex;
+    flex-direction: column
+}
+
+.login .textfield input {
+    margin-bottom: .6rem
+}
+
+.login-links {
+    margin-top: .8rem;
+    text-align: right
+}
+
+.login-links a {
+    font-size: .9rem;
+    color: #444
+}
+
+@media (max-width: 768px) {
+    .main-wrap {
+        flex-direction: column
+    }
+
+    .esq,
+    .dir {
+        flex: none;
+        width: 100%;
+        padding: 2rem 1rem
+    }
+
+    .esq {
+        order: 2;
+        text-align: center
+    }
+
+    .dir {
+        order: 1;
+        padding-top: 1rem;
+        padding-bottom: 2rem
+    }
+
+    .login.card {
+        width: 100%
+    }
+}
+
+
+

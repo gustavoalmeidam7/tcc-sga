@@ -20,10 +20,7 @@ export default defineConfig([
         ecmaVersion: 'latest',
         ecmaFeatures: { jsx: true },
         sourceType: 'module',
-    },
-    "paths": {
-      "@/*": ["./src/*"]
-    },
+      },
     },
     rules: {
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
