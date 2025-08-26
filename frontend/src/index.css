@@ -2,19 +2,15 @@
 @import "tw-animate-css";
 
 :root {
-  --bg-dark: #000000;
   --card-shadow: rgba(0, 0, 0, 0.34);
-  --radius: 0.625rem;
   --max-width: 1100px;
-  --gap: 1rem;
-  --text-dark: #000;
-  --text-sm: 1.1rem;
 }
 
 @layer base {
   body {
     @apply text-base font-medium bg-gray-50 text-black min-h-screen;
   }
+
   h1, h2, h3 {
     @apply text-lg font-bold mb-2;
   }
@@ -29,7 +25,7 @@
 
   input, textarea, select {
     @apply px-4 py-3 rounded-lg border-none outline-none text-base shadow-md;
-    background: var(--accent);
+    background: white;
   }
 
   textarea {
@@ -53,20 +49,16 @@
   }
 
   .card {
-    @apply p-5 rounded-xl shadow-xl font-normal;
-    background: var(--accent);
+    @apply p-5 rounded-xl shadow-xl font-normal bg-white;
     box-shadow: 0 10px 40px var(--card-shadow);
   }
 
   .btn {
-    @apply inline-block px-5 py-3 rounded-lg uppercase font-extrabold tracking-wider cursor-pointer shadow-lg;
-    background: var(--accent);
-    color: var(--text-dark);
+    @apply inline-block px-5 py-3 rounded-lg uppercase font-extrabold tracking-wider cursor-pointer shadow-lg bg-white text-black;
   }
 
   .btn-secondary {
-    @apply bg-transparent border-2 text-white font-semibold normal-case tracking-normal;
-    border-color: rgba(255, 255, 255, 0.08);
+    @apply bg-transparent border-2 text-white font-semibold normal-case tracking-normal border-white/10;
   }
 
   .logo {
@@ -85,4 +77,3 @@
     @apply flex-1 flex items-center justify-center p-8;
   }
 }
-

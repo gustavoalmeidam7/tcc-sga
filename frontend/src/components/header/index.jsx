@@ -1,7 +1,7 @@
 ﻿import { Link } from "react-router-dom"
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from "@/components/ui/navigation-menu"
 
-function Header() {
+export function Header() {
     return (
         <header className="bg-gray-800 px-8 py-4 flex items-center justify-between sticky top-0 z-20">
             <Link to="/">
@@ -46,5 +46,3 @@ function Header() {
         </header>
     )
 }
-
-export default Header;
