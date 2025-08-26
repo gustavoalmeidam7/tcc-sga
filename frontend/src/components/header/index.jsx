@@ -1,5 +1,5 @@
 ﻿import { Link } from "react-router-dom"
-import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from "@/components/ui/navigation-menu"
+import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from "@components/components/ui/navigation-menu"
 
 function Header() {
     return (

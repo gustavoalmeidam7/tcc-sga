@@ -1,4 +1,4 @@
-﻿import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card"
+﻿import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@components/components/ui/card"
 
 function Home() {
   return (
