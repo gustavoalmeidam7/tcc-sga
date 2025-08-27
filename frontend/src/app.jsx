@@ -20,10 +20,13 @@ export default function App() {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:hidden">
-            <SidebarTrigger />
-            <h1 className="font-semibold text-lg m-0">SGA</h1>
-          </header>
+            <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b px-4 sm:hidden">
+              <SidebarTrigger className="bg-gray-200 hover:bg-gray-400" />
+              <h1 className="font-semibold text-lg m-0">SGA</h1>
+            </header>
+            <header className="hidden sm:flex sticky top-0 z-30 h-14 items-center gap-4 px-4">
+              <SidebarTrigger className="border-b bg-gray-200 hover:bg-gray-400 " />
+            </header>
           <main className="p-4 md:p-6">
             <Routes>
               <Route path="/" element={<Home />} />
