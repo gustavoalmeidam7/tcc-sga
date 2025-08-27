@@ -2,7 +2,7 @@
 
 function Home() {
   return (
-    <main className="min-h-screen bg-gray-50 p-6 text-xl">
+    <main className="w-full flex items-center justify-center bg-gray-50 p-6 text-xl">
       <section className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 font-normal">
         <Card className="p-5 rounded-xl shadow-xl">
           <CardHeader>

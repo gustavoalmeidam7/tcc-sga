@@ -6,6 +6,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+
 import {
   Car,
   Home,
@@ -16,6 +17,7 @@ import {
   Package2,
   Users,
 } from "lucide-react";
+
 import { Link, useLocation } from "react-router-dom";
 
 const navItems = [
@@ -34,16 +36,21 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center h-10">
           <Package2 className="h-6 w-6" />
-          <span className="text-lg font-semibold">SGA</span>
+          <span className="absolute left-1/2 -translate-x-1/2 text-lg font-semibold">
+            SGA
+          </span>
         </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>
           {navItems.map((item) => (
             <SidebarMenuItem key={item.to}>
-              <Link to={item.to} className="w-full">
+              <Link
+                to={item.to}
+                className="w-full"
+              >
                 <SidebarMenuButton
                   isActive={location.pathname === item.to}
                   tooltip={item.label}

@@ -18,30 +18,28 @@ export default function App() {
   return (
     <BrowserRouter>
       <SidebarProvider>
-        <div className="flex min-h-screen">
-          <AppSidebar />
-          <SidebarInset>
-            <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:hidden">
-              <SidebarTrigger />
-              <h1 className="font-semibold text-lg">SGA</h1>
-            </header>
-            <main className="p-4 md:p-6">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/registro" element={<Registro />} />
-                <Route path="/ambulancias" element={<Ambulancias />} />
-                <Route path="/usuarios" element={<Usuarios />} />
-                <Route path="/viagens" element={<Viagens />} />
-                <Route path="/rec_senha" element={<RecSenha />} />
-                <Route path="/saiba-mais" element={<SaibaMais />} />
-                <Route path="/suporte" element={<Suporte />} />
-                <Route path="*" element={<div>404 - Página não encontrada</div>} />
-              </Routes>
-            </main>
-            <Footer />
-          </SidebarInset>
-        </div>
+        <AppSidebar />
+        <SidebarInset>
+          <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:hidden">
+            <SidebarTrigger />
+            <h1 className="font-semibold text-lg m-0">SGA</h1>
+          </header>
+          <main className="p-4 md:p-6">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/registro" element={<Registro />} />
+              <Route path="/ambulancias" element={<Ambulancias />} />
+              <Route path="/usuarios" element={<Usuarios />} />
+              <Route path="/viagens" element={<Viagens />} />
+              <Route path="/rec_senha" element={<RecSenha />} />
+              <Route path="/saiba-mais" element={<SaibaMais />} />
+              <Route path="/suporte" element={<Suporte />} />
+              <Route path="*" element={<div>404 - Página não encontrada</div>} />
+            </Routes>
+          </main>
+          <Footer />
+        </SidebarInset>
       </SidebarProvider>
     </BrowserRouter>
   );
