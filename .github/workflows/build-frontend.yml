@@ -2,12 +2,10 @@ on:
   push:
     branches:
       - main
-      - SGA-12-pipelines-ci-cd-automatizados-do-frontend
   pull_request:
     branches:
       - main
 
-# Deploy to GitHub Pages on push to main branch, deploy a vite react app
 jobs:
   build:
     permissions:
@@ -36,6 +34,3 @@ jobs:
         with:
           branch: gh-pages
           folder: frontend/dist
-      
-      - name: Post deployment message
-        run: echo "Deployed to GitHub Pages"
