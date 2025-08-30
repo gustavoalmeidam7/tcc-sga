@@ -1,0 +1,41 @@
+on:
+  push:
+    branches:
+      - main
+      - SGA-12-pipelines-ci-cd-automatizados-do-frontend
+  pull_request:
+    branches:
+      - main
+
+# Deploy to GitHub Pages on push to main branch, deploy a vite react app
+jobs:
+  build:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.x'
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: frontend
+
+      - name: Build project
+        run: npm run build
+        working-directory: frontend
+
+      - name: Deploy para GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: frontend/dist
+      
+      - name: Post deployment message
+        run: echo "Deployed to GitHub Pages"
