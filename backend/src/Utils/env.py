@@ -8,6 +8,7 @@ def get_env_var(var_name: str) -> str:
     key = os.environ.get(var_name, None)
 
     if key is None:
-        raise RuntimeError(f"Chave {var_name} não encontrada no .env file")
+        print(f"Chave {var_name} não encontrada no .env file")
+        return None
     
     return key
