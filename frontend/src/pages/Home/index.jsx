@@ -1,41 +1,168 @@
-﻿import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card"
+﻿import React from "react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
+import userAvatar from "@/assets/avatar.png";
+import { Briefcase, Ambulance, User, Activity, Plus } from "lucide-react";
 
-function Home() {
+export default function Home() {
   return (
-    <main className="w-full flex items-center justify-center bg-gray-50 p-6 text-xl">
-      <section className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 font-normal">
-        <Card className="p-5 rounded-xl shadow-xl">
-          <CardHeader>
-            <CardTitle>Página Inicial</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CardDescription>
-              Bem-vindo ao sistema de gerenciamento de ambulâncias.
-            </CardDescription>
-          </CardContent>
-        </Card>
+    <main className="w-full min-h-screen bg-gray-50 p-8">
+      <section className="max-w-7xl mx-auto space-y-8">
+        <header className="flex items-center justify-between gap-4 border-b pb-6">
+          <div className="flex items-center gap-4">
+            <Avatar className="w-14 h-14">
+              <AvatarImage src={userAvatar} alt="Foto do gestor" />
+              <AvatarFallback>G</AvatarFallback>
+            </Avatar>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Bem-vindo, Maicon</h1>
+              <p className="text-sm text-gray-600">Painel de controle</p>
+            </div>
+          </div>
+          <Button className="px-6 rounded-md border hover:bg-gray-100 transition-colors">
+            <Plus className="w-4 h-4 mr-2" />
+            Adicionar Nova Viagem
+          </Button>
+        </header>
 
-        <Card className="p-5 rounded-xl shadow-xl">
-          <CardHeader>
-            <CardTitle>Visão Geral</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CardDescription>
-              Atalhos rápidos: cadastrar paciente, agendar viagens, gerenciar ambulâncias.
-            </CardDescription>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="shadow-md border">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
+              <CardTitle className="text-sm font-medium text-gray-500">
+                Viagens do Dia
+              </CardTitle>
+              <Briefcase className="w-5 h-5 text-gray-500" />
+            </CardHeader>
+            <CardContent className="p-4 pt-0">
+              <div className="text-3xl font-semibold">12</div>
+              <p className="text-xs text-gray-500 mt-1">+2 novas hoje</p>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-md border">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
+              <CardTitle className="text-sm font-medium text-gray-500">
+                Ambulâncias Livres
+              </CardTitle>
+              <Ambulance className="w-5 h-5 text-gray-500" />
+            </CardHeader>
+            <CardContent className="p-4 pt-0">
+              <div className="text-3xl font-semibold">3 de 5</div>
+              <p className="text-xs text-gray-500 mt-1">Última atualização: agora</p>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-md border">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
+              <CardTitle className="text-sm font-medium text-gray-500">
+                Motoristas Ativos
+              </CardTitle>
+              <User className="w-5 h-5 text-gray-500" />
+            </CardHeader>
+            <CardContent className="p-4 pt-0">
+              <div className="text-3xl font-semibold">6</div>
+              <p className="text-xs text-gray-500 mt-1">Em serviço</p>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-md border">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
+              <CardTitle className="text-sm font-medium text-gray-500">
+                Chamados Pendentes
+              </CardTitle>
+              <Activity className="w-5 h-5 text-gray-500" />
+            </CardHeader>
+            <CardContent className="p-4 pt-0">
+              <div className="text-3xl font-semibold">2</div>
+              <p className="text-xs text-gray-500 mt-1">Aprovação necessária</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <Card className="shadow-md border">
+              <CardHeader>
+                <CardTitle>Viagens Pendentes</CardTitle>
+                <CardDescription>
+                  Aprovar ou atribuir viagens
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>ID</TableHead>
+                      <TableHead>Paciente</TableHead>
+                      <TableHead>Destino</TableHead>
+                      <TableHead className="text-right">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow className="odd:bg-gray-50 even:bg-white hover:bg-gray-100 transition-colors">
+                      <TableCell className="font-medium">001</TableCell>
+                      <TableCell>Maicon</TableCell>
+                      <TableCell>Hospital</TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="outline" size="sm" className="hover:bg-gray-100 transition-colors">
+                          Aprovar
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow className="odd:bg-gray-50 even:bg-white hover:bg-gray-100 transition-colors">
+                      <TableCell className="font-medium">002</TableCell>
+                      <TableCell>Kaique</TableCell>
+                      <TableCell>Clínica</TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="outline" size="sm" className="hover:bg-gray-100 transition-colors">
+                          Aprovar
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </div>
+
+          <aside className="space-y-6">
+            <Card className="shadow-md border">
+              <CardHeader>
+                <CardTitle>Ações Rápidas</CardTitle>
+                <CardDescription>Gerencie o sistema</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col gap-4">
+                  <Button className="w-full hover:bg-gray-100 transition-colors" variant="outline">
+                    Gerenciar Ambulâncias
+                  </Button>
+                  <Button className="w-full hover:bg-gray-100 transition-colors" variant="outline">
+                    Gerenciar Usuários
+                  </Button>
+                  <Button className="w-full hover:bg-gray-100 transition-colors" variant="outline">
+                    Visualizar Todas as Viagens
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </aside>
+        </div>
       </section>
     </main>
-  )
+  );
 }
-
-export default Home
-
-
-
-
-
-
-
-
