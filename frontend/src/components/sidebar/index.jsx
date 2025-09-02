@@ -34,7 +34,7 @@ export function AppSidebar() {
   const location = useLocation();
 
   return (
-    <Sidebar>
+    <Sidebar className="p-1">
       <SidebarHeader>
         <div className="flex items-center h-10">
           <Package2 className="h-6 w-6" />
@@ -43,10 +43,10 @@ export function AppSidebar() {
           </span>
         </div>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="p-0.5">
         <SidebarMenu>
           {navItems.map((item) => (
-            <SidebarMenuItem key={item.to}>
+            <SidebarMenuItem key={item.to} className="p-0.5">
               <Link
                 to={item.to}
                 className="w-full"
@@ -56,7 +56,7 @@ export function AppSidebar() {
                   tooltip={item.label}
                 >
                   <item.icon className="h-5 w-5" />
-                  <span>{item.label}</span>
+                  <span className="p-0.5 text-base">{item.label}</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
