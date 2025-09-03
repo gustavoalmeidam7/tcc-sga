@@ -45,9 +45,10 @@ class SessionService(metaclass=singleton):
         """ Cria uma nova sessão """
         userModel = self.userRepositoty.find_by_email(userEmail)
         credentialsException = HTTPException(status.HTTP_401_UNAUTHORIZED, "Email ou senha incorretos")
+        userNotExists = HTTPException(status.HTTP_404_NOT_FOUND, "Usuário não registrado")
         
         if not userModel:
-            raise credentialsException
+            raise userNotExists
         
         if not self.verify_password(plain_password, userModel.password):
             raise credentialsException

@@ -12,8 +12,8 @@ class UserRepository(metaclass=singleton):
         """ Retorna um usuário salvo no banco pelo ID """
         return User.get(User.id == id)
     
-    def find_by_email(self, email: str) -> User:
-        return User.get(User.email == email)
+    def find_by_email(self, email: str) -> User | None:
+        return User.select().where(User.email == email).first()
 
     def find_by_cpf(self, cpf: str) -> User:
         return User.get(User.cpf == cpf)
