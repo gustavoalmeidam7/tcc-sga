@@ -13,7 +13,7 @@ from src.Model.UserSession import Session
 
 MODELS = [Ambulance, Driver, Travel, User, Session]
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope='function', autouse=True)
 def test_database():
     """
     Este fixture configura um banco de dados SQLite em memória para toda a sessão de teste.
