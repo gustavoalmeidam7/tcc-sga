@@ -1,7 +1,7 @@
-from peewee import AutoField, CharField
-from src.Model.BaseModel import BaseModel
+from peewee import Model, AutoField, CharField
+from src.DB import db
 
-class Driver(BaseModel):
+class Driver(Model):
     id             = AutoField(primary_key=True)
     name           = CharField(max_length=50, null=False)
     cpf            = CharField(max_length=14, unique=True, null=False)
@@ -16,4 +16,5 @@ class Driver(BaseModel):
         )
 
     class Meta:
+        database = db
         table_name = "driver"
