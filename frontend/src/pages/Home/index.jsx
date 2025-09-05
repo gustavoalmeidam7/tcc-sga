@@ -30,7 +30,6 @@ export default function Home() {
               <AvatarImage src={userAvatar} alt="Foto do gestor" />
               <AvatarFallback>G</AvatarFallback>
             </Avatar>
-            <div>
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Bem-vindo, Maicon</h1>
               <p className="text-sm text-gray-600">Painel de controle</p>
             </div>
