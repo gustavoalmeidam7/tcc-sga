@@ -1,10 +1,10 @@
 from peewee import (
-    AutoField, ForeignKeyField, Model, CharField, DateTimeField
+    AutoField, ForeignKeyField, CharField, DateTimeField
 )
 from src.Model import User, Driver, Ambulance
-from src.DB import db
+from src.Model.BaseModel import BaseModel
 
-class Travel(Model):
+class Travel(BaseModel):
     travel_id    = AutoField(primary_key=True)
     user         = ForeignKeyField(User.User, backref="travels", null=False)
     driver       = ForeignKeyField(Driver.Driver, backref="travels", null=False)
@@ -23,5 +23,4 @@ class Travel(Model):
         )
 
     class Meta:
-        database = db
         table_name = "travels"

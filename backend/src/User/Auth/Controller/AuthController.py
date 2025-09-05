@@ -23,19 +23,19 @@ AUTH_ROUTER = APIRouter(
 )
 
 @AUTH_ROUTER.get("/user")
-def test_token(token: TOKEN_SCHEME) -> UserResponseSchema:
+async def test_token(token: TOKEN_SCHEME) -> UserResponseSchema:
     return sessionService.get_current_user(token)
 
 @AUTH_ROUTER.post("/revoke", status_code=status.HTTP_204_NO_CONTENT)
-def revoke_token(token: TOKEN_SCHEME, token_to_revoke: RevokeSessionSchema) -> None:
+async def revoke_token(token: TOKEN_SCHEME, token_to_revoke: RevokeSessionSchema) -> None:
     sessionService.revoke_session(token, token_to_revoke)
 
 @AUTH_ROUTER.get("/sessions")
-def retrive_sessions(token: TOKEN_SCHEME) -> UserSessionListSchema:
+async def retrive_sessions(token: TOKEN_SCHEME) -> UserSessionListSchema:
     return sessionService.get_user_sessions(token)
 
 @AUTH_ROUTER.post("/", status_code=status.HTTP_201_CREATED)
-def generate_token(request: Request, formdata: Annotated[OAuth2PasswordRequestForm, Depends()]) -> TokenResponseSchema:
+async def generate_token(request: Request, formdata: Annotated[OAuth2PasswordRequestForm, Depends()]) -> TokenResponseSchema:
     userIP = get_remote_address(request)
     
     session = sessionService.create_session(

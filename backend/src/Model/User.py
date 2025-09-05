@@ -1,7 +1,7 @@
-from peewee import ForeignKeyField, Model, AutoField, CharField, DateField
-from src.DB import db
+from peewee import ForeignKeyField, AutoField, CharField, DateField
+from src.Model.BaseModel import BaseModel
 
-class User(Model):
+class User(BaseModel):
     id              = AutoField(primary_key=True)
     email           = CharField(max_length=45, unique=True, null=False)
     cpf             = CharField(max_length=11, unique=True, null=False)
@@ -17,5 +17,4 @@ class User(Model):
         )
 
     class Meta:
-        database = db
         table_name = "users"

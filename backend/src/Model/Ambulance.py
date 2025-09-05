@@ -1,7 +1,7 @@
-from peewee import AutoField, CharField, IntegerField, Model
-from src.DB import db
+from peewee import AutoField, CharField, IntegerField
+from src.Model.BaseModel import BaseModel
 
-class Ambulance(Model):
+class Ambulance(BaseModel):
     id              = AutoField()
     number_plate    = CharField(max_length=8, null=False)
     ambulance_model = CharField(max_length=35, null=False)
@@ -13,7 +13,7 @@ class Ambulance(Model):
             f"<Ambulance(id={self.id}, number_plate={self.number_plate}, ambulance_model={self.ambulance_model}, year={self.year}, "
             f"document_number={self.document_number})>"
         )
-
+    
     class Meta:
-        database = db
         table_name = "ambulance"
+    
