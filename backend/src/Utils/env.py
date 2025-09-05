@@ -4,11 +4,9 @@ import os
 if not load_dotenv("./.env"):
     print("Erro ao carregar o arquivo \".env\". Verifique se ele existe e está no diretório correto ou se contem alguma chave.")
 
-def get_env_var(var_name: str) -> str:
-    key = os.environ.get(var_name, None)
-
+def get_env_var(key: str, default: str | None = None) -> str | None:
     if key is None:
-        print(f"Chave {var_name} não encontrada no .env file")
-        return None
+        print(f"Chave {key} não encontrada no .env file")
+        return default
     
-    return key
+    return os.environ.get(key, default)
