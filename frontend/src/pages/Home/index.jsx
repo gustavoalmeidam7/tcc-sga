@@ -1,4 +1,5 @@
 ﻿import React from "react";
+import { Link } from "react-router-dom";
 import {
   Card,
   CardHeader,
@@ -21,26 +22,21 @@ import { Briefcase, Ambulance, User, Activity, Plus } from "lucide-react";
 
 export default function Home() {
   return (
-    <main className="w-full min-h-screen bg-gray-50 p-8">
+    <main className="w-full min-h-screen bg-gray-50 p-4 sm:p-8">
       <section className="max-w-7xl mx-auto space-y-8">
-        <header className="flex items-center justify-between gap-4 border-b pb-6">
+        <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-6">
           <div className="flex items-center gap-4">
             <Avatar className="w-14 h-14">
               <AvatarImage src={userAvatar} alt="Foto do gestor" />
               <AvatarFallback>G</AvatarFallback>
             </Avatar>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Bem-vindo, Maicon</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Bem-vindo, Maicon</h1>
               <p className="text-sm text-gray-600">Painel de controle</p>
             </div>
           </div>
-          <Button className="px-6 rounded-md border hover:bg-gray-100 transition-colors">
-            <Plus className="w-4 h-4 mr-2" />
-            Adicionar Nova Viagem
-          </Button>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="shadow-md border">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
               <CardTitle className="text-sm font-medium text-gray-500">
@@ -103,8 +99,8 @@ export default function Home() {
                   Aprovar ou atribuir viagens
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <Table>
+              <CardContent className="overflow-x-auto">
+                <Table className="min-w-full">
                   <TableHeader>
                     <TableRow>
                       <TableHead>ID</TableHead>
@@ -148,15 +144,21 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col gap-4">
-                  <Button className="w-full hover:bg-gray-100 transition-colors" variant="outline">
-                    Gerenciar Ambulâncias
-                  </Button>
-                  <Button className="w-full hover:bg-gray-100 transition-colors" variant="outline">
-                    Gerenciar Usuários
-                  </Button>
-                  <Button className="w-full hover:bg-gray-100 transition-colors" variant="outline">
-                    Visualizar Todas as Viagens
-                  </Button>
+                  <Link to="/ambulancias">
+                    <Button className="w-full hover:bg-gray-200 transition-colors" variant="outline">
+                      Gerenciar Ambulâncias
+                    </Button>
+                  </Link>
+                  <Link to="/usuarios">
+                    <Button className="w-full hover:bg-gray-200 transition-colors" variant="outline">
+                      Gerenciar Usuários
+                    </Button>
+                  </Link>
+                  <Link to="/viagens">
+                    <Button className="w-full hover:bg-gray-200 transition-colors" variant="outline">
+                      Visualizar Todas as Viagens
+                    </Button>
+                  </Link>
                 </div>
               </CardContent>
             </Card>
