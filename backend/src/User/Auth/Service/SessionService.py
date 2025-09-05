@@ -108,7 +108,7 @@ class SessionService(metaclass=singleton):
         user = self.get_current_user(token)
         sessionToRevoke = self.sessionRepository.find_by_id(sessionId.session_id)
 
-        if sessionToRevoke.user == user.id:
+        if sessionToRevoke.user.id == user.id:
             self.sessionRepository.delete_token_by_id(sessionId.session_id)
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Token não encontrado")
