@@ -18,11 +18,11 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import userAvatar from "@/assets/avatar.png";
-import { Briefcase, Ambulance, User, Activity, Plus } from "lucide-react";
+import { Briefcase, Ambulance, User, Activity } from "lucide-react";
 
 export default function Home() {
   return (
-    <main className="w-full min-h-screen bg-gray-50 p-4 sm:p-8">
+    <main className="w-full min-h-screen p-4 sm:p-8">
       <section className="max-w-7xl mx-auto space-y-8">
         <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-6">
           <div className="flex items-center gap-4">
@@ -111,7 +111,7 @@ export default function Home() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    <TableRow className="odd:bg-gray-50 even:bg-white hover:bg-gray-100 transition-colors">
+                    <TableRow className="transition-colors">
                       <TableCell className="font-medium">001</TableCell>
                       <TableCell>Maicon</TableCell>
                       <TableCell>Hospital</TableCell>
@@ -121,7 +121,7 @@ export default function Home() {
                         </Button>
                       </TableCell>
                     </TableRow>
-                    <TableRow className="odd:bg-gray-50 even:bg-white hover:bg-gray-100 transition-colors">
+                    <TableRow className="transition-colors">
                       <TableCell className="font-medium">002</TableCell>
                       <TableCell>Kaique</TableCell>
                       <TableCell>Clínica</TableCell>

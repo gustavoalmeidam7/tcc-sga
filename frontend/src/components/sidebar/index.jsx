@@ -5,7 +5,17 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarFooter,
+  SidebarSeparator,
 } from "@/components/ui/sidebar";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import {
   Car,
@@ -16,6 +26,7 @@ import {
   Map,
   Package2,
   Users,
+  ChevronUp,
 } from "lucide-react";
 
 import { Link, useLocation } from "react-router-dom";
@@ -34,7 +45,7 @@ export function AppSidebar() {
   const location = useLocation();
 
   return (
-    <Sidebar className="p-1">
+    <Sidebar>
       <SidebarHeader>
         <div className="flex items-center h-10">
           <Package2 className="h-6 w-6" />
@@ -43,26 +54,42 @@ export function AppSidebar() {
           </span>
         </div>
       </SidebarHeader>
-      <SidebarContent className="p-0.5">
+      <SidebarContent>
         <SidebarMenu>
           {navItems.map((item) => (
-            <SidebarMenuItem key={item.to} className="p-0.5">
-              <Link
-                to={item.to}
-                className="w-full"
-              >
+            <SidebarMenuItem key={item.to}>
+              <Link to={item.to} className="w-full">
                 <SidebarMenuButton
                   isActive={location.pathname === item.to}
                   tooltip={item.label}
                 >
                   <item.icon className="h-5 w-5" />
-                  <span className="p-0.5 text-base">{item.label}</span>
+                  <span>{item.label}</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarSeparator />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <div className="flex items-center gap-3 p-1 cursor-pointer">
+              <Avatar>
+                <AvatarImage src="/src/assets/avatar.png" />
+                <AvatarFallback>CN</AvatarFallback>
+              </Avatar>
+              <span>Maicon</span>
+              <ChevronUp className="ml-auto"/>
+            </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-52" align="end">
+            <DropdownMenuItem>Editar conta</DropdownMenuItem>
+            <DropdownMenuItem>Sair</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 }
