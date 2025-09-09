@@ -55,16 +55,17 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarMenu>
+        <SidebarMenu className="gap-1.5">
           {navItems.map((item) => (
             <SidebarMenuItem key={item.to}>
               <Link to={item.to} className="w-full">
                 <SidebarMenuButton
                   isActive={location.pathname === item.to}
                   tooltip={item.label}
+                  className="h-10 md:h-9"
                 >
-                  <item.icon className="h-5 w-5" />
-                  <span>{item.label}</span>
+                  <item.icon/>
+                  <span className="text-lg md:text-base font-medium">{item.label}</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
@@ -80,7 +81,7 @@ export function AppSidebar() {
                 <AvatarImage src="/src/assets/avatar.png" />
                 <AvatarFallback>CN</AvatarFallback>
               </Avatar>
-              <span>Maicon</span>
+              <span className="text-lg md:text-base">Maicon</span>
               <ChevronUp className="ml-auto"/>
             </div>
           </DropdownMenuTrigger>
