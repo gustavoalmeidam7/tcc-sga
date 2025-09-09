@@ -62,7 +62,7 @@ export function AppSidebar() {
                 <SidebarMenuButton
                   isActive={location.pathname === item.to}
                   tooltip={item.label}
-                  className="h-8 md:h-9"
+                  className="h-9 md:h-9"
                 >
                   <item.icon/>
                   <span className="text-base font-medium">{item.label}</span>
