@@ -20,7 +20,7 @@ export default function App() {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset className="flex flex-col min-h-screen justify-between">
-          <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b px-4 sm:hidden">
+          <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b px-4 sm:hidden bg-sidebar">
             <SidebarTrigger className="bg-gray-200 hover:bg-gray-400" />
             <h1 className="font-semibold text-lg m-0">SGA</h1>
           </header>
