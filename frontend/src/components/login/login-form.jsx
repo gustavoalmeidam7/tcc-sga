@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Link } from "react-router-dom"
-import img_logo from "@/assets/logo.png";
+import img_logo from "@/assets/Logo.png";
 
 export function LoginForm({
   className,
