@@ -25,7 +25,7 @@ export default function App() {
             <h1 className="font-semibold text-lg m-0">SGA</h1>
           </header>
           <header className="hidden sm:flex sticky top-0 z-30 h-14 items-center gap-4 px-4">
-            <SidebarTrigger className="border bg-gray-200 hover:bg-gray-400 " />
+            <SidebarTrigger className="border bg-gray-200 hover:bg-gray-400" />
           </header>
           <main className="flex-grow p-4 md:p-6">
             <Routes>
