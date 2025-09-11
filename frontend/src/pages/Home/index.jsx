@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import {
   Card,
@@ -7,6 +7,14 @@ import {
   CardContent,
   CardDescription,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -19,6 +27,10 @@ import {
 } from "@/components/ui/table";
 import userAvatar from "@/assets/avatar.png";
 import { Briefcase, Ambulance, User, Activity } from "lucide-react";
+import { ViagensDoDiaModal } from "@/components/modals/ViagensDia";
+import { AmbulanciasLivresModal } from "@/components/modals/AmbulanciasLivres";
+import { MotoristasAtivosModal } from "@/components/modals/MotoristasAtivos";
+import { ChamadosPendentesModal } from "@/components/modals/ChamadosPendentes";
 
 export default function Home() {
   return (
@@ -37,58 +49,110 @@ export default function Home() {
           </div>
         </header>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="shadow-md border">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
-              <CardTitle className="text-sm font-medium text-gray-500">
-                Viagens do Dia
-              </CardTitle>
-              <Briefcase className="w-5 h-5 text-gray-500" />
-            </CardHeader>
-            <CardContent className="p-4 pt-0">
-              <div className="text-3xl font-semibold">12</div>
-              <p className="text-xs text-gray-500 mt-1">+2 novas hoje</p>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Card className="shadow-md border cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-transform duration-200 ease-in-out">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
+                  <CardTitle className="text-sm font-medium text-gray-500">
+                    Viagens do Dia
+                  </CardTitle>
+                  <Briefcase className="w-5 h-5 text-gray-500" />
+                </CardHeader>
+                <CardContent className="p-4 pt-0">
+                  <div className="text-3xl font-semibold">12</div>
+                  <p className="text-xs text-gray-500 mt-1">+2 novas hoje</p>
+                </CardContent>
+              </Card>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Viagens do Dia</DialogTitle>
+                <DialogDescription>
+                  Lista de todas as viagens realizadas hoje.
+                </DialogDescription>
+              </DialogHeader>
+              <ViagensDoDiaModal />
+            </DialogContent>
+          </Dialog>
 
-          <Card className="shadow-md border">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
-              <CardTitle className="text-sm font-medium text-gray-500">
-                Ambulâncias Livres
-              </CardTitle>
-              <Ambulance className="w-5 h-5 text-gray-500" />
-            </CardHeader>
-            <CardContent className="p-4 pt-0">
-              <div className="text-3xl font-semibold">3 de 5</div>
-              <p className="text-xs text-gray-500 mt-1">Última atualização: agora</p>
-            </CardContent>
-          </Card>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Card className="shadow-md border cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-transform duration-200 ease-in-out">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
+                  <CardTitle className="text-sm font-medium text-gray-500">
+                    Ambulâncias Livres
+                  </CardTitle>
+                  <Ambulance className="w-5 h-5 text-gray-500" />
+                </CardHeader>
+                <CardContent className="p-4 pt-0">
+                  <div className="text-3xl font-semibold">3 de 5</div>
+                  <p className="text-xs text-gray-500 mt-1">Última atualização: agora</p>
+                </CardContent>
+              </Card>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Ambulâncias Livres</DialogTitle>
+                <DialogDescription>
+                  Ambulâncias disponíveis no momento.
+                </DialogDescription>
+              </DialogHeader>
+              <AmbulanciasLivresModal />
+            </DialogContent>
+          </Dialog>
 
-          <Card className="shadow-md border">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
-              <CardTitle className="text-sm font-medium text-gray-500">
-                Motoristas Ativos
-              </CardTitle>
-              <User className="w-5 h-5 text-gray-500" />
-            </CardHeader>
-            <CardContent className="p-4 pt-0">
-              <div className="text-3xl font-semibold">6</div>
-              <p className="text-xs text-gray-500 mt-1">Em serviço</p>
-            </CardContent>
-          </Card>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Card className="shadow-md border cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-transform duration-200 ease-in-out">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
+                  <CardTitle className="text-sm font-medium text-gray-500">
+                    Motoristas Ativos
+                  </CardTitle>
+                  <User className="w-5 h-5 text-gray-500" />
+                </CardHeader>
+                <CardContent className="p-4 pt-0">
+                  <div className="text-3xl font-semibold">6</div>
+                  <p className="text-xs text-gray-500 mt-1">Em serviço</p>
+                </CardContent>
+              </Card>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Motoristas Ativos</DialogTitle>
+                <DialogDescription>
+                  Motoristas atualmente em serviço.
+                </DialogDescription>
+              </DialogHeader>
+              <MotoristasAtivosModal />
+            </DialogContent>
+          </Dialog>
 
-          <Card className="shadow-md border">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
-              <CardTitle className="text-sm font-medium text-gray-500">
-                Chamados Pendentes
-              </CardTitle>
-              <Activity className="w-5 h-5 text-gray-500" />
-            </CardHeader>
-            <CardContent className="p-4 pt-0">
-              <div className="text-3xl font-semibold">2</div>
-              <p className="text-xs text-gray-500 mt-1">Aprovação necessária</p>
-            </CardContent>
-          </Card>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Card className="shadow-md border cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-transform duration-200 ease-in-out">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
+                  <CardTitle className="text-sm font-medium text-gray-500">
+                    Chamados Pendentes
+                  </CardTitle>
+                  <Activity className="w-5 h-5 text-gray-500" />
+                </CardHeader>
+                <CardContent className="p-4 pt-0">
+                  <div className="text-3xl font-semibold">2</div>
+                  <p className="text-xs text-gray-500 mt-1">Aprovação necessária</p>
+                </CardContent>
+              </Card>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Chamados Pendentes</DialogTitle>
+                <DialogDescription>
+                  Chamados que necessitam de aprovação.
+                </DialogDescription>
+              </DialogHeader>
+              <ChamadosPendentesModal />
+            </DialogContent>
+          </Dialog>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
