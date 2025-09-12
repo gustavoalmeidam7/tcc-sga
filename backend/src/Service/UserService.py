@@ -1,15 +1,15 @@
 from src.Error.ErrorClass import ErrorClass
 
-from src.User.Schema.UserCreateSchema import UserCreateSchema
-from src.User.Schema.UserResponseSchema import UserResponseSchema
+from src.Schema.User.UserCreateSchema import UserCreateSchema
+from src.Schema.User.UserResponseSchema import UserResponseSchema
 from src.Model.User import User
 
-from src.User.Validator.UserValidator import UserValidator
+from src.Validator.UserValidator import UserValidator
 
-from src.User.Repository.UserRepository import UserRepository
+from src.Repository.UserRepository import UserRepository
 from src.Utils.singleton import singleton
 
-from src.User.Auth.Service.SessionService import SessionService
+from src.Service.SessionService import SessionService
 
 class UserService(metaclass=singleton):
     userRepository = UserRepository()

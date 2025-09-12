@@ -4,14 +4,14 @@ from slowapi.util import get_remote_address
 
 from typing import Annotated
 
-from src.User.Schema.UserResponseSchema import UserResponseSchema
+from src.Schema.User.UserResponseSchema import UserResponseSchema
 
-from src.User.Auth.Schema.RevokeSessionSchema import RevokeSessionSchema
-from src.User.Auth.Schema.UserSessionListSchema import UserSessionListSchema
-from src.User.Auth.Schema.TokenResponseSchema import TokenResponseSchema
+from src.Schema.Auth.RevokeSessionSchema import RevokeSessionSchema
+from src.Schema.Auth.UserSessionListSchema import UserSessionListSchema
+from src.Schema.Auth.TokenResponseSchema import TokenResponseSchema
 
-from src.User.Auth.Service.SessionService import TOKEN_SCHEME
-from src.User.Auth.Service.SessionService import SessionService
+from src.Service.SessionService import TOKEN_SCHEME
+from src.Service.SessionService import SessionService
 
 sessionService = SessionService()
 
@@ -37,7 +37,7 @@ async def retrive_sessions(token: TOKEN_SCHEME) -> UserSessionListSchema:
 @AUTH_ROUTER.post("/", status_code=status.HTTP_201_CREATED)
 async def generate_token(request: Request, formdata: Annotated[OAuth2PasswordRequestForm, Depends()]) -> TokenResponseSchema:
     userIP = get_remote_address(request)
-    
+
     session = sessionService.create_session(
         formdata.username, formdata.password, userIP
     )

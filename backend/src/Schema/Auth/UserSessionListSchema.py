@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict
 
-from src.User.Schema.UserResponseSchema import UserResponseSchema
+from src.Schema.User.UserResponseSchema import UserResponseSchema
 
 class session(BaseModel):
     model_config = ConfigDict(from_attributes=True)

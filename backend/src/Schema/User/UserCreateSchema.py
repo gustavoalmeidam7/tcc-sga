@@ -4,7 +4,7 @@ from datetime import date
 
 from src.Model.User import User
 
-from src.User.Service.Utils import unmask_number, validate_birthday
+from src.Service.Utils import unmask_number, validate_birthday
 
 class UserCreateSchema(BaseModel):
     username:      Annotated[str, Field(max_length=35)] = "Ronaldo de Assis Moreira"

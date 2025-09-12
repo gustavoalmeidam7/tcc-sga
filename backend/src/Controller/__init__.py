@@ -2,8 +2,8 @@ from fastapi import FastAPI
 
 from src.Utils.env import get_env_var
 
-from src.User.Controller.UserController import USER_ROUTER
-from src.User.Auth.Controller.AuthController import AUTH_ROUTER
+from src.Controller.UserController import USER_ROUTER
+from src.Controller.AuthController import AUTH_ROUTER
 env = get_env_var("environment")
 
 isDebug = (env == "DEV")

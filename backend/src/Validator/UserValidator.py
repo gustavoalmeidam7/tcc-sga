@@ -1,5 +1,5 @@
 from src.Model.User import User
-from src.User.Repository.UserRepository import UserRepository
+from src.Repository.UserRepository import UserRepository
 
 class UserValidationResult:
     def __init__(self, errors: list[dict] = None):
