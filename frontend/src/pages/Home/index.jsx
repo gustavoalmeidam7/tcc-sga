@@ -31,6 +31,7 @@ import { ViagensDoDiaModal } from "@/components/modals/ViagensDia";
 import { AmbulanciasLivresModal } from "@/components/modals/AmbulanciasLivres";
 import { MotoristasAtivosModal } from "@/components/modals/MotoristasAtivos";
 import { ChamadosPendentesModal } from "@/components/modals/ChamadosPendentes";
+import { TextAnimate } from "@/components/ui/text-animate";
 
 export default function Home() {
   return (
@@ -43,8 +44,8 @@ export default function Home() {
               <AvatarFallback>G</AvatarFallback>
             </Avatar>
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Bem-vindo, Maicon</h1>
-              <p className="text-sm text-gray-600">Painel de controle</p>
+              <TextAnimate animation="blurInUp" by="character" once delay={0.15} className="text-xl sm:text-2xl font-bold text-foreground">Bem-vindo, Maicon</TextAnimate>
+              <p className="text-sm text-white">Painel de controle</p>
             </div>
           </div>
         </header>
