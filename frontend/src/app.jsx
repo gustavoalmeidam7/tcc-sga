@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Footer from './components/footer';
+import Footer from './components/layout/footer';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Registro from './pages/Register';
@@ -11,7 +11,7 @@ import RecSenha from './pages/Rec_senha';
 import SaibaMais from './pages/Saiba_mais';
 import Suporte from './pages/Suporte';
 import './index.css';
-import { AppSidebar } from './components/sidebar';
+import { AppSidebar } from './components/layout/sidebar';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from './components/ui/sidebar';
 
 export default function App() {
