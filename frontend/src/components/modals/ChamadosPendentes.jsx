@@ -9,27 +9,27 @@ import {
 
 export function ChamadosPendentesModal() {
   return (
-    <Table>
+    <Table className="min-w-full border border-border">
       <TableHeader>
-        <TableRow>
-          <TableHead>ID</TableHead>
-          <TableHead>Paciente</TableHead>
-          <TableHead>Origem</TableHead>
-          <TableHead>Destino</TableHead>
+        <TableRow className="bg-muted">
+          <TableHead className="text-foreground">ID</TableHead>
+          <TableHead className="text-foreground">Paciente</TableHead>
+          <TableHead className="text-foreground">Origem</TableHead>
+          <TableHead className="text-foreground">Destino</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         <TableRow>
-          <TableCell>003</TableCell>
-          <TableCell>Ana</TableCell>
-          <TableCell>Residência</TableCell>
-          <TableCell>Hospital</TableCell>
+          <TableCell className="text-foreground">003</TableCell>
+          <TableCell className="text-foreground">Ana</TableCell>
+          <TableCell className="text-foreground">Residência</TableCell>
+          <TableCell className="text-foreground">Hospital</TableCell>
         </TableRow>
         <TableRow>
-          <TableCell>004</TableCell>
-          <TableCell>Pedro</TableCell>
-          <TableCell>Clínica</TableCell>
-          <TableCell>Residência</TableCell>
+          <TableCell className="text-foreground">004</TableCell>
+          <TableCell className="text-foreground">Pedro</TableCell>
+          <TableCell className="text-foreground">Clínica</TableCell>
+          <TableCell className="text-foreground">Residência</TableCell>
         </TableRow>
       </TableBody>
     </Table>

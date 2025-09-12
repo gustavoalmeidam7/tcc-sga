@@ -9,27 +9,27 @@ import {
 
 export function ViagensDoDiaModal() {
   return (
-    <Table>
+    <Table className="min-w-full border border-border">
       <TableHeader>
-        <TableRow>
-          <TableHead>ID</TableHead>
-          <TableHead>Paciente</TableHead>
-          <TableHead>Destino</TableHead>
-          <TableHead>Status</TableHead>
+        <TableRow className="bg-muted">
+          <TableHead className="text-foreground">ID</TableHead>
+          <TableHead className="text-foreground">Paciente</TableHead>
+          <TableHead className="text-foreground">Destino</TableHead>
+          <TableHead className="text-foreground">Status</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         <TableRow>
-          <TableCell>001</TableCell>
-          <TableCell>Maicon</TableCell>
-          <TableCell>Hospital</TableCell>
-          <TableCell>Concluída</TableCell>
+          <TableCell className="text-foreground">001</TableCell>
+          <TableCell className="text-foreground">Maicon</TableCell>
+          <TableCell className="text-foreground">Hospital</TableCell>
+          <TableCell className="text-foreground font-medium">Concluída</TableCell>
         </TableRow>
         <TableRow>
-          <TableCell>002</TableCell>
-          <TableCell>Kaique</TableCell>
-          <TableCell>Clínica</TableCell>
-          <TableCell>Concluída</TableCell>
+          <TableCell className="text-foreground">002</TableCell>
+          <TableCell className="text-foreground">Kaique</TableCell>
+          <TableCell className="text-foreground">Clínica</TableCell>
+          <TableCell className="text-foreground font-medium">Concluída</TableCell>
         </TableRow>
       </TableBody>
     </Table>
