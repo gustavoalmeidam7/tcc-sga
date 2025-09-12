@@ -4,16 +4,16 @@ from fastapi.security import OAuth2PasswordBearer
 from src.Utils.singleton import singleton
 from src.Utils.env import get_env_var
 
-from src.User.Repository.UserRepository import UserRepository
-from src.User.Schema.UserResponseSchema import UserResponseSchema
-from src.User.Auth.Schema.RevokeSessionSchema import RevokeSessionSchema
-from src.User.Auth.Schema.UserSessionListSchema import UserSessionListSchema
+from src.Repository.UserRepository import UserRepository
+from src.Schema.User.UserResponseSchema import UserResponseSchema
+from src.Schema.Auth.RevokeSessionSchema import RevokeSessionSchema
+from src.Schema.Auth.UserSessionListSchema import UserSessionListSchema
 
 from src.Model.UserSession import Session
 
 from playhouse.shortcuts import model_to_dict
 
-from src.User.Auth.Repository.SessionRepository import SessionRepository
+from src.Repository.SessionRepository import SessionRepository
 
 from typing import Annotated
 
@@ -29,8 +29,8 @@ class SessionService(metaclass=singleton):
         self.userRepositoty = UserRepository()
         self.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-        self.SECRET_KEY = get_env_var("secret_key_jwt")
-        self.ALGORITHM = get_env_var("algorithm_jwt")
+        self.SECRET_KEY = get_env_var("secret_key_jwt", "CHANGEME")
+        self.ALGORITHM = get_env_var("algorithm_jwt", "HS256")
 
     def get_password_hash(self, password: str) -> str:
         """ Gera um hash da senha para ser armazenada no banco de dados """

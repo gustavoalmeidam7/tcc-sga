@@ -2,7 +2,7 @@ from datetime import datetime
 from uuid import UUID
 from pydantic import BaseModel
 
-from src.User.Schema.UserResponseSchema import UserResponseSchema
+from src.Schema.User.UserResponseSchema import UserResponseSchema
 
 class UserSessionListSchema(BaseModel):
     user: UserResponseSchema

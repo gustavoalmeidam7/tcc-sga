@@ -1,10 +1,10 @@
 from typing import Annotated
 from fastapi import APIRouter, Header
 
-from src.User.Schema.UserCreateSchema import UserCreateSchema
-from src.User.Schema.UserResponseSchema import UserResponseSchema
+from src.Schema.User.UserCreateSchema import UserCreateSchema
+from src.Schema.User.UserResponseSchema import UserResponseSchema
 
-from src.User.Service.UserService import UserService
+from src.Service.UserService import UserService
 
 userService = UserService()
 

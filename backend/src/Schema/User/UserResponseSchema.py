@@ -3,7 +3,7 @@ from pydantic import BaseModel, ConfigDict, Field, AfterValidator, EmailStr
 
 from datetime import date
 
-from src.User.Service.Utils import validate_birthday
+from src.Service.Utils import validate_birthday
 
 class UserResponseSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
