@@ -4,7 +4,7 @@ from src.Utils.env import get_env_var
 
 from src.Controller.UserController import USER_ROUTER
 from src.Controller.AuthController import AUTH_ROUTER
-env = get_env_var("environment")
+env = get_env_var("environment", "DEV")
 
 isDebug = (env == "DEV")
 

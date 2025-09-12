@@ -29,8 +29,8 @@ class SessionService(metaclass=singleton):
         self.userRepositoty = UserRepository()
         self.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-        self.SECRET_KEY = get_env_var("secret_key_jwt")
-        self.ALGORITHM = get_env_var("algorithm_jwt")
+        self.SECRET_KEY = get_env_var("secret_key_jwt", "CHANGEME")
+        self.ALGORITHM = get_env_var("algorithm_jwt", "HS256")
 
     def get_password_hash(self, password: str) -> str:
         """ Gera um hash da senha para ser armazenada no banco de dados """
