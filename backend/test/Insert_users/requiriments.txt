@@ -1,0 +1,2 @@
+fordev  == 1.0.5
+requests== 2.32.3
