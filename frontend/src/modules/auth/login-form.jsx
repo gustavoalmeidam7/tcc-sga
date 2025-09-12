@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Link } from "react-router-dom"
-import img_logo from "@/assets/Logo.png";
+import img_logo from "@/assets/Logo.webp"
 
 const formSchema = z.object({
   email: z.string().email({
@@ -27,10 +27,7 @@ const formSchema = z.object({
   }),
 })
 
-export function LoginForm({
-  className,
-  ...props
-}) {
+export function LoginForm({ className, ...props }) {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -45,13 +42,13 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6 max-w-4xl mx-auto", className)} {...props}>
-      <Card className="overflow-hidden p-0">
-        <CardContent className="grid p-0 md:grid-cols-2">
+      <Card className="overflow-hidden">
+        <CardContent className="grid md:grid-cols-2">
           <div className="p-10 md:p-12">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6">
                 <div className="flex flex-col items-center text-center">
-                  <h1 className="text-2xl font-bold">Bem Vindo de Volta</h1>
+                  <h1 className="text-2xl font-bold text-foreground">Bem Vindo de Volta</h1>
                   <p className="text-muted-foreground text-balance">
                     Realize Login Com Sua Conta SGA
                   </p>
@@ -62,7 +59,7 @@ export function LoginForm({
                   name="email"
                   render={({ field }) => (
                     <FormItem className="grid gap-3">
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel className="text-foreground">Email</FormLabel>
                       <FormControl>
                         <Input
                           type="email"
@@ -70,7 +67,7 @@ export function LoginForm({
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-destructive-foreground" />
                     </FormItem>
                   )}
                 />
@@ -81,41 +78,43 @@ export function LoginForm({
                   render={({ field }) => (
                     <FormItem className="grid gap-3">
                       <div className="flex items-center">
-                        <FormLabel>Senha</FormLabel>
-                        <a
-                          href="#"
-                          className="ml-auto text-sm underline-offset-2 hover:underline"
+                        <FormLabel className="text-foreground">Senha</FormLabel>
+                        <Link
+                          to="/rec_senha"
+                          className="ml-auto text-sm text-primary-foreground underline-offset-2 hover:underline"
                         >
                           Esqueceu sua senha?
-                        </a>
+                        </Link>
                       </div>
                       <FormControl>
                         <Input type="password" {...field} />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-destructive-foreground" />
                     </FormItem>
                   )}
                 />
 
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
                   Login
                 </Button>
 
-                <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
+                <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:flex after:items-center after:border-t after:border-border">
                   <span className="bg-card text-muted-foreground relative z-10 px-2">
                     Nao Possui Conta?
                   </span>
                 </div>
-                <div className="text-center text-sm">
+
+                <div className="text-center text-sm text-foreground">
                   Venha fazer parte?{" "}
-                  <Link to="/registro" className="underline underline-offset-4">
+                  <Link to="/registro" className="underline text-primary-foreground">
                     Cadastre-se
                   </Link>
                 </div>
               </form>
             </Form>
           </div>
-          <div className="bg-muted relative hidden md:block">
+
+          <div className="bg-muted relative hidden md:flex items-center justify-center p-10 md:p-12">
             <img
               src={img_logo}
               alt="Imagem de Login"

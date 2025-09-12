@@ -9,24 +9,24 @@ import {
 
 export function MotoristasAtivosModal() {
   return (
-    <Table>
+    <Table className="min-w-full border border-border">
       <TableHeader>
-        <TableRow>
-          <TableHead>Nome</TableHead>
-          <TableHead>Turno</TableHead>
-          <TableHead>Status</TableHead>
+        <TableRow className="bg-muted">
+          <TableHead className="text-foreground">Nome</TableHead>
+          <TableHead className="text-foreground">Turno</TableHead>
+          <TableHead className="text-foreground">Status</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         <TableRow>
-          <TableCell>Carlos</TableCell>
-          <TableCell>Manhã</TableCell>
-          <TableCell>Ativo</TableCell>
+          <TableCell className="text-foreground">Carlos</TableCell>
+          <TableCell className="text-foreground">Manhã</TableCell>
+          <TableCell className="text-foreground font-medium">Ativo</TableCell>
         </TableRow>
         <TableRow>
-          <TableCell>Mariana</TableCell>
-          <TableCell>Tarde</TableCell>
-          <TableCell>Ativo</TableCell>
+          <TableCell className="text-foreground">Mariana</TableCell>
+          <TableCell className="text-foreground">Tarde</TableCell>
+          <TableCell className="text-foreground font-medium">Ativo</TableCell>
         </TableRow>
       </TableBody>
     </Table>
