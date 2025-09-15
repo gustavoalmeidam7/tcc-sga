@@ -24,8 +24,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# if get_env_var("ENVIRONMENT", "dev") != "dev":
-#     app.add_middleware(HTTPSRedirectMiddleware)
+if get_env_var("ENVIRONMENT", "DEV") != "DEV":
+    app.add_middleware(HTTPSRedirectMiddleware)
 
 @app.exception_handler(ErrorClass)
 def error_handler(request: Request, error: ErrorClass):
