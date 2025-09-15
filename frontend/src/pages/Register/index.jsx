@@ -1,4 +1,4 @@
-import { RegisterForm } from "@/modules/auth/register-form";
+import { RegisterForm } from "@/modules/auth/registro.jsx";
 
 export default function Registro() {
   return (
