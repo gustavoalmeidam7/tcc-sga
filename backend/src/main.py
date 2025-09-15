@@ -11,6 +11,7 @@ from src.Controller import app
 from src.DB import db
 
 origins = [
+    "http://localhost:5173",
     "https://*.tcc-sga.pages.dev",
     "http://*.tcc-sga.pages.dev",
 ]
@@ -23,8 +24,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-if get_env_var("ENVIRONMENT", "dev") != "dev":
-    app.add_middleware(HTTPSRedirectMiddleware)
+# if get_env_var("ENVIRONMENT", "dev") != "dev":
+#     app.add_middleware(HTTPSRedirectMiddleware)
 
 @app.exception_handler(ErrorClass)
 def error_handler(request: Request, error: ErrorClass):
