@@ -9,13 +9,15 @@ class UserRepository(metaclass=singleton):
 
 
     def find_by_id(self, id: int) -> User:
-        """ Retorna um usuário salvo no banco pelo ID """
+        """ Retorna um usuário pelo seu ID """
         return User.get(User.id == id)
     
     def find_by_email(self, email: str) -> User | None:
+        """ Retorna um usuário pelo seu email """
         return User.select().where(User.email == email).first()
 
     def find_by_cpf(self, cpf: str) -> User:
+        """ Retorna um usuário pelo seu CPF """
         return User.get(User.cpf == cpf)
     
     def find_all_with_page(self, pageNumber: int= 0, pageSize: int = 25) -> 'list[User]':
@@ -32,24 +34,27 @@ class UserRepository(metaclass=singleton):
 
 
     def delete_by_id(self, id: int) -> None:
+        """ Excluí um usuário pelo seu ID """
         User.delete_by_id(id)
-
-    def delete_all(self) -> None:
-        User.delete().where(User.select())
 
 
     def exists_by_id(self, id: int) -> bool:
+        """ Verifica se um usuário existe pelo seu ID """
         return User.select().where(User.id == id).exists()
 
     def exists_by_email(self, email: str) -> bool:
+        """ Verifica se um usuário existe pelo seu e-mail """
         return User.select().where(User.email == email).exists()
 
     def exists_by_phone_number(self, phone_number: str) -> bool:
+        """ Verifica se um usuário existe pelo seu número de telefone """
         return User.select().where(User.phone_number == phone_number).exists()
 
     def exists_by_cpf(self, cpf: str) -> bool:
+        """ Verifica se um usuário existe pelo seu CPF """
         return User.select().where(User.cpf == cpf).exists()
 
 
     def count(self) -> int:
+        """ Retorna a quantidade de usuários cadastrados """
         return User.select().count()
