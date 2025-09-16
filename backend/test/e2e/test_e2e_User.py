@@ -9,7 +9,7 @@ def test_create_user_e2e(client: TestClient):
         "birthday": "2000-01-01",
         "password": "a_strong_password"
     }
-    response = client.post("/user/create", json=user_data)
+    response = client.post("/user/", json=user_data)
     
     assert response.status_code == 200
     
@@ -29,7 +29,7 @@ def test_get_users_e2e(client: TestClient):
         "birthday": "1999-12-31",
         "password": "another_password"
     }
-    create_response = client.post("/user/create", json=user_data)
+    create_response = client.post("/user/", json=user_data)
     assert create_response.status_code == 200
     created_user_email = create_response.json()["email"]
 

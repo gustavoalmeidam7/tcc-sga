@@ -10,7 +10,7 @@ def _create_user_and_get_token(client: TestClient, email: str, password: str):
         "birthday": "1995-05-10",
         "password": password
     }
-    response = client.post("/user/create", json=user_data)
+    response = client.post("/user/", json=user_data)
     assert response.status_code == 200
 
     login_data = {
