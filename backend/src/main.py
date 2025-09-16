@@ -10,15 +10,9 @@ from src.Controller import app
 
 from src.DB import db
 
-origins = [
-    "http://localhost:5173",
-    "https://*.tcc-sga.pages.dev",
-    "http://*.tcc-sga.pages.dev",
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origin_regex=r"(https://.*\.tcc-sga\.pages\.dev|http://localhost:5173)",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
