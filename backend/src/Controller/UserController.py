@@ -1,25 +1,39 @@
 from typing import Annotated
-from fastapi import APIRouter, Header
+from fastapi import APIRouter, Depends
+from fastapi.security import OAuth2PasswordBearer
 
 from src.Schema.User.UserCreateSchema import UserCreateSchema
 from src.Schema.User.UserResponseSchema import UserResponseSchema
 
-from src.Service.UserService import UserService
+from src.Service import UserService
 
-userService = UserService()
+TOKEN_SCHEME = Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="token"))]
 
 USER_ROUTER = APIRouter(
     prefix="/user",
     tags=["user"]
 )
 
-@USER_ROUTER.post("/create")
+@USER_ROUTER.post("/")
 async def create_user(user: UserCreateSchema) -> 'UserResponseSchema':
-    user = userService.create(user)
+    user = UserService.create(user)
 
     return user
 
+@USER_ROUTER.delete("/")
+async def delete_user(token: TOKEN_SCHEME) -> 'None':
+    pass
+
+# Change reponse schema to response patch schema and create schema to patch schema
+@USER_ROUTER.patch("/")
+async def update_user(token: TOKEN_SCHEME, userUpdate: UserCreateSchema) -> 'UserResponseSchema':
+    pass
+
+@USER_ROUTER.get("/")
+async def get_user(token: TOKEN_SCHEME) -> 'UserResponseSchema':
+    pass
+
 @USER_ROUTER.get("/getusers")
 async def get_users(page: int = 1, pagesize: int = 15) -> 'list[UserResponseSchema]':
-    return userService.find_all_page_dict(int(page), int(pagesize))
+    return UserService.find_all_page_dict(int(page), int(pagesize))
 

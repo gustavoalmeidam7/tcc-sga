@@ -1,8 +1,8 @@
 from src.Model.User import User
-from src.Repository.UserRepository import UserRepository
+from src.Repository import UserRepository
 
 class UserValidationResult:
-    def __init__(self, errors: list[dict] = None):
+    def __init__(self, errors: list[dict] = []):
         self.errors = errors or []
 
     def add_error(self, error: dict):
@@ -16,7 +16,6 @@ class UserValidationResult:
 class UserValidator:
     def __init__(self) -> None:
         self.userValidationResult = UserValidationResult()
-        self.userRepository = UserRepository()
 
     def validate(self, userModel: User) -> 'UserValidationResult':
         self.is_email_unique(userModel.email)
@@ -26,13 +25,13 @@ class UserValidator:
         return self.userValidationResult
 
     def is_email_unique(self, email: str) -> 'None':
-        if self.userRepository.exists_by_email(email):
+        if UserRepository.exists_by_email(email):
             self.userValidationResult.errors.append({"Email" : "Email já existe"})
 
-    def is_phone_number_unique(self, phone_number: str) -> 'str':
-        if self.userRepository.exists_by_phone_number(phone_number):
+    def is_phone_number_unique(self, phone_number: str) -> 'None':
+        if UserRepository.exists_by_phone_number(phone_number):
             self.userValidationResult.errors.append({"Telefone" : "Número de telefone já existe"})
 
-    def is_cpf_unique(self, cpf: str) -> 'str':
-        if self.userRepository.exists_by_cpf(cpf):
+    def is_cpf_unique(self, cpf: str) -> 'None':
+        if UserRepository.exists_by_cpf(cpf):
             self.userValidationResult.errors.append({"CPF" : "CPF já existe"})
