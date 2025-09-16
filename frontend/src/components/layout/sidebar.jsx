@@ -78,7 +78,7 @@ export function AppSidebar() {
           <DropdownMenuTrigger asChild>
             <div className="flex items-center gap-3 p-1 cursor-pointer">
               <Avatar>
-                <AvatarImage src="/src/assets/avatar.png" />
+                <AvatarImage src="/src/assets/avatar.webp" />
                 <AvatarFallback>CN</AvatarFallback>
               </Avatar>
               <span className="text-lg md:text-base">Maicon</span>
