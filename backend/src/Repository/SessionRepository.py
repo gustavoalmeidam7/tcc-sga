@@ -14,7 +14,7 @@ def find_all() -> List[Session]:
 
 def find_all_by_user(user: User) -> list[Session]:
     """ Retorna todas sessões de um usuário  """
-    return list(Session.select().where(Session.user == user.id))
+    return list(Session.select().where(Session.usuario == user.id))
 
 def find_by_id(id: UUID) -> Session | None:
     """ Procuta sessão pelo id da mesma, se não for encontrada retorna None """
@@ -31,4 +31,4 @@ def delete_token_by_id(token: UUID) -> None:
 
 def delete_all_user_tokens_by_id(id: int) -> None:
     """ Deleta todas sessões associadas a um usuário pelo seu ID """
-    Session.delete().where(Session.user == id).execute()
+    Session.delete().where(Session.usuario == id).execute()

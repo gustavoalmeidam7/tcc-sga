@@ -1,5 +1,6 @@
-from src.Model.User import User
-from src.Repository import UserRepository
+from datetime import date
+import re
+from uuid import UUID
 
 class UserValidationResult:
     def __init__(self, errors: list[dict] = []):
@@ -17,21 +18,43 @@ class UserValidator:
     def __init__(self) -> None:
         self.userValidationResult = UserValidationResult()
 
-    def validate(self, userModel: User) -> 'UserValidationResult':
+    def validate(self, userModel: 'User') -> 'UserValidationResult':
         self.is_email_unique(userModel.email)
-        self.is_phone_number_unique(userModel.phone_number)
+        self.is_phone_number_unique(userModel.telefone)
         self.is_cpf_unique(userModel.cpf)
 
         return self.userValidationResult
 
     def is_email_unique(self, email: str) -> 'None':
+        from src.Repository import UserRepository
         if UserRepository.exists_by_email(email):
             self.userValidationResult.errors.append({"Email" : "Email já existe"})
 
     def is_phone_number_unique(self, phone_number: str) -> 'None':
+        from src.Repository import UserRepository
         if UserRepository.exists_by_phone_number(phone_number):
             self.userValidationResult.errors.append({"Telefone" : "Número de telefone já existe"})
 
     def is_cpf_unique(self, cpf: str) -> 'None':
+        from src.Repository import UserRepository
         if UserRepository.exists_by_cpf(cpf):
             self.userValidationResult.errors.append({"CPF" : "CPF já existe"})
+
+def unmask_number(number: str) -> str:
+    return re.sub(r"[^0-9]", "", number)
+
+def validate_birthday(birthday: date) -> date:
+    if birthday > date.today():
+        raise ValueError("Data de nascimento deve ser antes de hoje")
+
+    return birthday
+
+# TODO do a real validation with external tools
+def validate_cpf(cpf: str) -> str:
+    cpf = unmask_number(cpf)
+    return cpf
+
+def validate_uuid(uuid: UUID) -> str:
+    """ Valida se uma string é um UUID válido """
+    uuid_str = str(uuid).replace("-", "")
+    return uuid_str

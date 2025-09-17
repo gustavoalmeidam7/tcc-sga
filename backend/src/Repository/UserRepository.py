@@ -27,7 +27,7 @@ def find_all_with_page(pageNumber: int= 0, pageSize: int = 25) -> 'list[User]':
 
 def update(userModel: User) -> None:
     """ Atualiza um usuário pelo ID """
-    User.update(username=userModel.username, email=userModel.email, phone_number=userModel.phone_number, password=userModel.password).where(User.id == userModel.id)
+    User.update(username=userModel.nome, email=userModel.email, phone_number=userModel.telefone, password=userModel.senha).where(User.id == userModel.id)
 
 
 def delete_by_id(id: int) -> None:
@@ -49,7 +49,7 @@ def exists_by_email(email: str) -> bool:
 
 def exists_by_phone_number(phone_number: str) -> bool:
     """ Verifica se um usuário existe pelo seu número de telefone """
-    return User.select().where(User.phone_number == phone_number).exists()
+    return User.select().where(User.telefone == phone_number).exists()
 
 def exists_by_cpf(cpf: str) -> bool:
     """ Verifica se um usuário existe pelo seu CPF """

@@ -13,7 +13,7 @@ from src.Service import SessionService
 def create(userSchema: UserCreateSchema) -> 'UserResponseSchema':
     ## TODO VALIDAR MELHOR CPF E TELEFONE
     userModel = userSchema.to_model()
-    userModel.password = SessionService.get_password_hash(userModel.password)
+    userModel.senha = SessionService.get_password_hash(userModel.senha)
 
     validatorResult = UserValidator().validate(userModel)
     if(not validatorResult.is_valid):

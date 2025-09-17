@@ -3,12 +3,13 @@ from pydantic import BaseModel, ConfigDict, Field, AfterValidator, EmailStr
 
 from datetime import date
 
-from src.Service.Utils import validate_birthday
+from src.Validator.UserValidator import validate_birthday, validate_uuid
+from uuid import UUID
 
 class UserResponseSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     
-    id: int = 1
+    id: UUID = UUID("3fa85f64-5717-4562-b3fc-2c963f66afa6")
     username: Annotated[str, Field(max_length=35)] = "Ronaldo de Assis Moreira"
     birthday: Annotated[date, Field(), AfterValidator(validate_birthday)] = date(1980, 3, 21)
-    email:    Annotated[EmailStr, Field(data="email", max_length=45)] = "ronaldo@mail.com"
+    email:    Annotated[EmailStr, Field(max_length=45)] = "ronaldo@mail.com"

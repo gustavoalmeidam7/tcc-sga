@@ -5,14 +5,12 @@ from src.Utils.env import get_env_var
 
 from src.Repository import UserRepository
 
-from src.Schema.User.UserResponseSchema import UserResponseSchema
 from src.Schema.Auth.RevokeSessionSchema import RevokeSessionSchema
 from src.Schema.Auth.UserSessionListSchema import UserSessionListSchema
 
 from src.Model.UserSession import Session
 from src.Model.User import User
 
-from playhouse.shortcuts import model_to_dict
 from peewee import DoesNotExist
 
 from src.Repository import SessionRepository
@@ -48,7 +46,7 @@ def create_session(userEmail: str, plain_password: str, userIP: str) -> Session:
     if not userModel:
         raise userNotExists
     
-    if not verify_password(plain_password, userModel.password):
+    if not verify_password(plain_password, userModel.senha):
         raise credentialsException
 
     session = Session().create(
@@ -85,7 +83,7 @@ def get_current_user(token: TOKEN_SCHEME) -> 'User':
         raise credentialsException
 
     try:
-        return userSession.user
+        return userSession.usuario
     except DoesNotExist:
         raise credentialsException
 
@@ -109,7 +107,7 @@ def revoke_session(token: TOKEN_SCHEME, sessionId: RevokeSessionSchema) -> None:
     user = get_current_user(token)
     sessionToRevoke = SessionRepository.find_by_id(sessionId.session_id) or Session() 
 
-    if sessionToRevoke.user.id == user.id:
+    if sessionToRevoke.usuario.id == user.id:
         SessionRepository.delete_token_by_id(sessionId.session_id)
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Token não encontrado")

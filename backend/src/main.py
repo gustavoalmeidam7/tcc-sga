@@ -12,7 +12,7 @@ from src.Controller.AuthController import AUTH_ROUTER
 
 from src.Error.ErrorClass import ErrorClass
 
-from src.Model import User, Driver, Travel, UserSession
+from src.Model import User, Driver, Travel, UserSession, Ambulance, Equipment, Manager
 
 from src.Utils.env import get_env_var
 
@@ -25,7 +25,7 @@ isDebug = (env == "DEV")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     db.connect()
-    db.create_tables([User.User, Driver.Driver, Travel.Travel, UserSession.Session])
+    db.create_tables([User.User, Driver.Driver, Travel.Travel, UserSession.Session, Ambulance.Ambulance, Equipment.Equipment, Manager.Manager])
     yield
     db.close()
 
