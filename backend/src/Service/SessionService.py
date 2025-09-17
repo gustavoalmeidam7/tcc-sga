@@ -4,11 +4,13 @@ from fastapi.security import OAuth2PasswordBearer
 from src.Utils.env import get_env_var
 
 from src.Repository import UserRepository
+
 from src.Schema.User.UserResponseSchema import UserResponseSchema
 from src.Schema.Auth.RevokeSessionSchema import RevokeSessionSchema
 from src.Schema.Auth.UserSessionListSchema import UserSessionListSchema
 
 from src.Model.UserSession import Session
+from src.Model.User import User
 
 from playhouse.shortcuts import model_to_dict
 
@@ -60,8 +62,8 @@ def generate_jwt_token(id: UUID) -> dict:
     content = {"sub": str(id)}
     return jwt.encode(content, SECRET_KEY, algorithm=ALGORITHM)
 
-def get_current_user(token: TOKEN_SCHEME) -> UserResponseSchema:
-    """ Pega o user pelo token """
+def get_current_user(token: TOKEN_SCHEME) -> 'User':
+    """ Retorn o usuário pelo token """
 
     credentialsException = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -80,9 +82,7 @@ def get_current_user(token: TOKEN_SCHEME) -> UserResponseSchema:
     if not userSession:
         raise credentialsException
 
-    user = userSession.user
-
-    return UserResponseSchema.model_validate(model_to_dict(user))
+    return userSession.user
 
 def get_user_sessions(token: TOKEN_SCHEME) -> UserSessionListSchema:
     """ Encontra as sessões de um usuário """
