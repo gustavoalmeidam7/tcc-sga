@@ -1,12 +1,11 @@
-from typing import Annotated, Any
-from fastapi import APIRouter, Depends
+from typing import Annotated
+from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordBearer
 
 from src.Schema.User.UserCreateSchema import UserCreateSchema
 from src.Schema.User.UserResponseSchema import UserResponseSchema
 
-from src.Decorators.UserDecorators import token_get_user
-from src.Model.User import User
+from src.Decorators.UserDecorators import GET_AUTENTHICATED_USER
 
 from src.Service import UserService
 
@@ -19,21 +18,21 @@ USER_ROUTER = APIRouter(
 
 @USER_ROUTER.post("/")
 async def create_user(user: UserCreateSchema) -> 'UserResponseSchema':
-    user = UserService.create(user)
-
-    return user
+    return UserService.create(user)
 
 @USER_ROUTER.delete("/")
-async def delete_user(token: TOKEN_SCHEME):
-    pass
+async def delete_user(user: GET_AUTENTHICATED_USER):
+    UserService.delete_by_id(user.id) # type: ignore
+
+    return {"Message": "Usuário deletado com sucesso"}
 
 # Change reponse schema to response patch schema and create schema to patch schema
 @USER_ROUTER.patch("/")
-async def update_user(token: TOKEN_SCHEME, userUpdate: UserCreateSchema):
+async def update_user(user: GET_AUTENTHICATED_USER, userUpdate: UserCreateSchema):
     pass
 
 @USER_ROUTER.get("/")
-async def get_user(user: Annotated[Any, Depends(token_get_user)]) -> 'UserResponseSchema':
+async def get_user(user: GET_AUTENTHICATED_USER) -> 'UserResponseSchema':
     return UserResponseSchema.model_validate(user)
 
 @USER_ROUTER.get("/getusers")

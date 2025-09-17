@@ -27,8 +27,7 @@ def find_all_with_page(pageNumber: int= 0, pageSize: int = 25) -> 'list[User]':
 
 def update(userModel: User) -> None:
     """ Atualiza um usuário pelo ID """
-    query = User.update(id=userModel.id, username=userModel.username, email=userModel.email).where(User.id == userModel.id)
-    query.execute()
+    User.update(username=userModel.username, email=userModel.email, phone_number=userModel.phone_number, password=userModel.password).where(User.id == userModel.id)
 
 
 def delete_by_id(id: int) -> None:

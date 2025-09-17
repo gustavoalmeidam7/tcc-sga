@@ -13,6 +13,7 @@ from src.Model.UserSession import Session
 from src.Model.User import User
 
 from playhouse.shortcuts import model_to_dict
+from peewee import DoesNotExist
 
 from src.Repository import SessionRepository
 
@@ -77,12 +78,16 @@ def get_current_user(token: TOKEN_SCHEME) -> 'User':
     except:
         raise credentialsException
     
+
     userSession = SessionRepository.find_by_id(id)
 
-    if not userSession:
+    if userSession is None:
         raise credentialsException
 
-    return userSession.user
+    try:
+        return userSession.user
+    except DoesNotExist:
+        raise credentialsException
 
 def get_user_sessions(token: TOKEN_SCHEME) -> UserSessionListSchema:
     """ Encontra as sessões de um usuário """
@@ -108,3 +113,8 @@ def revoke_session(token: TOKEN_SCHEME, sessionId: RevokeSessionSchema) -> None:
         SessionRepository.delete_token_by_id(sessionId.session_id)
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Token não encontrado")
+    
+def revoke_all_sessions_by_user_id(id: int) -> None:
+    """ Revoga todas sessões de um usuário pelo token do mesmo """
+
+    SessionRepository.delete_all_user_tokens_by_id(id)

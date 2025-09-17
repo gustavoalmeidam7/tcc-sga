@@ -28,3 +28,7 @@ def insert_session(session: Session) -> Session | None:
 def delete_token_by_id(token: UUID) -> None:
     """ Deleta uma sessão pelo seu ID """
     Session.delete_by_id(token)
+
+def delete_all_user_tokens_by_id(id: int) -> None:
+    """ Deleta todas sessões associadas a um usuário pelo seu ID """
+    Session.delete().where(Session.user == id).execute()

@@ -8,7 +8,7 @@ import uuid
 
 class Session(BaseModel):
     id = UUIDField(primary_key=True, default=uuid.uuid4)
-    user = ForeignKeyField(User, backref="sessions")
+    user = ForeignKeyField(User, backref="sessions", default=None)
     ip = CharField(max_length=39)
     validUntil = DateTimeField(default=datetime.now(timezone.utc) + timedelta(minutes=30))
     timestamp = DateTimeField(default=datetime.now(timezone.utc))

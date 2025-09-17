@@ -25,6 +25,7 @@ def create(userSchema: UserCreateSchema) -> 'UserResponseSchema':
 
 def delete_by_id(id: int) -> None:
     UserRepository.delete_by_id(id)
+    SessionService.revoke_all_sessions_by_user_id(id)
 
 def delete_all() -> None:
     """ Deleta todos usuários (usado apenas em testes) """

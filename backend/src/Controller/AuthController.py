@@ -20,10 +20,6 @@ AUTH_ROUTER = APIRouter(
     ]
 )
 
-@AUTH_ROUTER.get("/user")
-async def test_token(token: TOKEN_SCHEME) -> UserResponseSchema:
-    return SessionService.get_current_user(token)
-
 @AUTH_ROUTER.post("/revoke", status_code=status.HTTP_204_NO_CONTENT)
 async def revoke_token(token: TOKEN_SCHEME, token_to_revoke: RevokeSessionSchema) -> None:
     SessionService.revoke_session(token, token_to_revoke)
