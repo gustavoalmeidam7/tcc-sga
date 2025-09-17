@@ -32,8 +32,11 @@ import { AmbulanciasLivresModal } from "@/components/modals/AmbulanciasLivres";
 import { MotoristasAtivosModal } from "@/components/modals/MotoristasAtivos";
 import { ChamadosPendentesModal } from "@/components/modals/ChamadosPendentes";
 import { TextAnimate } from "@/components/ui/text-animate";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Home() {
+  const { user } = useAuth();
+
   return (
     <main className="w-full min-h-screen p-4 sm:p-8">
       <section className="max-w-7xl mx-auto space-y-8">
@@ -45,8 +48,8 @@ export default function Home() {
             </Avatar>
             <div>
               <TextAnimate
-                animation="blurInUp" by="character" once delay={0.15} className="text-xl sm:text-2xl font-bold text-foreground">
-                Bem-vindo, Maicon
+                animation="blurInUp" by="character" once delay={0.15} className="text-base sm:text-2xl font-bold text-foreground">
+                {user ? `Bem-vindo, ${user.username}` : `Bem-vindo!`}
               </TextAnimate>
               <p className="text-sm text-muted-foreground">Painel de controle</p>
             </div>

@@ -27,22 +27,30 @@ import {
   Package2,
   Users,
   ChevronUp,
+  LogOut,
 } from "lucide-react";
 
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
   { to: "/", icon: Home, label: "Página Inicial" },
   { to: "/viagens", icon: Map, label: "Viagens" },
   { to: "/ambulancias", icon: Car, label: "Ambulâncias" },
   { to: "/usuarios", icon: Users, label: "Usuários" },
-  { to: "/login", icon: LogIn, label: "Iniciar Sessão" },
   { to: "/saiba-mais", icon: Info, label: "Saiba Mais" },
   { to: "/suporte", icon: LifeBuoy, label: "Suporte" },
 ];
 
 export function AppSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout, isAuthenticated } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
+  };
 
   return (
     <Sidebar>
@@ -70,27 +78,43 @@ export function AppSidebar() {
               </Link>
             </SidebarMenuItem>
           ))}
+          {!isAuthenticated && (
+            <SidebarMenuItem>
+              <Link to="/login" className="w-full">
+                <SidebarMenuButton
+                  isActive={location.pathname === "/login"}
+                  tooltip="Iniciar Sessão"
+                  className="h-9 md:h-9"
+                >
+                  <LogIn/>
+                  <span className="text-base font-medium">Iniciar Sessão</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+          )}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter>
-        <SidebarSeparator />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <div className="flex items-center gap-3 p-1 cursor-pointer">
-              <Avatar>
-                <AvatarImage src="/src/assets/avatar.webp" />
-                <AvatarFallback>CN</AvatarFallback>
-              </Avatar>
-              <span className="text-lg md:text-base">Maicon</span>
-              <ChevronUp className="ml-auto"/>
-            </div>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-52" align="end">
-            <DropdownMenuItem>Editar conta</DropdownMenuItem>
-            <DropdownMenuItem>Sair</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarFooter>
+      {isAuthenticated && (
+        <SidebarFooter>
+          <SidebarSeparator />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <div className="flex items-center gap-3 p-1 cursor-pointer">
+                <Avatar>
+                  <AvatarImage src="/src/assets/avatar.webp" />
+                  <AvatarFallback>CN</AvatarFallback>
+                </Avatar>
+                <span className="text-lg md:text-base">{user?.username}</span>
+                <ChevronUp className="ml-auto"/>
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-52" align="end">
+              <DropdownMenuItem>Editar conta</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout}>Sair</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </SidebarFooter>
+      )}
     </Sidebar>
   );
 }
