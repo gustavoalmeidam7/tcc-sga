@@ -1,35 +1,6 @@
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarFooter,
-  SidebarSeparator,
-} from "@/components/ui/sidebar";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
-import {
-  Car,
-  Home,
-  Info,
-  LifeBuoy,
-  LogIn,
-  Map,
-  Package2,
-  Users,
-  ChevronUp,
-  LogOut,
-} from "lucide-react";
-
+import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, SidebarSeparator, } from "@/components/ui/sidebar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu";
+import { Car, Home, Info, LifeBuoy, LogIn, Map, Package2, Users, ChevronUp, LogOut, } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -99,18 +70,14 @@ export function AppSidebar() {
           <SidebarSeparator />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <div className="flex items-center gap-3 p-1 cursor-pointer">
-                <Avatar>
-                  <AvatarImage src="/src/assets/avatar.webp" />
-                  <AvatarFallback>CN</AvatarFallback>
-                </Avatar>
+              <div className="flex items-center gap-3 p-1 pl-2 cursor-pointer">
                 <span className="text-lg md:text-base">{user?.username}</span>
                 <ChevronUp className="ml-auto"/>
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-52" align="end">
               <DropdownMenuItem>Editar conta</DropdownMenuItem>
-              <DropdownMenuItem onClick={handleLogout}>Sair</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout}> <LogOut /> Sair</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </SidebarFooter>
