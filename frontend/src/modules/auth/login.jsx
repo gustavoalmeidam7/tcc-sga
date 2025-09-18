@@ -38,7 +38,12 @@ export function LoginForm({ className, ...props }) {
       await login(values.email, values.password)
       navigate(from, { replace: true })
     } catch (err) {
-      setError(err.response?.data?.detail || 'Email ou senha incorretos.')
+      const status = err.response?.status;
+      if (status === 401 || status === 400) {
+        setError('Email ou senha incorretos.');
+      } else {
+        setError('Ocorreu um erro no servidor. Tente novamente mais tarde.');
+      }
     } finally {
       setLoading(false)
     }
