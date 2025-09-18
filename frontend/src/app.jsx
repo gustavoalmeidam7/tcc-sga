@@ -29,7 +29,7 @@ export default function App() {
           </header>
           <main className="flex-grow p-4 md:p-6">
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route path="/home" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/registro" element={<Registro />} />
               <Route path="/ambulancias" element={<Ambulancias />} />

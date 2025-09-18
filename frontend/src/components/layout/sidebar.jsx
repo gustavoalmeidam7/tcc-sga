@@ -5,7 +5,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
-  { to: "/", icon: Home, label: "Página Inicial" },
+  { to: "/home", icon: Home, label: "Página Inicial" },
   { to: "/viagens", icon: Map, label: "Viagens" },
   { to: "/ambulancias", icon: Car, label: "Ambulâncias" },
   { to: "/usuarios", icon: Users, label: "Usuários" },
