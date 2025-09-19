@@ -5,7 +5,6 @@ import { AuthContext } from '../hooks/useAuth';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadUserOnMount = async () => {
@@ -19,7 +18,6 @@ export const AuthProvider = ({ children }) => {
           clearAuthToken();
         }
       }
-      setIsLoading(false);
     };
 
     loadUserOnMount();
@@ -61,10 +59,6 @@ export const AuthProvider = ({ children }) => {
     logout,
     register,
   };
-
-  if (isLoading) {
-    return <div>Carregando...</div>;
-  }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

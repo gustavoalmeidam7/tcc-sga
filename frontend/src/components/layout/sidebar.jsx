@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, SidebarSeparator, } from "@/components/ui/sidebar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu";
 import { Car, Home, Info, LifeBuoy, LogIn, Map, Package2, Users, ChevronUp, LogOut, } from "lucide-react";
@@ -13,7 +14,7 @@ const navItems = [
   { to: "/suporte", icon: LifeBuoy, label: "Suporte" },
 ];
 
-export function AppSidebar() {
+export const AppSidebar = memo(function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout, isAuthenticated } = useAuth();
@@ -84,4 +85,4 @@ export function AppSidebar() {
       )}
     </Sidebar>
   );
-}
+});

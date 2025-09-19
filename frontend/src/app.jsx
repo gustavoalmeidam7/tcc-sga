@@ -1,18 +1,25 @@
-import React from 'react'
+import React, { Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Footer from './components/layout/footer'
-import Home from './pages/Home'
-import Login from './pages/Login'
-import Registro from './pages/Register'
-import Ambulancias from './pages/Gerenciar_ambulancias'
-import Usuarios from './pages/Gerenciar_usuario'
-import Viagens from './pages/Viagens'
-import RecSenha from './pages/Rec_senha'
-import SaibaMais from './pages/Saiba_mais'
-import Suporte from './pages/Suporte'
 import './index.css'
 import { AppSidebar } from './components/layout/sidebar'
 import { SidebarProvider, SidebarInset, SidebarTrigger } from './components/ui/sidebar'
+
+const Home = lazy(() => import('./pages/Home'));
+const Login = lazy(() => import('./pages/Login'));
+const Registro = lazy(() => import('./pages/Register'));
+const Ambulancias = lazy(() => import('./pages/Gerenciar_ambulancias'));
+const Usuarios = lazy(() => import('./pages/Gerenciar_usuario'));
+const Viagens = lazy(() => import('./pages/Viagens'));
+const RecSenha = lazy(() => import('./pages/Rec_senha'));
+const SaibaMais = lazy(() => import('./pages/Saiba_mais'));
+const Suporte = lazy(() => import('./pages/Suporte'));
+
+const LoadingSpinner = () => (
+  <div className="flex justify-center items-center h-full">
+    <p>Carregando...</p>
+  </div>
+);
 
 export default function App() {
   return (
@@ -28,18 +35,21 @@ export default function App() {
             <SidebarTrigger className="border bg-gray-200 hover:bg-gray-400" />
           </header>
           <main className="flex-grow p-4 md:p-6">
-            <Routes>
-              <Route path="/home" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/registro" element={<Registro />} />
-              <Route path="/ambulancias" element={<Ambulancias />} />
-              <Route path="/usuarios" element={<Usuarios />} />
-              <Route path="/viagens" element={<Viagens />} />
-              <Route path="/rec_senha" element={<RecSenha />} />
-              <Route path="/saiba-mais" element={<SaibaMais />} />
-              <Route path="/suporte" element={<Suporte />} />
-              <Route path="*" element={<div>404 - Página não encontrada</div>} />
-            </Routes>
+            <Suspense fallback={<LoadingSpinner />}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/home" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/registro" element={<Registro />} />
+                <Route path="/ambulancias" element={<Ambulancias />} />
+                <Route path="/usuarios" element={<Usuarios />} />
+                <Route path="/viagens" element={<Viagens />} />
+                <Route path="/rec_senha" element={<RecSenha />} />
+                <Route path="/saiba-mais" element={<SaibaMais />} />
+                <Route path="/suporte" element={<Suporte />} />
+                <Route path="*" element={<div>404 - Página não encontrada</div>} />
+              </Routes>
+            </Suspense>
           </main>
           <Footer />
         </SidebarInset>
