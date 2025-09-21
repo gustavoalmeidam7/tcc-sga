@@ -2,10 +2,10 @@ from peewee import CharField, DateField, IntegerField
 from src.Model.BaseModel import BaseModel
 
 import uuid
-from src.Validator.UserValidator import validate_uuid
+from src.Validator.UserValidator import generate_uuid
 
 class User(BaseModel):
-    id              = CharField(max_length=32, primary_key=True, default=validate_uuid(uuid.uuid4()))
+    id              = CharField(default=generate_uuid, max_length=32, primary_key=True)
     email           = CharField(max_length=100, unique=True, null=False)
     senha           = CharField(max_length=60, null=False)
     nome            = CharField(max_length=50, null=False)

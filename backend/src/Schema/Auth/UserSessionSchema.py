@@ -8,5 +8,5 @@ class UserSessionListSchema(BaseModel):
     user: UserResponseSchema
     id: UUID
     ip: str
-    validUntil: datetime
-    timestamp: datetime
+    valido_ate: datetime
+    criado_em: datetime

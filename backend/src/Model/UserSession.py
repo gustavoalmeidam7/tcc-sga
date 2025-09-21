@@ -6,10 +6,10 @@ from src.Model import User
 
 import uuid
 
-from src.Validator.UserValidator import validate_uuid
+from src.Validator.UserValidator import generate_uuid
 
 class Session(BaseModel):
-    id         = CharField(max_length=32, default=validate_uuid(uuid.uuid4()), primary_key=True)
+    id         = CharField(default=generate_uuid, max_length=36, primary_key=True)
     usuario    = ForeignKeyField(User.User, backref="sessoes", null=False)
     ip         = CharField(max_length=39, null=False)
     valido_ate = DateTimeField(default=datetime.now(timezone.utc) + timedelta(minutes=30), null=False)

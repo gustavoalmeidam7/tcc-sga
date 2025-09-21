@@ -2,12 +2,11 @@ from peewee import ForeignKeyField, CharField, DateTimeField, IntegerField
 from src.Model import User, Driver, Ambulance
 from src.Model.BaseModel import BaseModel
 
-import uuid
 from datetime import datetime, timezone
-from src.Validator.UserValidator import validate_uuid
+from src.Validator.UserValidator import generate_uuid
 
 class Travel(BaseModel):
-    id            = CharField(max_length=32, default=validate_uuid(uuid.uuid4()), primary_key=True)
+    id            = CharField(default=generate_uuid, max_length=32, primary_key=True)
     realizado     = IntegerField(null=False)
     inicio        = DateTimeField(null=False)
     fim           = DateTimeField(null=True)

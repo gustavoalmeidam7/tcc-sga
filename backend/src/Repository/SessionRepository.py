@@ -1,9 +1,10 @@
 from uuid import UUID
 
-from src.Model.UserSession import Session
+from src.Validator.UserValidator import validate_uuid
 from src.Model.User import User
 
 from src.Model.UserSession import Session
+from src.Repository.UserRepository import find_by_id
 
 from typing import List
 from uuid import UUID
@@ -18,16 +19,28 @@ def find_all_by_user(user: User) -> list[Session]:
 
 def find_by_id(id: UUID) -> Session | None:
     """ Procuta sessão pelo id da mesma, se não for encontrada retorna None """
-    return Session.select().where(Session.id == id).first()
+    return Session.select().where(Session.id == validate_uuid(id)).first()
 
-def insert_session(session: Session) -> Session | None:
+def find_user_by_session_id(id: str | UUID) -> User | None:
+    """ Retorna o usuário pela sessão do mesmo """
+    if type(id) == UUID:
+        id = validate_uuid(id)
+    
+    userModel = Session.select().where(Session.id == id).first()
+    if userModel is None:
+        return None
+    
+    userModel = userModel.usuario
+    
+    return userModel
+
+def insert_session(session: Session) -> None:
     """ Insere uma sessão no banco de dados """
-    session = session.save(force_insert=True)
-    return session
+    session.save(force_insert=True)
 
 def delete_token_by_id(token: UUID) -> None:
     """ Deleta uma sessão pelo seu ID """
-    Session.delete_by_id(token)
+    Session.delete_by_id(validate_uuid(token))
 
 def delete_all_user_tokens_by_id(id: int) -> None:
     """ Deleta todas sessões associadas a um usuário pelo seu ID """

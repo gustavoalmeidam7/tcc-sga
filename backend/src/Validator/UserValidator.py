@@ -1,6 +1,6 @@
 from datetime import date
 import re
-from uuid import UUID
+import uuid
 
 class UserValidationResult:
     def __init__(self, errors: list[dict] = []):
@@ -54,7 +54,11 @@ def validate_cpf(cpf: str) -> str:
     cpf = unmask_number(cpf)
     return cpf
 
-def validate_uuid(uuid: UUID) -> str:
+def validate_uuid(uuid: uuid.UUID) -> str:
     """ Valida se uma string é um UUID válido """
     uuid_str = str(uuid).replace("-", "")
     return uuid_str
+
+def generate_uuid() -> str:
+    """ Gera um UUID válido em formato de string """
+    return validate_uuid(uuid.uuid4())

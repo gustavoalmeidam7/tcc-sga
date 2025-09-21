@@ -43,22 +43,24 @@ def create_session(userEmail: str, plain_password: str, userIP: str) -> Session:
     credentialsException = HTTPException(status.HTTP_401_UNAUTHORIZED, "Email ou senha incorretos")
     userNotExists = HTTPException(status.HTTP_404_NOT_FOUND, "Usuário não registrado")
     
-    if not userModel:
+    if userModel is None:
         raise userNotExists
     
     if not verify_password(plain_password, userModel.senha):
         raise credentialsException
 
-    session = Session().create(
-        user=userModel,
+    sessionModel = Session(
+        usuario=userModel,
         ip=userIP
     )
 
-    return session
+    SessionRepository.insert_session(sessionModel)
 
-def generate_jwt_token(id: UUID) -> dict:
+    return sessionModel
+
+def generate_jwt_token(id: str) -> dict:
     """ Encoda em JWT uma sessão pelo ID da mesma """
-    content = {"sub": str(id)}
+    content = {"sub": id}
     return jwt.encode(content, SECRET_KEY, algorithm=ALGORITHM)
 
 def get_current_user(token: TOKEN_SCHEME) -> 'User':
@@ -77,23 +79,20 @@ def get_current_user(token: TOKEN_SCHEME) -> 'User':
         raise credentialsException
     
 
-    userSession = SessionRepository.find_by_id(id)
+    userModel = SessionRepository.find_user_by_session_id(id)
 
-    if userSession is None:
+    if userModel is None:
         raise credentialsException
 
-    try:
-        return userSession.usuario
-    except DoesNotExist:
-        raise credentialsException
+    return userModel
 
 def get_user_sessions(token: TOKEN_SCHEME) -> UserSessionListSchema:
     """ Encontra as sessões de um usuário """
 
     user = get_current_user(token)
     return UserSessionListSchema.model_validate({
-        "user": user,
-        "sessions": SessionRepository.find_all_by_user(user)
+        "usuario": user,
+        "sessoes": SessionRepository.find_all_by_user(user)
     })
 
 def revoke_session(token: TOKEN_SCHEME, sessionId: RevokeSessionSchema) -> None:
@@ -101,14 +100,14 @@ def revoke_session(token: TOKEN_SCHEME, sessionId: RevokeSessionSchema) -> None:
 
     mySessionId = jwt.decode(token, SECRET_KEY, ALGORITHM).get("sub")
 
-    if UUID(mySessionId) == sessionId.session_id:
+    if UUID(mySessionId) == sessionId.id_sessao:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Impossível revogar o próprio token")
     
-    user = get_current_user(token)
-    sessionToRevoke = SessionRepository.find_by_id(sessionId.session_id) or Session() 
+    # user = get_current_user(token)
+    # sessionToRevoke = SessionRepository.find_by_id(sessionId.id_sessao) or Session() 
 
-    if sessionToRevoke.usuario.id == user.id:
-        SessionRepository.delete_token_by_id(sessionId.session_id)
+    if SessionRepository.find_user_by_session_id(sessionId.id_sessao) is not None:
+        SessionRepository.delete_token_by_id(sessionId.id_sessao)
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Token não encontrado")
     

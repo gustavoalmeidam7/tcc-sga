@@ -4,10 +4,10 @@ def test_create_user_e2e(client: TestClient):
     user_data = {
         "email": "test.e2e@example.com",
         "cpf": "12345678901",
-        "phone_number": "11999998888",
-        "username": "test_e2e_user",
-        "birthday": "2000-01-01",
-        "password": "a_strong_password"
+        "telefone": "11999998888",
+        "nome": "test_e2e_user",
+        "nascimento": "2000-01-01",
+        "senha": "a_strong_password"
     }
     response = client.post("/user/", json=user_data)
     
@@ -15,19 +15,19 @@ def test_create_user_e2e(client: TestClient):
     
     response_json = response.json()
     assert response_json["email"] == user_data["email"]
-    assert response_json["username"] == user_data["username"]
+    assert response_json["nome"] == user_data["nome"]
     assert "id" in response_json
     
-    assert "password" not in response_json
+    assert "senha" not in response_json
 
 def test_get_users_e2e(client: TestClient):
     user_data = {
         "email": "test.getusers@example.com",
         "cpf": "10987654321",
-        "phone_number": "11777776666",
-        "username": "get_users_tester",
-        "birthday": "1999-12-31",
-        "password": "another_password"
+        "telefone": "11777776666",
+        "nome": "get_users_tester",
+        "nascimento": "1999-12-31",
+        "senha": "another_password"
     }
     create_response = client.post("/user/", json=user_data)
     assert create_response.status_code == 200

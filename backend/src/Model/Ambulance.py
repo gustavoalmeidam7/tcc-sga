@@ -1,12 +1,10 @@
 from peewee import CharField, IntegerField
 from src.Model.BaseModel import BaseModel
 
-import uuid
-
-from src.Validator.UserValidator import validate_uuid
+from src.Validator.UserValidator import generate_uuid
 
 class Ambulance(BaseModel):
-    id     = CharField(max_length=32, default=validate_uuid(uuid.uuid4()), primary_key=True)
+    id     = CharField(default=generate_uuid, max_length=32, primary_key=True)
     status = IntegerField(null=False)
     placa  = CharField(max_length=8, null=False)
     tipo   = IntegerField(null=False)
