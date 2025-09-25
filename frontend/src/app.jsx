@@ -1,25 +1,11 @@
-import React, { Suspense, lazy } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Footer from './components/layout/footer'
-import './index.css'
-import { AppSidebar } from './components/layout/sidebar'
-import { SidebarProvider, SidebarInset, SidebarTrigger } from './components/ui/sidebar'
-
-const Home = lazy(() => import('./pages/Home'));
-const Login = lazy(() => import('./pages/Login'));
-const Registro = lazy(() => import('./pages/Register'));
-const Ambulancias = lazy(() => import('./pages/Gerenciar_ambulancias'));
-const Usuarios = lazy(() => import('./pages/Gerenciar_usuario'));
-const Viagens = lazy(() => import('./pages/Viagens'));
-const RecSenha = lazy(() => import('./pages/Rec_senha'));
-const SaibaMais = lazy(() => import('./pages/Saiba_mais'));
-const Suporte = lazy(() => import('./pages/Suporte'));
-
-const LoadingSpinner = () => (
-  <div className="flex justify-center items-center h-full">
-    <p>Carregando...</p>
-  </div>
-);
+import React, { Suspense } from "react"
+import { BrowserRouter, Routes, Route } from "react-router-dom"
+import Footer from "./components/layout/footer/footer"
+import "./index.css"
+import { AppSidebar } from "./components/layout/sidebar"
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "./components/ui/sidebar"
+import { appRoutes } from "./routes"
+import LoadingSpinner from "@/components/layout/loading"
 
 export default function App() {
   return (
@@ -35,19 +21,19 @@ export default function App() {
             <SidebarTrigger className="border bg-gray-200 hover:bg-gray-400" />
           </header>
           <main className="flex-grow p-4 md:p-6">
-            <Suspense fallback={<LoadingSpinner />}>
+            <Suspense fallback={<LoadingSpinner size="large" />}>
               <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/home" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/registro" element={<Registro />} />
-                <Route path="/ambulancias" element={<Ambulancias />} />
-                <Route path="/usuarios" element={<Usuarios />} />
-                <Route path="/viagens" element={<Viagens />} />
-                <Route path="/rec_senha" element={<RecSenha />} />
-                <Route path="/saiba-mais" element={<SaibaMais />} />
-                <Route path="/suporte" element={<Suporte />} />
-                <Route path="*" element={<div>404 - Página não encontrada</div>} />
+                {appRoutes.map((route, index) =>
+                  route.children ? (
+                    <Route key={index} element={route.element}>
+                      {route.children.map((child, i) => (
+                        <Route key={i} path={child.path} element={child.element} />
+                      ))}
+                    </Route>
+                  ) : (
+                    <Route key={index} path={route.path} element={route.element} />
+                  )
+                )}
               </Routes>
             </Suspense>
           </main>
