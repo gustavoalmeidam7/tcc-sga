@@ -14,7 +14,7 @@ const login = async (email, password) => {
 };
 
 const register = async (userData) => {
-  const response = await API.post('/user/create', userData);
+  const response = await API.post('/user/', userData);
   return response.data;
 };
 
@@ -23,7 +23,7 @@ const logout = () => {
 };
 
 const getMe = async () => {
-  const response = await API.get('/token/user');
+  const response = await API.get('/user/');
   return response.data;
 };
 
