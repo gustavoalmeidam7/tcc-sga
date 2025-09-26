@@ -1,5 +1,4 @@
 import React, { lazy } from "react"
-import { PrivateRoute } from "@/components/PrivateRoute"
 
 const Home = lazy(() => import("./pages/Home"))
 const Login = lazy(() => import("./pages/Login"))
@@ -12,22 +11,17 @@ const SaibaMais = lazy(() => import("./pages/Saiba_mais"))
 const Suporte = lazy(() => import("./pages/Suporte"))
 
 export const appRoutes = [
-  { path: "/", element: <Home /> },
-  { path: "/login", element: <Login /> },
-  { path: "/registro", element: <Registro /> },
-  { path: "/rec_senha", element: <RecSenha /> },
-  { path: "/saiba-mais", element: <SaibaMais /> },
-  { path: "/suporte", element: <Suporte /> },
+  { path: "/", element: <Home />, label: "Dashboard" },
+  { path: "/login", element: <Login />, label: "Login" },
+  { path: "/registro", element: <Registro />, label: "Registro" },
+  { path: "/rec_senha", element: <RecSenha />, label: "Recuperar Senha" },
+  { path: "/saiba-mais", element: <SaibaMais />, label: "Saiba Mais" },
+  { path: "/suporte", element: <Suporte />, label: "Suporte" },
+  { path: "/home", element: <Home />, label: "Dashboard" },
+  { path: "/ambulancias", element: <Ambulancias />, label: "Gerenciar Ambulâncias" },
+  { path: "/usuarios", element: <Usuarios />, label: "Gerenciar Usuários" },
+  { path: "/viagens", element: <Viagens />, label: "Viagens" },
+    
 
-  {
-    element: <PrivateRoute />,
-    children: [
-      { path: "/home", element: <Home /> },
-      { path: "/ambulancias", element: <Ambulancias /> },
-      { path: "/usuarios", element: <Usuarios /> },
-      { path: "/viagens", element: <Viagens /> },
-    ],
-  },
-
-  { path: "*", element: <div>404 - Página não encontrada</div> },
+  { path: "*", element: <div>404 - Página não encontrada</div>, label: "Página Não Encontrada" },
 ]

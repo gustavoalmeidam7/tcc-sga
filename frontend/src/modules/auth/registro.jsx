@@ -49,7 +49,7 @@ export function RegisterForm({ className, ...props }) {
       await register(userData)
       setSuccess('Cadastro realizado com sucesso! Você será redirecionado para o login.')
       
-      setTimeout(() => { navigate('/login') }, 2000)
+      setTimeout(() => { navigate('/login') }, 500)
 
     } catch (err) {
       if (err.response?.data?.Erros) {
