@@ -40,20 +40,46 @@ def test_get_user_authenticated(client: TestClient):
     assert getUserData.json()["nascimento"] == userData["nascimento"]
     assert "senha" is not getUserData
 
-# TODO: Implement later
+def test_delete_user(client: TestClient):
+    user1Data = TestUserHelper.generate_user()
+    user2Data = TestUserHelper.generate_user()
 
-# def test_delete_user(client: TestClient):
-#     user1Data = TestUserHelper.generate_user()
-#     user2Data = TestUserHelper.generate_user()
+    TestUserHelper.register_user(client, user1Data)
+    TestUserHelper.register_user(client, user2Data)
 
-#     TestUserHelper.register_user(client, user1Data)
-#     TestUserHelper.register_user(client, user2Data)
+    user1Token = TestUserHelper.autenticate_user(client, user1Data["email"], user1Data["senha"])
+    user2Token = TestUserHelper.autenticate_user(client, user2Data["email"], user2Data["senha"])
 
-#     user1Token = TestUserHelper.autenticate_user(client, user1Data["email"], user1Data["senha"])
-#     user2Token = TestUserHelper.autenticate_user(client, user1Data["email"], user1Data["senha"])
+    deleteUserResponse = client.delete("/user/", headers=user1Token)
 
-#     deleteUserResponse = client.delete("/", headers=user1Token)
+    assert deleteUserResponse.status_code == 204
 
-#     assert deleteUserResponse == 204
+    getAllUsers = client.get("/user/getusers", headers=user2Token)
 
-#     getAllUsers = client.get("/getusers")
+    response_json = getAllUsers.json()
+    assert isinstance(response_json, list)
+    assert len(response_json) > 0
+    
+    emails_in_response = [user["email"] for user in response_json]
+    assert user1Data["email"] not in emails_in_response
+
+def test_update_user(client: TestClient):
+    userData = TestUserHelper.generate_user()
+    TestUserHelper.register_user(client, userData)
+    userToken = TestUserHelper.autenticate_user(client, userData["email"], userData["senha"])
+
+    # TODO: Test update only few fields inted of bulk update
+
+    updateData = TestUserHelper.generate_user()
+    updateData["cargo"] = 1
+    updateData.pop("cpf")
+    updateData.pop("nascimento")
+    updateData.pop("senha")
+
+    response = client.patch("/user/", headers=userToken, json=updateData)
+    
+    responseJson = response.json()
+    responseJson.pop("id")
+
+    assert response.status_code == 200
+    assert  responseJson == updateData
