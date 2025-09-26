@@ -1,255 +1,148 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardDescription,
+  Card, 
+  CardHeader, 
+  CardTitle, 
+  CardContent
 } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle 
 } from "@/components/ui/dialog";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
-} from "@/components/ui/table";
-import { Briefcase, Ambulance, User, Activity } from "lucide-react";
-import { ViagensDoDiaModal } from "@/components/modals/ViagensDia";
-import { AmbulanciasLivresModal } from "@/components/modals/AmbulanciasLivres";
-import { MotoristasAtivosModal } from "@/components/modals/MotoristasAtivos";
-import { ChamadosPendentesModal } from "@/components/modals/ChamadosPendentes";
-import { TextAnimate } from "@/components/ui/text-animate";
 import { useAuth } from "@/hooks/useAuth";
+import { Ambulance, Clock} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableRow 
+} from "@/components/ui/table";
+import { DataTable } from "@/components/ui/data-table";
+import { columns_viagens, columns_motoristas } from "./components/columns";
+import { recentActivities, viagensData, motoristasData } from "./components/dados";
+import { AmbulanciasLivresModal } from "@/components/modals/AmbulanciasLivres";
+import { ChamadosPendentesModal } from "@/components/modals/ChamadosPendentes";
+
 
 export default function Home() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const [isAmbulanciasModalOpen, AmbulanciasModal] = useState(false);
+  const [isChamadosModalOpen, ChamadosOpen] = useState(false);
 
   return (
-    <main className="w-full min-h-screen p-4 sm:p-8">
-      <section className="max-w-7xl mx-auto space-y-8">
-        <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-6">
-          <div>
-            <div>
-              <TextAnimate
-                animation="blurInUp" by="character" once delay={0.15} className="text-2xl font-bold text-foreground">
-                {user ? `Bem-vindo, ${user.username}` : `Bem-vindo!`}
-              </TextAnimate>
-              <p className="text-sm text-muted-foreground">Painel de controle</p>
-            </div>
-          </div>
-        </header>
-
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Card className="shadow-md border cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-transform duration-200 ease-in-out">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Viagens do Dia
-                  </CardTitle>
-                  <Briefcase className="w-5 h-5 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="p-4 pt-0">
-                  <div className="text-3xl font-semibold text-foreground">12</div>
-                  <p className="text-xs text-muted-foreground mt-1">+2 novas hoje</p>
-                </CardContent>
-              </Card>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Viagens do Dia</DialogTitle>
-                <DialogDescription>
-                  Lista de todas as viagens realizadas hoje.
-                </DialogDescription>
-              </DialogHeader>
-              <ViagensDoDiaModal />
-            </DialogContent>
-          </Dialog>
-
-          <Dialog>
-            <DialogTrigger asChild>
-              <Card className="shadow-md border cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-transform duration-200 ease-in-out">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Ambulâncias Livres
-                  </CardTitle>
-                  <Ambulance className="w-5 h-5 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="p-4 pt-0">
-                  <div className="text-3xl font-semibold text-foreground">3 de 5</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Última atualização: agora
-                  </p>
-                </CardContent>
-              </Card>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Ambulâncias Livres</DialogTitle>
-                <DialogDescription>
-                  Ambulâncias disponíveis no momento.
-                </DialogDescription>
-              </DialogHeader>
-              <AmbulanciasLivresModal />
-            </DialogContent>
-          </Dialog>
-
-          <Dialog>
-            <DialogTrigger asChild>
-              <Card className="shadow-md border cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-transform duration-200 ease-in-out">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Motoristas Ativos
-                  </CardTitle>
-                  <User className="w-5 h-5 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="p-4 pt-0">
-                  <div className="text-3xl font-semibold text-foreground">6</div>
-                  <p className="text-xs text-muted-foreground mt-1">Em serviço</p>
-                </CardContent>
-              </Card>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Motoristas Ativos</DialogTitle>
-                <DialogDescription>
-                  Motoristas atualmente em serviço.
-                </DialogDescription>
-              </DialogHeader>
-              <MotoristasAtivosModal />
-            </DialogContent>
-          </Dialog>
-
-          <Dialog>
-            <DialogTrigger asChild>
-              <Card className="shadow-md border cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-transform duration-200 ease-in-out">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Chamados Pendentes
-                  </CardTitle>
-                  <Activity className="w-5 h-5 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="p-4 pt-0">
-                  <div className="text-3xl font-semibold text-foreground">2</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Aprovação necessária
-                  </p>
-                </CardContent>
-              </Card>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Chamados Pendentes</DialogTitle>
-                <DialogDescription>
-                  Chamados que necessitam de aprovação.
-                </DialogDescription>
-              </DialogHeader>
-              <ChamadosPendentesModal />
-            </DialogContent>
-          </Dialog>
+    <main className="space-y-6 lg:container lg:mx-auto">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Bem-vindo, {user?.username}!</h1>
+          <p className="text-muted-foreground">Este é o seu centro de comando SGA.</p>
         </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div onClick={() => AmbulanciasModal(true)} className="cursor-pointer">
+            <Card>
+              <CardContent className="p-2 md:p-3 flex items-center space-x-2">
+                <Ambulance className="h-5 w-5 md:h-6 md:w-6 text-chart-4" />
+                <div>
+                  <div className="text-lg md:text-xl font-bold text-primary">2</div>
+                  <div className="text-base md:text-base">Ambulâncias Livres</div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          <div onClick={() => ChamadosOpen(true)} className="cursor-pointer">
+            <Card>
+              <CardContent className="p-2 md:p-3 flex items-center space-x-2">
+                <Clock className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+                <div>
+                  <div className="text-lg md:text-xl font-bold text-primary">2</div>
+                  <div className="text-base md:text-base">Chamados Pendentes</div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <Card className="shadow-md border">
+      <Dialog open={isAmbulanciasModalOpen} onOpenChange={AmbulanciasModal}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Ambulâncias Livres</DialogTitle>
+          </DialogHeader>
+          <AmbulanciasLivresModal />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isChamadosModalOpen} onOpenChange={ChamadosOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Chamados Pendentes</DialogTitle>
+          </DialogHeader>
+          <ChamadosPendentesModal />
+        </DialogContent>
+      </Dialog>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-2 p-5">
+          <Tabs defaultValue="viagens">
+            <TabsList className="bg-transparent rounded-none p-0 h-auto">
+              <TabsTrigger value="viagens" className="text-base data-[state=active]:bg-accent data-[state=active]:shadow-none rounded-t-md rounded-b-none border-b-2 border-transparent data-[state=active]:border-primary">Viagens Pendentes</TabsTrigger>
+              <TabsTrigger value="motoristas" className="text-base data-[state=active]:bg-accent data-[state=active]:shadow-none rounded-t-md rounded-b-none border-b-2 border-transparent data-[state=active]:border-primary">Motoristas Ativos</TabsTrigger>
+            </TabsList>
+            <TabsContent value="viagens" className="mt-4">
+              <DataTable columns={columns_viagens} data={viagensData} />
+            </TabsContent>
+            <TabsContent value="motoristas" className="mt-4">
+              <DataTable columns={columns_motoristas} data={motoristasData} />
+            </TabsContent>
+          </Tabs>
+        </Card>
+
+        <aside className="lg:col-span-1 space-y-6 flex flex-col items-center lg:items-end">
+          <section className="w-full max-w-sm">
+            <Card>
               <CardHeader>
-                <CardTitle>Viagens Pendentes</CardTitle>
-                <CardDescription>Aprovar ou atribuir viagens</CardDescription>
+                <CardTitle className="text-xl">Ações Rápidas</CardTitle>
               </CardHeader>
-              <CardContent className="overflow-x-auto">
-                <Table className="min-w-full">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>ID</TableHead>
-                      <TableHead>Paciente</TableHead>
-                      <TableHead>Destino</TableHead>
-                      <TableHead className="text-right">Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
+              <CardContent className="flex flex-col space-y-3">
+                <Button onClick={() => navigate('/ambulancias')} variant="secondary" className="text-base">Gerenciar Ambulâncias</Button>
+                <Button onClick={() => navigate('/usuarios')} variant="secondary" className="text-base">Gerenciar Usuários</Button>
+                <Button onClick={() => navigate('/viagens')} variant="secondary" className="text-base">Visualizar Viagens</Button>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section className="w-full max-w-sm">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl">Atividade Recente</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
                   <TableBody>
-                    <TableRow className="transition-colors">
-                      <TableCell className="font-medium">001</TableCell>
-                      <TableCell>Maicon</TableCell>
-                      <TableCell>Hospital</TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="hover:bg-accent hover:text-accent-foreground transition-colors"
-                        >
-                          Aprovar
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow className="transition-colors">
-                      <TableCell className="font-medium">002</TableCell>
-                      <TableCell>Kaique</TableCell>
-                      <TableCell>Clínica</TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="hover:bg-accent hover:text-accent-foreground transition-colors"
-                        >
-                          Aprovar
-                        </Button>
-                      </TableCell>
-                    </TableRow>
+                    {recentActivities.map((activity, index) => (
+                      <TableRow key={index} className="border-none">
+                        <TableCell className="p-3">
+                          <div className={`p-2 ${activity.bgColor} rounded-full w-fit`}>
+                            {activity.icon}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground p-3">
+                          {activity.text}
+                        </TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </CardContent>
             </Card>
-          </div>
-
-          <aside className="space-y-6">
-            <Card className="shadow-md border">
-              <CardHeader>
-                <CardTitle>Ações Rápidas</CardTitle>
-                <CardDescription>Gerencie o sistema</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col gap-4">
-                  <Link to="/ambulancias">
-                    <Button
-                      className="w-full hover:bg-accent hover:text-accent-foreground transition-colors"
-                      variant="outline"
-                    >
-                      Gerenciar Ambulâncias
-                    </Button>
-                  </Link>
-                  <Link to="/usuarios">
-                    <Button
-                      className="w-full hover:bg-accent hover:text-accent-foreground transition-colors"
-                      variant="outline"
-                    >
-                      Gerenciar Usuários
-                    </Button>
-                  </Link>
-                  <Link to="/viagens">
-                    <Button
-                      className="w-full hover:bg-accent hover:text-accent-foreground transition-colors"
-                      variant="outline"
-                    >
-                      Visualizar Todas as Viagens
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          </aside>
-        </div>
-      </section>
+          </section>
+        </aside>
+      </div>
     </main>
   );
 }
