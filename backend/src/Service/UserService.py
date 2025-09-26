@@ -3,6 +3,7 @@ from src.Error.ErrorClass import ErrorClass
 from src.Schema.User.UserCreateSchema import UserCreateSchema
 from src.Schema.User.UserResponseSchema import UserResponseSchema
 from src.Schema.User.UserUpdateResponseSchema import UserUpdateResponseSchema
+from src.Schema.User.UserUpdateSchema import UserUpdateSchema
 from src.Model.User import User
 
 from src.Validator.UserValidator import UserValidator
@@ -43,6 +44,8 @@ def find_all_page_dict(page: int = 0, pageSize: int = 25) -> 'list[UserResponseS
 
     return list(map(UserResponseSchema.model_validate, UserRepository.find_all_with_page(page, pageSize)))
 
-def update_user(user: User, updateFields: dict) -> UserUpdateResponseSchema:
+def update_user(user: User, updateFields: UserUpdateSchema) -> UserUpdateResponseSchema:
     """ Atualiza um usuário do banco de dados """
+    user = UserRepository.update_by_id(user.id, User(**updateFields.model_dump()))
+    UserUpdateResponseSchema.model_validate(user)
     return UserUpdateResponseSchema.model_validate(user)
