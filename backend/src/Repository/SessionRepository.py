@@ -4,7 +4,6 @@ from src.Validator.UserValidator import validate_uuid
 from src.Model.User import User
 
 from src.Model.UserSession import Session
-from src.Repository.UserRepository import find_by_id
 
 from typing import List
 from uuid import UUID

@@ -49,6 +49,9 @@ def validate_birthday(birthday: date) -> date:
 
     return birthday
 
+def email_validator(email: str) -> str:
+    return email
+
 # TODO do a real validation with external tools
 def validate_cpf(cpf: str) -> str:
     cpf = unmask_number(cpf)

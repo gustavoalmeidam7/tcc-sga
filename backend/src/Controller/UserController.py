@@ -20,22 +20,20 @@ USER_ROUTER = APIRouter(
 async def create_user(user: UserCreateSchema) -> 'UserResponseSchema':
     return UserService.create(user)
 
-@USER_ROUTER.delete("/")
+@USER_ROUTER.delete("/", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(user: GET_AUTENTHICATED_USER):
     UserService.delete_by_id(user.id) # type: ignore
 
-    return {"Message": "Usuário deletado com sucesso"}
-
-# Change reponse schema to response patch schema and create schema to patch schema
 @USER_ROUTER.patch("/")
 async def update_user(user: GET_AUTENTHICATED_USER, userUpdate: UserCreateSchema):
-    pass
+    # CHANGEME: Função mocada
+    return UserService.update_user(user, [])
 
 @USER_ROUTER.get("/")
 async def get_user(user: GET_AUTENTHICATED_USER) -> 'UserResponseSchema':
     return UserResponseSchema.model_validate(user)
 
 @USER_ROUTER.get("/getusers")
-async def get_users(page: int = 1, pagesize: int = 15) -> 'list[UserResponseSchema]':
+async def get_users(user: GET_AUTENTHICATED_USER, page: int = 1, pagesize: int = 15) -> 'list[UserResponseSchema]':
     return UserService.find_all_page_dict(int(page), int(pagesize))
 

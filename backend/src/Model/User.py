@@ -1,7 +1,6 @@
 from peewee import CharField, DateField, IntegerField
 from src.Model.BaseModel import BaseModel
 
-import uuid
 from src.Validator.UserValidator import generate_uuid
 
 class User(BaseModel):
@@ -12,7 +11,7 @@ class User(BaseModel):
     nascimento      = DateField(null=False)
     cpf             = CharField(max_length=11, unique=True, null=False)
     telefone        = CharField(max_length=12, unique=True, null=False)
-    cargo           = IntegerField(null=True)
+    cargo           = IntegerField(default=0, null=False)
 
     class Meta:
         table_name = "usuario"
