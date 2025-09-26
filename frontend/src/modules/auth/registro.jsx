@@ -1,5 +1,3 @@
-'use client'
-
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -14,14 +12,14 @@ import { Input } from '@/components/ui/input'
 import img_logo from '@/assets/Logo_Maior.webp'
 
 const formSchema = z.object({
-  username: z.string().min(2, { message: 'O nome de usuário deve ter pelo menos 2 caracteres.' }),
+  nome: z.string().min(2, { message: 'O nome de usuário deve ter pelo menos 2 caracteres.' }),
   email: z.string().email({ message: 'Por favor, insira um email válido.' }),
   cpf: z.string().min(11, { message: 'O CPF deve ter 11 dígitos.' }),
-  phone_number: z.string().min(10, { message: 'Insira um número de telefone válido.' }),
-  birthday: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'Insira uma data de nascimento válida.' }),
-  password: z.string().min(8, { message: 'A senha deve ter no mínimo 8 caracteres.' }),
+  telefone: z.string().min(10, { message: 'Insira um número de telefone válido.' }),
+  nascimento: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'Insira uma data de nascimento válida.' }),
+  senha: z.string().min(8, { message: 'A senha deve ter no mínimo 8 caracteres.' }),
   confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
+}).refine((data) => data.senha === data.confirmPassword, {
   message: 'As senhas não coincidem.',
   path: ['confirmPassword'],
 })
@@ -35,7 +33,6 @@ export function RegisterForm({ className, ...props }) {
 
   const form = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: { username: '', email: '', cpf: '', phone_number: '', birthday: '', password: '', confirmPassword: '' },
   });
 
   async function onSubmit(values) {
@@ -79,7 +76,7 @@ export function RegisterForm({ className, ...props }) {
                 {error && <p className="text-red-500 text-sm text-center mt-2">{error}</p>}
                 {success && <p className="text-green-500 text-sm text-center mt-2">{success}</p>}
 
-                <FormField control={form.control} name="username" render={({ field }) => (
+                <FormField control={form.control} name="nome" render={({ field }) => (
                   <FormItem className="grid gap-3">
                     <FormLabel className="text-foreground">Nome de Usuário</FormLabel>
                     <FormControl><Input placeholder="Seu nome de usuário" {...field} /></FormControl>
@@ -100,21 +97,21 @@ export function RegisterForm({ className, ...props }) {
                     <FormMessage className="text-destructive-foreground" />
                   </FormItem>
                 )} />
-                <FormField control={form.control} name="phone_number" render={({ field }) => (
+                <FormField control={form.control} name="telefone" render={({ field }) => (
                   <FormItem className="grid gap-3">
                     <FormLabel className="text-foreground">Telefone</FormLabel>
                     <FormControl><Input type="tel" placeholder="(00) 00000-0000" {...field} /></FormControl>
                     <FormMessage className="text-destructive-foreground" />
                   </FormItem>
                 )} />
-                <FormField control={form.control} name="birthday" render={({ field }) => (
+                <FormField control={form.control} name="nascimento" render={({ field }) => (
                   <FormItem className="grid gap-3">
                     <FormLabel className="text-foreground">Data de Nascimento</FormLabel>
                     <FormControl><Input type="date" {...field} /></FormControl>
                     <FormMessage className="text-destructive-foreground" />
                   </FormItem>
                 )} />
-                <FormField control={form.control} name="password" render={({ field }) => (
+                <FormField control={form.control} name="senha" render={({ field }) => (
                   <FormItem className="grid gap-3">
                     <FormLabel className="text-foreground">Senha</FormLabel>
                     <FormControl><Input type="password" {...field} /></FormControl>
