@@ -2,9 +2,9 @@
 @import "tw-animate-css";
 
 :root {
-  --background: hsl(215 13.7931% 34.1176%);
+  --background: hsl(215 28% 17%);
   --foreground: hsl(210 17% 97%);
-  --card: hsl(215.0000 27.9070% 16.8627%);
+  --card: hsl(215 28% 22%);
   --card-foreground: hsl(210 16.6667% 97.6471%);
   --popover: hsl(215.0000 27.9070% 16.8627%);
   --popover-foreground: hsl(210 16.6667% 97.6471%);
@@ -35,7 +35,9 @@
   --sidebar-border: hsl(216.9231 19.1176% 26.6667%);
   --sidebar-ring: hsl(217.2193 91.2195% 59.8039%);
   --font-sans: Poppins;
-  --radius: 0.5rem;
+  --radius: 0.75rem;
+  --glass-bg: hsl(215 28% 20% / 0.5);
+  --glass-border: hsl(210 17% 97% / 0.1);
   --shadow-2xs: 0px 5px 15px 0px hsl(0 0% 0% / 0.13);
   --shadow-xs: 0px 5px 15px 0px hsl(0 0% 0% / 0.13);
   --shadow-sm: 0px 5px 15px 0px hsl(0 0% 0% / 0.25), 0px 1px 2px -1px hsl(0 0% 0% / 0.25);
