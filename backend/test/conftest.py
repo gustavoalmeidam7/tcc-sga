@@ -5,13 +5,9 @@ from fastapi.testclient import TestClient
 from src.DB import db
 from src.main import app
 
-from src.Model.Ambulance import Ambulance
-from src.Model.Driver import Driver
-from src.Model.Travel import Travel
-from src.Model.User import User
-from src.Model.UserSession import Session
+from src.Model import User, Driver, Travel, UserSession, Ambulance, Equipment, Manager
 
-MODELS = [Ambulance, Driver, Travel, User, Session]
+MODELS = [User.User, Driver.Driver, Travel.Travel, UserSession.Session, Ambulance.Ambulance, Equipment.Equipment, Manager.Manager]
 
 @pytest.fixture(scope='function', autouse=True)
 def test_database():

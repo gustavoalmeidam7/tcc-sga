@@ -1,19 +1,19 @@
 from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
 
-from src.Utils.singleton import singleton
 from src.Utils.env import get_env_var
 
-from src.Repository.UserRepository import UserRepository
-from src.Schema.User.UserResponseSchema import UserResponseSchema
+from src.Repository import UserRepository
+
 from src.Schema.Auth.RevokeSessionSchema import RevokeSessionSchema
 from src.Schema.Auth.UserSessionListSchema import UserSessionListSchema
 
 from src.Model.UserSession import Session
+from src.Model.User import User
 
-from playhouse.shortcuts import model_to_dict
+from peewee import DoesNotExist
 
-from src.Repository.SessionRepository import SessionRepository
+from src.Repository import SessionRepository
 
 from typing import Annotated
 
@@ -23,93 +23,95 @@ from uuid import UUID
 
 TOKEN_SCHEME = Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="token"))]
 
-class SessionService(metaclass=singleton):
-    def __init__(self):
-        self.sessionRepository = SessionRepository()
-        self.userRepositoty = UserRepository()
-        self.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+PWD_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-        self.SECRET_KEY = get_env_var("secret_key_jwt", "CHANGEME")
-        self.ALGORITHM = get_env_var("algorithm_jwt", "HS256")
+SECRET_KEY = get_env_var("secret_key_jwt", "CHANGEME")
+ALGORITHM = get_env_var("algorithm_jwt", "HS256")
 
-    def get_password_hash(self, password: str) -> str:
-        """ Gera um hash da senha para ser armazenada no banco de dados """
-        return self.pwd_context.hash(password)
+def get_password_hash(password: str) -> str:
+    """ Gera um hash da senha para ser armazenada no banco de dados """
+    return PWD_CONTEXT.hash(password)
 
-    def verify_password(self, plain_password: str, hash_password: str) -> bool:
-        """ Verifica o hash da senha comparando o hash da senha atual
-        com a armazenada no banco de dados """
-        return self.pwd_context.verify(plain_password, hash_password)
+def verify_password(plain_password: str, hash_password: str) -> bool:
+    """ Verifica o hash da senha comparando o hash da senha atual
+    com a armazenada no banco de dados """
+    return PWD_CONTEXT.verify(plain_password, hash_password)
 
-    def create_session(self, userEmail: str, plain_password: str, userIP: str) -> Session:
-        """ Cria uma nova sessão """
-        userModel = self.userRepositoty.find_by_email(userEmail)
-        credentialsException = HTTPException(status.HTTP_401_UNAUTHORIZED, "Email ou senha incorretos")
-        userNotExists = HTTPException(status.HTTP_404_NOT_FOUND, "Usuário não registrado")
-        
-        if not userModel:
-            raise userNotExists
-        
-        if not self.verify_password(plain_password, userModel.password):
-            raise credentialsException
+def create_session(userEmail: str, plain_password: str, userIP: str) -> Session:
+    """ Cria uma nova sessão """
+    userModel = UserRepository.find_by_email(userEmail)
+    credentialsException = HTTPException(status.HTTP_401_UNAUTHORIZED, "Email ou senha incorretos")
+    userNotExists = HTTPException(status.HTTP_404_NOT_FOUND, "Usuário não registrado")
+    
+    if userModel is None:
+        raise userNotExists
+    
+    if not verify_password(plain_password, userModel.senha):
+        raise credentialsException
 
-        session = Session().create(
-            user=userModel,
-            ip=userIP
-        )
+    sessionModel = Session(
+        usuario=userModel,
+        ip=userIP
+    )
 
-        return session
+    SessionRepository.insert_session(sessionModel)
 
-    def generate_jwt_token(self, id: UUID) -> dict:
-        """ Encoda em JWT uma sessão pelo ID da mesma """
-        content = {"sub": str(id)}
-        return jwt.encode(content, self.SECRET_KEY, algorithm=self.ALGORITHM)
+    return sessionModel
 
-    def get_current_user(self, token: TOKEN_SCHEME) -> UserResponseSchema:
-        """ Pega o user pelo token """
+def generate_jwt_token(id: str) -> dict:
+    """ Encoda em JWT uma sessão pelo ID da mesma """
+    content = {"sub": id}
+    return jwt.encode(content, SECRET_KEY, algorithm=ALGORITHM)
 
-        credentialsException = HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Não foi possível validar as credenciais de usuário, tente entrar novamente",
-            headers={"WWW-Authenticate": "Bearer"}
-        )
+def get_current_user(token: TOKEN_SCHEME) -> 'User':
+    """ Retorn o usuário pelo token """
 
-        try:
-            payload = jwt.decode(token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
-            id = payload.get("sub")
-        except:
-            raise credentialsException
-        
-        userSession = self.sessionRepository.find_by_id(id)
+    credentialsException = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Não foi possível validar as credenciais de usuário, tente entrar novamente",
+        headers={"WWW-Authenticate": "Bearer"}
+    )
 
-        if not userSession:
-            raise credentialsException
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        id = payload.get("sub")
+    except:
+        raise credentialsException
+    
 
-        user = userSession.user
+    userModel = SessionRepository.find_user_by_session_id(id)
 
-        return UserResponseSchema.model_validate(model_to_dict(user))
+    if userModel is None:
+        raise credentialsException
 
-    def get_user_sessions(self, token: TOKEN_SCHEME) -> UserSessionListSchema:
-        """ Encontra as sessões de um usuário """
+    return userModel
 
-        user = self.get_current_user(token)
-        return UserSessionListSchema.model_validate({
-            "user": user,
-            "sessions": self.sessionRepository.find_all_by_user(user)
-        })
+def get_user_sessions(token: TOKEN_SCHEME) -> UserSessionListSchema:
+    """ Encontra as sessões de um usuário """
 
-    def revoke_session(self, token: TOKEN_SCHEME, sessionId: RevokeSessionSchema) -> None:
-        """ Revoga uma sessão pelo id da mesma """
+    user = get_current_user(token)
+    return UserSessionListSchema.model_validate({
+        "usuario": user,
+        "sessoes": SessionRepository.find_all_by_user(user)
+    })
 
-        mySessionId = jwt.decode(token, self.SECRET_KEY, self.ALGORITHM).get("sub")
+def revoke_session(token: TOKEN_SCHEME, sessionId: RevokeSessionSchema) -> None:
+    """ Revoga uma sessão pelo id da mesma """
 
-        if UUID(mySessionId) == sessionId.session_id:
-            raise HTTPException(status.HTTP_400_BAD_REQUEST, "Impossível revogar o próprio token")
-        
-        user = self.get_current_user(token)
-        sessionToRevoke = self.sessionRepository.find_by_id(sessionId.session_id)
+    mySessionId = jwt.decode(token, SECRET_KEY, ALGORITHM).get("sub")
 
-        if sessionToRevoke.user.id == user.id:
-            self.sessionRepository.delete_token_by_id(sessionId.session_id)
-        else:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Token não encontrado")
+    if UUID(mySessionId) == sessionId.id_sessao:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Impossível revogar o próprio token")
+    
+    # user = get_current_user(token)
+    # sessionToRevoke = SessionRepository.find_by_id(sessionId.id_sessao) or Session() 
+
+    if SessionRepository.find_user_by_session_id(sessionId.id_sessao) is not None:
+        SessionRepository.delete_token_by_id(sessionId.id_sessao)
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Token não encontrado")
+    
+def revoke_all_sessions_by_user_id(id: int) -> None:
+    """ Revoga todas sessões de um usuário pelo token do mesmo """
+
+    SessionRepository.delete_all_user_tokens_by_id(id)
