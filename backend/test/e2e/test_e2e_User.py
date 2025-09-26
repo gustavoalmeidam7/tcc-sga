@@ -1,39 +1,20 @@
 from fastapi.testclient import TestClient
+from helpers import TestUserHelper
 
 def test_create_user_e2e(client: TestClient):
-    user_data = {
-        "email": "test.e2e@example.com",
-        "cpf": "12345678901",
-        "telefone": "11999998888",
-        "nome": "test_e2e_user",
-        "nascimento": "2000-01-01",
-        "senha": "a_strong_password"
-    }
-    response = client.post("/user/", json=user_data)
-    
-    assert response.status_code == 200
-    
-    response_json = response.json()
-    assert response_json["email"] == user_data["email"]
-    assert response_json["nome"] == user_data["nome"]
-    assert "id" in response_json
-    
-    assert "senha" not in response_json
+    user_data = TestUserHelper.generate_user()
+
+    TestUserHelper.register_user(client, user_data)
 
 def test_get_users_e2e(client: TestClient):
-    user_data = {
-        "email": "test.getusers@example.com",
-        "cpf": "10987654321",
-        "telefone": "11777776666",
-        "nome": "get_users_tester",
-        "nascimento": "1999-12-31",
-        "senha": "another_password"
-    }
-    create_response = client.post("/user/", json=user_data)
-    assert create_response.status_code == 200
-    created_user_email = create_response.json()["email"]
+    user_data = TestUserHelper.generate_user()
 
-    get_response = client.get("/user/getusers")
+    createResponse = TestUserHelper.register_user(client, user_data)
+    created_user_email = createResponse["email"]
+
+    userToken = TestUserHelper.autenticate_user(client, user_data["email"], user_data["senha"])
+
+    get_response = client.get("/user/getusers", headers=userToken)
     
     assert get_response.status_code == 200
     
@@ -43,3 +24,36 @@ def test_get_users_e2e(client: TestClient):
     
     emails_in_response = [user["email"] for user in response_json]
     assert created_user_email in emails_in_response
+
+def test_get_user_authenticated(client: TestClient):
+    userData = TestUserHelper.generate_user()
+
+    TestUserHelper.register_user(client, userData)
+
+    userToken = TestUserHelper.autenticate_user(client, userData["email"], userData["senha"])
+
+    getUserData = client.get("/user/", headers=userToken)
+
+    assert getUserData.status_code == 200
+    assert getUserData.json()["email"]      == userData["email"]
+    assert getUserData.json()["nome"]       == userData["nome"]
+    assert getUserData.json()["nascimento"] == userData["nascimento"]
+    assert "senha" is not getUserData
+
+# TODO: Implement later
+
+# def test_delete_user(client: TestClient):
+#     user1Data = TestUserHelper.generate_user()
+#     user2Data = TestUserHelper.generate_user()
+
+#     TestUserHelper.register_user(client, user1Data)
+#     TestUserHelper.register_user(client, user2Data)
+
+#     user1Token = TestUserHelper.autenticate_user(client, user1Data["email"], user1Data["senha"])
+#     user2Token = TestUserHelper.autenticate_user(client, user1Data["email"], user1Data["senha"])
+
+#     deleteUserResponse = client.delete("/", headers=user1Token)
+
+#     assert deleteUserResponse == 204
+
+#     getAllUsers = client.get("/getusers")

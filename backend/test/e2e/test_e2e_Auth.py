@@ -28,19 +28,6 @@ def test_login_for_access_token(client: TestClient):
     password = "a_secure_password"
     _create_user_and_get_token(client, email, password)
 
-def test_get_user_with_token(client: TestClient):
-    email = "auth.test.getuser@example.com"
-    password = "a_secure_password"
-    token = _create_user_and_get_token(client, email, password)
-    print(f"test\\e2e\\test_e2e_Auth.py:35 Token: {token}")
-
-    headers = {"Authorization": f"Bearer {token}"}
-    response = client.get("/user/", headers=headers)
-    
-    assert response.status_code == 200
-    user_info = response.json()
-    assert user_info["email"] == email
-
 def test_get_user_sessions(client: TestClient):
     email = "auth.test.getsessions@example.com"
     password = "a_secure_password"
@@ -66,7 +53,6 @@ def test_revoke_token(client: TestClient):
     token1 = _create_user_and_get_token(client, email, password)
     
     login_data = {"username": email, "password": password}
-    ## ERRO NESSE ENDPOINT A O CRIAR TOKEN JWT
     response = client.post("/token/", data=login_data)
     assert response.status_code == 201
     token2 = response.json()["access_token"]
