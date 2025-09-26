@@ -19,15 +19,15 @@ def autenticate_user(client: TestClient, email: str, password: str) -> str:
 def generate_user() -> dict:
     return {
         "email": faker.free_email(),
-        "cpf": "".join(list(filter(lambda c: c != '-' and c != '.', list(faker.cpf())))),
-        "telefone": "".join(list(filter(lambda c: c.isnumeric(), list(faker.phone_number())))),
+        "cpf": "".join(filter(lambda c: c != '-' and c != '.', list(faker.cpf()))),
+        "telefone": "".join(filter(lambda c: c.isnumeric(), list(faker.phone_number())))[1:],
         "nome": faker.name(),
         "nascimento": str(faker.date_of_birth(minimum_age=1, maximum_age=100)),
         "senha": faker.password()
     }
 
 def register_user(client: TestClient, userData: dict) -> dict:
-    print(userData)
+    print(f"User data:\n{userData}")
     response = client.post("/user/", json=userData)
     
     assert response.status_code == 200
