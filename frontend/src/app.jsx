@@ -1,18 +1,11 @@
-import React from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Footer from './components/layout/footer'
-import Home from './pages/Home'
-import Login from './pages/Login'
-import Registro from './pages/Register'
-import Ambulancias from './pages/Gerenciar_ambulancias'
-import Usuarios from './pages/Gerenciar_usuario'
-import Viagens from './pages/Viagens'
-import RecSenha from './pages/Rec_senha'
-import SaibaMais from './pages/Saiba_mais'
-import Suporte from './pages/Suporte'
-import './index.css'
-import { AppSidebar } from './components/layout/sidebar'
-import { SidebarProvider, SidebarInset, SidebarTrigger } from './components/ui/sidebar'
+import React, { Suspense } from "react"
+import { BrowserRouter, Routes, Route } from "react-router-dom"
+import Footer from "./components/layout/footer/footer"
+import "./index.css"
+import { AppSidebar } from "./components/layout/sidebar"
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "./components/ui/sidebar"
+import { appRoutes } from "./routes"
+import LoadingSpinner from "@/components/layout/loading"
 
 export default function App() {
   return (
@@ -28,18 +21,21 @@ export default function App() {
             <SidebarTrigger className="border bg-gray-200 hover:bg-gray-400" />
           </header>
           <main className="flex-grow p-4 md:p-6">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/registro" element={<Registro />} />
-              <Route path="/ambulancias" element={<Ambulancias />} />
-              <Route path="/usuarios" element={<Usuarios />} />
-              <Route path="/viagens" element={<Viagens />} />
-              <Route path="/rec_senha" element={<RecSenha />} />
-              <Route path="/saiba-mais" element={<SaibaMais />} />
-              <Route path="/suporte" element={<Suporte />} />
-              <Route path="*" element={<div>404 - Página não encontrada</div>} />
-            </Routes>
+            <Suspense fallback={<LoadingSpinner size="large" />}>
+              <Routes>
+                {appRoutes.map((route, index) =>
+                  route.children ? (
+                    <Route key={index} element={route.element}>
+                      {route.children.map((child, i) => (
+                        <Route key={i} path={child.path} element={child.element} />
+                      ))}
+                    </Route>
+                  ) : (
+                    <Route key={index} path={route.path} element={route.element} />
+                  )
+                )}
+              </Routes>
+            </Suspense>
           </main>
           <Footer />
         </SidebarInset>

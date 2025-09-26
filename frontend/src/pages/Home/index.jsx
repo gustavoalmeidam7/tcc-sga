@@ -16,7 +16,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   Table,
   TableHeader,
@@ -25,28 +24,26 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
-import userAvatar from "@/assets/avatar.webp";
 import { Briefcase, Ambulance, User, Activity } from "lucide-react";
 import { ViagensDoDiaModal } from "@/components/modals/ViagensDia";
 import { AmbulanciasLivresModal } from "@/components/modals/AmbulanciasLivres";
 import { MotoristasAtivosModal } from "@/components/modals/MotoristasAtivos";
 import { ChamadosPendentesModal } from "@/components/modals/ChamadosPendentes";
 import { TextAnimate } from "@/components/ui/text-animate";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Home() {
+  const { user } = useAuth();
+
   return (
     <main className="w-full min-h-screen p-4 sm:p-8">
       <section className="max-w-7xl mx-auto space-y-8">
         <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-6">
-          <div className="flex items-center gap-4">
-            <Avatar className="w-14 h-14">
-              <AvatarImage src={userAvatar} alt="Foto do gestor" />
-              <AvatarFallback>G</AvatarFallback>
-            </Avatar>
+          <div>
             <div>
               <TextAnimate
-                animation="blurInUp" by="character" once delay={0.15} className="text-xl sm:text-2xl font-bold text-foreground">
-                Bem-vindo, Maicon
+                animation="blurInUp" by="character" once delay={0.15} className="text-2xl font-bold text-foreground">
+                {user ? `Bem-vindo, ${user.username}` : `Bem-vindo!`}
               </TextAnimate>
               <p className="text-sm text-muted-foreground">Painel de controle</p>
             </div>

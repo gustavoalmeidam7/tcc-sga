@@ -1,4 +1,4 @@
-﻿import { LoginForm } from "@/modules/auth/login-form"
+﻿import { LoginForm } from "@/modules/auth/login.jsx"
 
 export default function Login() {
   return (
