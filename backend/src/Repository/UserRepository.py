@@ -1,4 +1,6 @@
 from src.Model.User import User
+from src.Validator.UserValidator import validate_uuid
+from uuid import UUID
 
 def create(userModel: User) -> User:
     """ Cria um usuário """
@@ -26,9 +28,23 @@ def find_all_with_page(pageNumber: int= 0, pageSize: int = 25) -> 'list[User]':
 
 
 def update(userModel: User) -> None:
-    """ Atualiza um usuário pelo ID """
+    """ Atualiza um usuário pelo modelo"""
     User.update(username=userModel.nome, email=userModel.email, phone_number=userModel.telefone, password=userModel.senha).where(User.id == userModel.id)
 
+def update_by_id(id: UUID, userModel: User) -> User:
+    """ Atualiza um usuário pelo ID """
+    # TODO: Adicionar validação dos campos
+    id = validate_uuid(id)
+    query = User.update(
+        nome=userModel.nome,
+        email=userModel.email,
+        telefone=userModel.telefone,
+        cargo=userModel.cargo
+    ).where(
+        User.id == id
+    )
+    query.execute()
+    return userModel
 
 def delete_by_id(id: int) -> None:
     """ Excluí um usuário pelo seu ID """

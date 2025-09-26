@@ -4,6 +4,7 @@ from fastapi.security import OAuth2PasswordBearer
 
 from src.Schema.User.UserCreateSchema import UserCreateSchema
 from src.Schema.User.UserResponseSchema import UserResponseSchema
+from src.Schema.User.UserUpdateSchema import UserUpdateSchema
 
 from src.Decorators.UserDecorators import GET_AUTENTHICATED_USER
 
@@ -25,9 +26,8 @@ async def delete_user(user: GET_AUTENTHICATED_USER):
     UserService.delete_by_id(user.id) # type: ignore
 
 @USER_ROUTER.patch("/")
-async def update_user(user: GET_AUTENTHICATED_USER, userUpdate: UserCreateSchema):
-    # CHANGEME: Função mocada
-    return UserService.update_user(user, [])
+async def update_user(user: GET_AUTENTHICATED_USER, userUpdate: UserUpdateSchema):
+    return UserService.update_user(user, userUpdate)
 
 @USER_ROUTER.get("/")
 async def get_user(user: GET_AUTENTHICATED_USER) -> 'UserResponseSchema':
