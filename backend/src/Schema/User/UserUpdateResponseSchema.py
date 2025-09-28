@@ -11,6 +11,5 @@ class UserUpdateResponseSchema(BaseModel):
     id        : Annotated[uuid.UUID,Field()]              = uuid.uuid4()
     email     : Annotated[EmailStr, Field(max_length=45)] = "ronaldo@mail.com"
     nome      : Annotated[str,      Field(max_length=50)] = "Ronaldo de Assis Moreira"
-    nascimento: Annotated[date,     Field()]              = date(1980, 3, 21)
     telefone  : Annotated[str,      Field(max_length=12)] = "51991234567"
     cargo     : Annotated[int,      Field()]              = UserRole.USER

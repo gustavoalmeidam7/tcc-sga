@@ -40,6 +40,12 @@ class UserValidator:
         if UserRepository.exists_by_cpf(cpf):
             self.userValidationResult.errors.append({"CPF" : "CPF já existe"})
 
+def phone_number_validator(number: str | int) -> str:
+    if type(number) == int:
+        number = str(number)
+    
+    return unmask_number(number)
+
 def unmask_number(number: str) -> str:
     return re.sub(r"[^0-9]", "", number)
 
