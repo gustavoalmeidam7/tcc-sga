@@ -1,12 +1,20 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@layer base {
+  @media (max-width: 1440px) and (min-width: 1200px) {
+    html {
+      font-size: 75%;
+    }
+  }
+}
+
 :root {
   --background: hsl(215 28% 17%);
   --foreground: hsl(210 17% 97%);
   --card: hsl(215 28% 22%);
   --card-foreground: hsl(210 16.6667% 97.6471%);
-  --popover: hsl(215.0000 27.9070% 16.8627%);
+  --popover: hsl(215 27.907% 16.8627%);
   --popover-foreground: hsl(210 16.6667% 97.6471%);
   --primary: hsl(217.2193 91.2195% 59.8039%);
   --primary-foreground: hsl(0 0% 100%);
@@ -24,9 +32,9 @@
   --chart-1: hsl(217.2193 91.2195% 59.8039%);
   --chart-2: hsl(220 8.9362% 46.0784%);
   --chart-3: hsl(142.0859 70.5628% 45.2941%);
-  --chart-4: hsl(37.6923 92.1260% 50.1961%);
-  --chart-5: hsl(198.6301 88.6640% 48.4314%);
-  --sidebar: hsl(215.0000 27.9070% 16.8627%);
+  --chart-4: hsl(37.6923 92.126% 50.1961%);
+  --chart-5: hsl(198.6301 88.664% 48.4314%);
+  --sidebar: hsl(215 27.907% 16.8627%);
   --sidebar-foreground: hsl(210 16.6667% 97.6471%);
   --sidebar-primary: hsl(217.2193 91.2195% 59.8039%);
   --sidebar-primary-foreground: hsl(0 0% 100%);
@@ -40,11 +48,16 @@
   --glass-border: hsl(210 17% 97% / 0.1);
   --shadow-2xs: 0px 5px 15px 0px hsl(0 0% 0% / 0.13);
   --shadow-xs: 0px 5px 15px 0px hsl(0 0% 0% / 0.13);
-  --shadow-sm: 0px 5px 15px 0px hsl(0 0% 0% / 0.25), 0px 1px 2px -1px hsl(0 0% 0% / 0.25);
-  --shadow: 0px 5px 15px 0px hsl(0 0% 0% / 0.25), 0px 1px 2px -1px hsl(0 0% 0% / 0.25);
-  --shadow-md: 0px 5px 15px 0px hsl(0 0% 0% / 0.25), 0px 2px 4px -1px hsl(0 0% 0% / 0.25);
-  --shadow-lg: 0px 5px 15px 0px hsl(0 0% 0% / 0.25), 0px 4px 6px -1px hsl(0 0% 0% / 0.25);
-  --shadow-xl: 0px 5px 15px 0px hsl(0 0% 0% / 0.25), 0px 8px 10px -1px hsl(0 0% 0% / 0.25);
+  --shadow-sm: 0px 5px 15px 0px hsl(0 0% 0% / 0.25),
+    0px 1px 2px -1px hsl(0 0% 0% / 0.25);
+  --shadow: 0px 5px 15px 0px hsl(0 0% 0% / 0.25),
+    0px 1px 2px -1px hsl(0 0% 0% / 0.25);
+  --shadow-md: 0px 5px 15px 0px hsl(0 0% 0% / 0.25),
+    0px 2px 4px -1px hsl(0 0% 0% / 0.25);
+  --shadow-lg: 0px 5px 15px 0px hsl(0 0% 0% / 0.25),
+    0px 4px 6px -1px hsl(0 0% 0% / 0.25);
+  --shadow-xl: 0px 5px 15px 0px hsl(0 0% 0% / 0.25),
+    0px 8px 10px -1px hsl(0 0% 0% / 0.25);
   --shadow-2xl: 0px 5px 15px 0px hsl(0 0% 0% / 0.63);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
