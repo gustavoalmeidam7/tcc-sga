@@ -72,7 +72,7 @@ export const AppSidebar = memo(function AppSidebar() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <div className="flex items-center gap-3 p-1 pl-2 cursor-pointer">
-                <span className="text-lg md:text-base">{user?.username}</span>
+                <span className="text-lg md:text-base">{user?.nome}</span>
                 <ChevronUp className="ml-auto"/>
               </div>
             </DropdownMenuTrigger>

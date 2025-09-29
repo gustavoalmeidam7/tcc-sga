@@ -1,9 +1,9 @@
 import API from './api.js';
 
-const login = async (email, password) => {
+const login = async (email, senha) => {
   const formData = new URLSearchParams();
   formData.append('username', email);
-  formData.append('password', password);
+  formData.append('password', senha);
 
   const response = await API.post('/token', formData, {
     headers: {
@@ -27,11 +27,17 @@ const getMe = async () => {
   return response.data;
 };
 
+const getAllUsers = async () => {
+  const response = await API.get('/user/getusers');
+  return response.data;
+}
+
 const authService = {
   login,
   register,
   logout,
   getMe,
+  getAllUsers,
 };
 
 export default authService;

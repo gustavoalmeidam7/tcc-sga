@@ -37,6 +37,9 @@ export const columns_viagens = [
       const status = row.getValue("status");
       const variant = {
         Aguardando: "bg-chart-4/20 text-chart-4 font-semibold",
+        Progresso: "bg-primary/20 text-primary font-semibold",
+        Concluido: "bg-green-500/20 text-green-600 font-semibold",
+        Cancelado: "bg-destructive/20 text-destructive font-semibold",
       }[status] ?? "bg-muted/20 text-muted-foreground";
 
       return <div className={`px-2 py-1 rounded-full text-xs text-center w-24 ${variant}`}>{status}</div>;
