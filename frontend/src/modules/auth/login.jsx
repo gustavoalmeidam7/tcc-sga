@@ -1,5 +1,3 @@
-'use client'
-
 import { useState } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -12,40 +10,36 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import img_logo from '@/assets/Logo.webp'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Por favor, insira um email válido.' }),
-  password: z.string().min(1, { message: 'A senha é obrigatória.' }),
+  senha: z.string().min(1, { message: 'A senha é obrigatória.' }),
 })
 
 export function LoginForm({ className, ...props }) {
-  const { login } = useAuth()
+  const { login, isLoading: authLoading, error: authError, clearError } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const from = location.state?.from?.pathname || '/'
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const [success, setSuccess] = useState(null)
 
   const form = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { email: '', senha: '' },
   })
 
   async function onSubmit(values) {
-    setLoading(true)
-    setError(null)
+    if (authError) clearError();
+    setSuccess(null);
+
     try {
-      await login(values.email, values.password)
-      navigate(from, { replace: true })
+      await login(values.email, values.senha);
+      setSuccess('Login bem-sucedido! Redirecionando...');
+      setTimeout(() => navigate(from, { replace: true }), 500);
     } catch (err) {
-      const status = err.response?.status;
-      if (status === 401 || status === 400) {
-        setError('Email ou senha incorretos.');
-      } else {
-        setError('Ocorreu um erro no servidor. Tente novamente mais tarde.');
-      }
-    } finally {
-      setLoading(false)
+      console.error('Erro no login:', err);
     }
   }
 
@@ -61,7 +55,19 @@ export function LoginForm({ className, ...props }) {
                   <p className="text-muted-foreground text-balance">Realize login com sua conta SGA</p>
                 </div>
 
-                {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+                {authError && (
+                  <Alert variant="destructive">
+                    <XCircle className="h-4 w-4" />
+                    <AlertDescription>{authError}</AlertDescription>
+                  </Alert>
+                )}
+
+                {success && (
+                  <Alert className="border-green-500 bg-green-50">
+                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    <AlertDescription className="text-green-600">{success}</AlertDescription>
+                  </Alert>
+                )}
 
                 <FormField
                   control={form.control}
@@ -79,7 +85,7 @@ export function LoginForm({ className, ...props }) {
 
                 <FormField
                   control={form.control}
-                  name="password"
+                  name="senha"
                   render={({ field }) => (
                     <FormItem className="grid gap-3">
                       <div className="flex items-center">
@@ -98,9 +104,15 @@ export function LoginForm({ className, ...props }) {
                     </FormItem>
                   )}
                 />
-
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? 'Entrando...' : 'Login'}
+                <Button type="submit" className="w-full" disabled={authLoading || !!success}>
+                  {authLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Entrando...
+                    </>
+                  ) : (
+                    'Login'
+                  )}
                 </Button>
 
                 <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:flex after:items-center after:border-t after:border-border">

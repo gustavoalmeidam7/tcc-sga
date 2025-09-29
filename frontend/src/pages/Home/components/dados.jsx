@@ -41,7 +41,7 @@ export const viagensData = [
     id: "2",
     paciente: "Marjorie Cristina",
     destino: "Santa Casa",
-    status: "Aguardando",
+    status: "Concluido",
   },
 ];
 

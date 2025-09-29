@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export function DataTable({ columns, data }) {
+export function DataTable({ columns, data, filterColumn, filterPlaceholder }) {
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
 
@@ -32,6 +32,11 @@ export function DataTable({ columns, data }) {
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
+    initialState: {
+      pagination: {
+        pageSize: 5,
+      },
+    },
     state: {
       sorting,
       columnFilters,
@@ -40,16 +45,18 @@ export function DataTable({ columns, data }) {
 
   return (
     <div>
-      <div className="flex items-center py-4">
-        <Input
-          placeholder="Filtrar por paciente..."
-          value={(table.getColumn("paciente")?.getFilterValue()) ?? ""}
-          onChange={(event) =>
-            table.getColumn("paciente")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
-      </div>
+      {filterColumn && (
+        <div className="flex items-center py-4">
+          <Input
+            placeholder={filterPlaceholder || 'Filtrar...'}
+            value={(table.getColumn(filterColumn)?.getFilterValue()) ?? ""}
+            onChange={(event) =>
+              table.getColumn(filterColumn)?.setFilterValue(event.target.value)
+            }
+            className="max-w-sm"
+          />
+        </div>
+      )}
       <div className="rounded-md border border-border/20 overflow-hidden">
         <Table className="border-separate w-full" style={{ borderSpacing: '0 0.5rem' }}>
           <TableHeader>
@@ -72,19 +79,27 @@ export function DataTable({ columns, data }) {
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className="bg-background rounded-md hover:bg-black/50 transition delay-40 duration-300 ease-in-out hover:-translate-y-1.5 hover:scale-100"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="py-3 px-4 text-sm first:rounded-l-md last:rounded-r-md">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              <>
+                {table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    className="bg-background rounded-md hover:bg-black/50 transition delay-40 duration-300 ease-in-out hover:-translate-y-1.5 hover:scale-100"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id} className="py-3 px-4 text-sm first:rounded-l-md last:rounded-r-md">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+                {/* Adiciona linhas de preenchimento para altura fixa */}
+                {Array.from({ length: Math.max(0, 5 - table.getRowModel().rows.length) }).map((_, i) => (
+                  <TableRow key={`padding-${i}`} style={{ height: '53px' }}>
+                    <TableCell colSpan={columns.length}>&nbsp;</TableCell>
+                  </TableRow>
+                ))}
+              </>
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
