@@ -33,7 +33,7 @@ export default function Home() {
         <div className="w-full max-w-sm grid grid-cols-2 gap-4">
           <div onClick={() => AmbulanciasModal(true)} className="cursor-pointer">
             <Card>
-              <CardContent className="p-2 md:p-3 flex items-center space-x-2">
+              <CardContent className="p-2 flex items-center space-x-2">
                 <Ambulance className="h-5 w-5 md:h-6 md:w-6 text-chart-4" />
                 <div>
                   <div className="text-lg md:text-xl font-bold text-primary">2</div>
@@ -44,7 +44,7 @@ export default function Home() {
           </div>
           <div onClick={() => ChamadosOpen(true)} className="cursor-pointer">
             <Card>
-              <CardContent className="p-2 md:p-3 flex items-center space-x-2">
+              <CardContent className="p-2 flex items-center space-x-2">
                 <Clock className="h-5 w-5 md:h-6 md:w-6 text-primary" />
                 <div>
                   <div className="text-lg md:text-xl font-bold text-primary">2</div>
