@@ -20,7 +20,7 @@ const publicNavItems = [
 
 
 const Logo = () => (
-  <SidebarHeader className="border-b">
+  <SidebarHeader className="p-4">
       <Link to="/home" className="flex items-center gap-3" title="SGA - Início">
       <h1>Logo</h1>
       </Link>
