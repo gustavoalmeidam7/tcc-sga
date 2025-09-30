@@ -4,7 +4,7 @@
 @layer base {
   @media (max-width: 1440px) and (min-width: 1200px) {
     html {
-      font-size: 75%;
+      font-size: 85%;
     }
   }
 }
