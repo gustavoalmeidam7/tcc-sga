@@ -23,7 +23,7 @@ export default function App() {
               <SidebarTrigger className="border bg-gray-200 hover:bg-gray-400" />
             </header>
             <main className="flex-grow p-4 md:p-6">
-              <Suspense fallback={<LoadingSpinner size="large" text="Carregando..." fullScreen />}>
+              <Suspense fallback={<LoadingSpinner size="large" text="Carregando..." />}>
                 <Routes>
                   {appRoutes.map((route, index) =>
                     route.children ? (

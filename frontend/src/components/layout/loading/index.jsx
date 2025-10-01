@@ -51,8 +51,8 @@ const LoadingSpinner = ({
   }
 
   return (
-    <div className={cn('flex items-center justify-center', className)}>
-      <div className="flex flex-col items-center gap-2">
+    <div className={cn('fixed inset-0 flex items-center justify-center', className)}>
+      <div className="flex flex-col items-center gap-4">
         {spinner}
         {text && (
           <p className="text-sm text-muted-foreground">
