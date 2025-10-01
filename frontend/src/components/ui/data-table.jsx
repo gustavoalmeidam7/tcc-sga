@@ -61,7 +61,7 @@ export function DataTable({ columns, data, filterColumn, filterPlaceholder }) {
         <Table className="border-separate w-full" style={{ borderSpacing: '0 0.5rem' }}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="bg-gray-900 rounded-md">
+              <TableRow key={headerGroup.id} className="bg-muted rounded-md">
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead key={header.id} className="font-bold py-3 text-base first:rounded-l-md last:rounded-r-md">
@@ -84,7 +84,7 @@ export function DataTable({ columns, data, filterColumn, filterPlaceholder }) {
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
-                    className="bg-background rounded-md hover:bg-black/50 transition delay-40 duration-300 ease-in-out hover:-translate-y-1.5 hover:scale-100"
+                    className="bg-background rounded-md hover:bg-accent hover:text-accent-foreground transition delay-40 duration-300 ease-in-out hover:-translate-y-1.5 hover:scale-100"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id} className="py-3 px-4 text-sm first:rounded-l-md last:rounded-r-md">
