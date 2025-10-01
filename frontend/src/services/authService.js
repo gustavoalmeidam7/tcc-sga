@@ -18,10 +18,6 @@ const register = async (userData) => {
   return response.data;
 };
 
-const logout = () => {
-  return API.post('/token/revoke');
-};
-
 const getMe = async () => {
   const response = await API.get('/user/');
   return response.data;
@@ -35,7 +31,6 @@ const getAllUsers = async () => {
 const authService = {
   login,
   register,
-  logout,
   getMe,
   getAllUsers,
 };

@@ -2,7 +2,6 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { appRoutes } from '@/routes';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LogOut, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -53,10 +52,6 @@ export function AppHeader() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <div className="flex items-center cursor-pointer">
-              <Avatar className="h-9 w-9 border border-glass-border">
-                <AvatarImage src={user?.avatarUrl} />
-                <AvatarFallback>{user?.username?.[0].toUpperCase()}</AvatarFallback>
-              </Avatar>
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56 bg-glass-bg border-glass-border">
