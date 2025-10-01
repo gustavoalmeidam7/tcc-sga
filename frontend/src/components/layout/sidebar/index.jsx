@@ -1,9 +1,10 @@
 import { memo } from "react";
 import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter } from "@/components/ui/sidebar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ChevronsUpDown,Car, Home, Info, LifeBuoy, LogIn, LogOut, Map, Settings, Users } from "lucide-react";
+import { ChevronsUpDown,Car, Home, Info, LifeBuoy, LogIn, LogOut, Map, Settings, Users, User } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const navItems = [
   { to: "/home", icon: Home, label: "Página Inicial" },
@@ -47,6 +48,7 @@ const UserProfile = ({ user, onLogout }) => (
     <DropdownMenu >
       <DropdownMenuTrigger asChild>
         <SidebarMenuButton className="group/user-profile flex w-full items-center gap-3 rounded-md p-2 text-left hover:bg-accent">
+          <User className="text-background-foreground" />
           <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate text-base font-medium">{user?.nome}</span>
           </div>
@@ -98,10 +100,18 @@ export const AppSidebar = memo(function AppSidebar() {
 
         <div className="mt-auto flex flex-col gap-1">
           {isAuthenticated ? (
-            <NavMenuItem
-              item={{ to: "/suporte", icon: LifeBuoy, label: "Suporte" }}
-              pathname={location.pathname}
-            />
+            <div className="flex items-center justify-between gap-2 px-2">
+              <Link to="/suporte" className="flex-1">
+                <SidebarMenuButton
+                  isActive={location.pathname === "/suporte"}
+                  className="h-9 w-full justify-start"
+                >
+                  <LifeBuoy className="h-5 w-5" />
+                  <span className="font-medium text-base">Suporte</span>
+                </SidebarMenuButton>
+              </Link>
+              <ThemeToggle />
+            </div>
           ) : (
             <Link to="/login" className="w-full">
               <SidebarMenuButton
