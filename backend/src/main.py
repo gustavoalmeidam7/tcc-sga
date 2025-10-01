@@ -7,8 +7,7 @@ from contextlib import asynccontextmanager
 
 from src.Utils.env import get_env_var
 
-from src.Controller.UserController import USER_ROUTER
-from src.Controller.AuthController import AUTH_ROUTER
+from src.Controller import AuthController, DriverController, TravelController, UserController
 
 from src.Error.ErrorClass import ErrorClass
 
@@ -17,6 +16,8 @@ from src.Model import User, Driver, Travel, UserSession, Ambulance, Equipment, M
 from src.Utils.env import get_env_var
 
 from src.DB import db
+
+routers = [AuthController.AUTH_ROUTER, DriverController.DriverRouter, TravelController.TravelRouter, UserController.USER_ROUTER]
 
 env = get_env_var("environment", "DEV")
 
@@ -31,8 +32,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(debug=isDebug, title="Gerenciamento de ambulância API", description="Api para gerenciamento de ambulâncias - TCC", version="1.0.0", root_path="/api", lifespan=lifespan)
 
-app.include_router(USER_ROUTER)
-app.include_router(AUTH_ROUTER)
+for route in routers:
+  app.include_router(route)
+# map(lambda r: app.include_router(r), routers)
 
 app.add_middleware(
     CORSMiddleware,
