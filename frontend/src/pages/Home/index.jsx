@@ -1,32 +1,18 @@
 import { useState } from "react";
-import {
-  Card, 
-  CardHeader, 
-  CardTitle, 
-  CardContent
-} from "@/components/ui/card";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle 
-} from "@/components/ui/dialog";
+import {Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { Ambulance, Clock} from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableRow 
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { DataTable } from "@/components/ui/data-table";
 import { columns_viagens, columns_motoristas } from "./components/columns";
 import { recentActivities, viagensData, motoristasData } from "./components/dados";
 import { AmbulanciasLivresModal } from "@/components/modals/AmbulanciasLivres";
 import { ChamadosPendentesModal } from "@/components/modals/ChamadosPendentes";
+import { TextAnimate } from "@/components/ui/text-animate";
 
 
 export default function Home() {
@@ -39,13 +25,15 @@ export default function Home() {
     <main className="space-y-6 lg:container lg:mx-auto">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Bem-vindo, {user?.username}!</h1>
+          <TextAnimate animation="blurInUp" by="character" once delay={0.15} className="text-xl md:text-2xl font-bold text-foreground">
+            {`Bem-vindo, ${user?.nome || ''}!`}
+          </TextAnimate>
           <p className="text-muted-foreground">Este é o seu centro de comando SGA.</p>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="w-full max-w-sm grid grid-cols-2 gap-4">
           <div onClick={() => AmbulanciasModal(true)} className="cursor-pointer">
             <Card>
-              <CardContent className="p-2 md:p-3 flex items-center space-x-2">
+              <CardContent className="p-2 flex items-center space-x-2">
                 <Ambulance className="h-5 w-5 md:h-6 md:w-6 text-chart-4" />
                 <div>
                   <div className="text-lg md:text-xl font-bold text-primary">2</div>
@@ -56,7 +44,7 @@ export default function Home() {
           </div>
           <div onClick={() => ChamadosOpen(true)} className="cursor-pointer">
             <Card>
-              <CardContent className="p-2 md:p-3 flex items-center space-x-2">
+              <CardContent className="p-2 flex items-center space-x-2">
                 <Clock className="h-5 w-5 md:h-6 md:w-6 text-primary" />
                 <div>
                   <div className="text-lg md:text-xl font-bold text-primary">2</div>
@@ -94,10 +82,10 @@ export default function Home() {
               <TabsTrigger value="motoristas" className="text-base data-[state=active]:bg-accent data-[state=active]:shadow-none rounded-t-md rounded-b-none border-b-2 border-transparent data-[state=active]:border-primary">Motoristas Ativos</TabsTrigger>
             </TabsList>
             <TabsContent value="viagens" className="mt-4">
-              <DataTable columns={columns_viagens} data={viagensData} />
+              <DataTable key="viagens" columns={columns_viagens} data={viagensData} filterColumn="paciente" filterPlaceholder="Filtrar por paciente..." />
             </TabsContent>
             <TabsContent value="motoristas" className="mt-4">
-              <DataTable columns={columns_motoristas} data={motoristasData} />
+              <DataTable key="motoristas" columns={columns_motoristas} data={motoristasData} filterColumn="nome" filterPlaceholder="Filtrar por nome..." />
             </TabsContent>
           </Tabs>
         </Card>
