@@ -9,6 +9,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 const navItems = [
   { to: "/home", icon: Home, label: "Página Inicial" },
   { to: "/viagens", icon: Map, label: "Viagens" },
+  { to: "/agendamentos", icon: Users, label: "Agendamentos" },
   { to: "/ambulancias", icon: Car, label: "Ambulâncias" },
   { to: "/usuarios", icon: Users, label: "Usuários" },
 ];
