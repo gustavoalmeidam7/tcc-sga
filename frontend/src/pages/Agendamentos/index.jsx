@@ -19,6 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { formatarDataHora } from "@/lib/date-utils";
 
 function Agendamentos() {
   const [viagens, setViagens] = useState([]);
@@ -63,17 +64,6 @@ function Agendamentos() {
     }
   };
 
-  const formatarDataHora = (dataISO) => {
-    if (!dataISO) return "Data não disponível";
-    const data = new Date(dataISO);
-    return data.toLocaleString("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
 
   const getStatusViagem = (viagem) => {
     const agora = new Date();
@@ -104,6 +94,7 @@ function Agendamentos() {
           <span>{formatarDataHora(row.original.inicio)}</span>
         </div>
       ),
+      enableColumnFilter: true,
     },
     {
       accessorKey: "local_inicio",
@@ -113,6 +104,7 @@ function Agendamentos() {
           {row.original.local_inicio}
         </div>
       ),
+      enableColumnFilter: true,
     },
     {
       accessorKey: "local_fim",
@@ -122,6 +114,7 @@ function Agendamentos() {
           {row.original.local_fim}
         </div>
       ),
+      enableColumnFilter: true,
     },
     {
       accessorKey: "duracao",
@@ -132,6 +125,7 @@ function Agendamentos() {
         );
         return <span>{duracao} min</span>;
       },
+      enableColumnFilter: false,
     },
     {
       accessorKey: "status",
@@ -140,6 +134,11 @@ function Agendamentos() {
         const status = getStatusViagem(row.original);
         const badgeInfo = getStatusBadge(status);
         return <Badge className={badgeInfo.className}>{badgeInfo.label}</Badge>;
+      },
+      enableColumnFilter: true,
+      filterFn: (row, id, value) => {
+        const status = getStatusViagem(row.original);
+        return status.toLowerCase().includes(value.toLowerCase());
       },
     },
     {
@@ -159,6 +158,7 @@ function Agendamentos() {
           </Button>
         );
       },
+      enableColumnFilter: false,
     },
   ];
 

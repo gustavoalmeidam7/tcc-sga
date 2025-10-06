@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, MapPin, Navigation, User, Calendar, Clock } from "lucide-react";
+import { formatarData } from "@/lib/date-utils";
 
 export function ModalConfirmacao({
   open,
@@ -16,11 +17,6 @@ export function ModalConfirmacao({
 }) {
   if (!dadosViagem) return null;
 
-  const formatarData = (data) => {
-    if (!data) return "";
-    const [ano, mes, dia] = data.split("-");
-    return `${dia}/${mes}/${ano}`;
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -52,7 +48,7 @@ export function ModalConfirmacao({
             <div>
               <p className="text-sm font-medium">Data e Hora</p>
               <p className="text-sm text-muted-foreground">
-                {formatarData(dadosViagem.dataAgendamento)} às {dadosViagem.horaAgendamento}
+                {formatarData(new Date(dadosViagem.dataAgendamento).toISOString())} às {dadosViagem.horaAgendamento}
               </p>
             </div>
           </div>

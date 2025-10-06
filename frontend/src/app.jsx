@@ -36,9 +36,9 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <ErrorBoundary>
-      <ThemeProvider>
-        <BrowserRouter>
+    <BrowserRouter>
+      <ErrorBoundary>
+        <ThemeProvider>
           <AuthProvider>
             <OfflineIndicator />
             <SidebarProvider>
@@ -54,8 +54,8 @@ export default function App() {
               </SidebarInset>
             </SidebarProvider>
           </AuthProvider>
-        </BrowserRouter>
-      </ThemeProvider>
-    </ErrorBoundary>
+        </ThemeProvider>
+      </ErrorBoundary>
+    </BrowserRouter>
   );
 }

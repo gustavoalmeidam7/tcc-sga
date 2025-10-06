@@ -28,11 +28,17 @@ const getAllUsers = async () => {
   return response.data;
 }
 
+const updateUser = async (userData) => {
+  const response = await API.patch('/user/', userData);
+  return response.data;
+};
+
 const authService = {
   login,
   register,
   getMe,
   getAllUsers,
+  updateUser,
 };
 
 export default authService;

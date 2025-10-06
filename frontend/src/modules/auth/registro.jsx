@@ -289,7 +289,7 @@ export function RegisterForm({ className, ...props }) {
 
                   <div className="text-center text-sm mt-1">
                     Faça o login.{" "}
-                    <Link to="/login" className="underline text-primary-foreground hover:text-primary">
+                    <Link to="/login" className="underline underline-offset-4 hover:text-primary">
                       Login
                     </Link>
                   </div>

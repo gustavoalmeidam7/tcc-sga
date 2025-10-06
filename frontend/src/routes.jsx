@@ -1,6 +1,8 @@
 import React, { lazy } from "react";
 import PrivateRoute from "./components/PrivateRoute";
+import RoleBasedRoute from "./components/RoleBasedRoute";
 import AnimatedPage from "./components/ui/animated-page";
+import { ROLES } from "./lib/roles";
 
 const LandingPage = lazy(() => import("./pages/LandingPage"));
 const Home = lazy(() => import("./pages/Home"));
@@ -9,10 +11,11 @@ const Registro = lazy(() => import("./pages/Register"));
 const Ambulancias = lazy(() => import("./pages/Gerenciar_ambulancias"));
 const Usuarios = lazy(() => import("./pages/Gerenciar_usuario"));
 const Viagens = lazy(() => import("./pages/Viagens"));
+const Agendamentos = lazy(() => import("./pages/Agendamentos"));
+const Perfil = lazy(() => import("./pages/Perfil"));
 const RecSenha = lazy(() => import("./pages/Rec_senha"));
 const SaibaMais = lazy(() => import("./pages/Saiba_mais"));
 const Suporte = lazy(() => import("./pages/Suporte"));
-const Agendamentos = lazy(() => import("./pages/Agendamentos"));
 
 export const appRoutes = [
   { path: "/", element: <AnimatedPage><LandingPage /></AnimatedPage>, label: "Landing Page" },
@@ -23,11 +26,11 @@ export const appRoutes = [
   { path: "/suporte", element: <AnimatedPage><Suporte /></AnimatedPage>, label: "Suporte" },
 
   { path: "/home", element: <PrivateRoute><AnimatedPage><Home /></AnimatedPage></PrivateRoute>, label: "Dashboard" },
-  { path: "/ambulancias", element: <PrivateRoute><AnimatedPage><Ambulancias /></AnimatedPage></PrivateRoute>, label: "Gerenciar Ambulâncias" },
-  { path: "/usuarios", element: <PrivateRoute><AnimatedPage><Usuarios /></AnimatedPage></PrivateRoute>, label: "Gerenciar Usuários" },
+  { path: "/ambulancias", element: <RoleBasedRoute requiredRole={ROLES.DRIVER}><AnimatedPage><Ambulancias /></AnimatedPage></RoleBasedRoute>, label: "Gerenciar Ambulâncias" },
+  { path: "/usuarios", element: <RoleBasedRoute requiredRole={ROLES.MANAGER}><AnimatedPage><Usuarios /></AnimatedPage></RoleBasedRoute>, label: "Gerenciar Usuários" },
   { path: "/viagens", element: <PrivateRoute><AnimatedPage><Viagens /></AnimatedPage></PrivateRoute>, label: "Viagens" },
-  { path: "/agendamentos", element: <PrivateRoute><AnimatedPage><Agendamentos /></AnimatedPage></PrivateRoute>, label: "Agendamentos" },
+  { path: "/agendamentos", element: <PrivateRoute><AnimatedPage><Agendamentos /></AnimatedPage></PrivateRoute>, label: "Meus Agendamentos" },
+  { path: "/perfil", element: <PrivateRoute><AnimatedPage><Perfil /></AnimatedPage></PrivateRoute>, label: "Meu Perfil" },
 
-  
   { path: "*", element: <AnimatedPage><div>404 - Página não encontrada</div></AnimatedPage>, label: "Página Não Encontrada" },
 ];
