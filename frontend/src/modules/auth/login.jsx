@@ -123,7 +123,7 @@ export function LoginForm({ className, ...props }) {
 
                 <div className="text-center text-sm">
                   Venha fazer parte?{' '}
-                  <Link to="/registro" className="underline underline-offset-4">
+                  <Link to="/registro" className="underline underline-offset-4 hover:text-primary">
                     Cadastre-se
                   </Link>
                 </div>

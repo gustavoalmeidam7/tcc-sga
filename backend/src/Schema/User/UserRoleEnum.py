@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import IntEnum
 
-class UserRole(Enum):
+class UserRole(IntEnum):
     USER    = 0,
     DRIVER  = 1,
     MANAGER = 2

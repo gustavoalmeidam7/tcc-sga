@@ -165,18 +165,23 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  const updateUserContext = useCallback((updatedUserData) => {
+    setUser(updatedUserData);
+  }, []);
+
   const value = {
     user,
     isAuthenticated: !!user,
     isLoading,
     error,
-    
+
     login,
     logout,
     register,
     refreshUser,
     validateToken,
     clearError,
+    updateUserContext,
   };
 
   return (

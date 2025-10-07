@@ -1,16 +1,27 @@
-import { memo } from "react";
-import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter } from "@/components/ui/sidebar";
+import { memo, useState } from "react";
+import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton, SidebarFooter } from "@/components/ui/sidebar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ChevronsUpDown,Car, Home, Info, LifeBuoy, LogIn, LogOut, Map, Settings, Users, User } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronsUpDown, Car, Home, Info, LifeBuoy, LogIn, LogOut, Map, Settings, Users, User, ChevronDown, PlusCircle, Calendar } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useRole } from "@/hooks/use-role";
+import { ROLES } from "@/lib/roles";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 const navItems = [
-  { to: "/home", icon: Home, label: "Página Inicial" },
-  { to: "/viagens", icon: Map, label: "Viagens" },
-  { to: "/ambulancias", icon: Car, label: "Ambulâncias" },
-  { to: "/usuarios", icon: Users, label: "Usuários" },
+  { to: "/home", icon: Home, label: "Página Inicial", roles: [ROLES.USER, ROLES.DRIVER, ROLES.MANAGER] },
+  {
+    label: "Viagens",
+    icon: Map,
+    roles: [ROLES.USER, ROLES.DRIVER, ROLES.MANAGER],
+    subItems: [
+      { to: "/viagens", icon: PlusCircle, label: "Nova Viagem", roles: [ROLES.USER, ROLES.MANAGER] },
+      { to: "/agendamentos", icon: Calendar, label: "Meus Agendamentos", roles: [ROLES.USER, ROLES.DRIVER, ROLES.MANAGER] },
+    ]
+  },
+  { to: "/ambulancias", icon: Car, label: "Ambulâncias", roles: [ROLES.DRIVER, ROLES.MANAGER] },
+  { to: "/usuarios", icon: Users, label: "Usuários", roles: [ROLES.MANAGER] },
 ];
   
 const publicNavItems = [
@@ -28,65 +39,117 @@ const Logo = () => (
   </SidebarHeader>
 );
 
-const NavMenuItem = ({ item, pathname }) => (
-  <SidebarMenuItem>
-    <Link to={item.to} className="w-full">
-      <SidebarMenuButton
-        isActive={pathname === item.to}
-        tooltip={item.label}
-        className="h-9"
-      >
-        <item.icon className="h-5 w-5" />
-        <span className="font-medium text-base">{item.label}</span>
-      </SidebarMenuButton>
-    </Link>
-  </SidebarMenuItem>
-);
+const NavMenuItem = ({ item, pathname, ItemView }) => {
+  const [isOpen, setIsOpen] = useState(false);
 
-const UserProfile = ({ user, onLogout }) => (
-  <SidebarFooter className="p-2 border-t">
-    <DropdownMenu >
-      <DropdownMenuTrigger asChild>
-        <SidebarMenuButton className="group/user-profile flex w-full items-center gap-3 rounded-md p-2 text-left hover:bg-accent">
-          <User className="text-background-foreground" />
-          <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate text-base font-medium">{user?.nome}</span>
-          </div>
-          <ChevronsUpDown className="ml-auto size-4" />
+  if (item.subItems) {
+    const ItemsVisiveis = item.subItems.filter((subItem) => ItemView(subItem));
+
+    if (ItemsVisiveis.length === 0) return null;
+
+    return (
+      <Collapsible open={isOpen} onOpenChange={setIsOpen} className="group/collapsible">
+        <SidebarMenuItem>
+          <CollapsibleTrigger asChild>
+            <SidebarMenuButton tooltip={item.label} className="h-9">
+              <item.icon className="h-5 w-5" />
+              <span className="font-medium text-base">{item.label}</span>
+              <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
+            </SidebarMenuButton>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <SidebarMenuSub>
+              {ItemsVisiveis.map((subItem) => (
+                <SidebarMenuSubItem key={subItem.to}>
+                  <SidebarMenuSubButton asChild isActive={pathname === subItem.to}>
+                    <Link to={subItem.to}>
+                      <subItem.icon className="h-4 w-4" />
+                      <span>{subItem.label}</span>
+                    </Link>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+              ))}
+            </SidebarMenuSub>
+          </CollapsibleContent>
+        </SidebarMenuItem>
+      </Collapsible>
+    );
+  }
+
+  return (
+    <SidebarMenuItem>
+      <Link to={item.to} className="w-full">
+        <SidebarMenuButton
+          isActive={pathname === item.to}
+          tooltip={item.label}
+          className="h-9"
+        >
+          <item.icon className="h-5 w-5" />
+          <span className="font-medium text-base">{item.label}</span>
         </SidebarMenuButton>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-45" align="end" forceMount>
-        <DropdownMenuItem >
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Editar Perfil</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={onLogout} className="text-destructive">
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Sair</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  </SidebarFooter>
-);
+      </Link>
+    </SidebarMenuItem>
+  );
+};
+
+const UserProfile = ({ user, onLogout }) => {
+  const navigate = useNavigate();
+
+  return (
+    <SidebarFooter className="p-2 border-t">
+      <DropdownMenu >
+        <DropdownMenuTrigger asChild>
+          <SidebarMenuButton className="group/user-profile flex w-full items-center gap-3 rounded-md p-2 text-left hover:bg-accent">
+            <User className="text-background-foreground" />
+            <div className="grid flex-1 text-left text-sm leading-tight">
+              <span className="truncate text-base font-medium">{user?.nome}</span>
+            </div>
+            <ChevronsUpDown className="ml-auto size-4" />
+          </SidebarMenuButton>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-45" align="end" forceMount>
+          <DropdownMenuItem onClick={() => navigate("/perfil")}>
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Editar Perfil</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={onLogout} className="text-destructive">
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Sair</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </SidebarFooter>
+  );
+};
 
 export const AppSidebar = memo(function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout, isAuthenticated } = useAuth();
+  const { userRole } = useRole();
 
   const handleLogout = async () => {
     await logout();
     navigate("/login");
   };
 
+  const ItemView = (item) => {
+    if (!item.roles) return true;
+    if (userRole === null) return false; 
+    return item.roles.includes(userRole);
+  };
+
   const renderNavItems = (items) =>
-    items.map((item) => (
-      <NavMenuItem
-        key={item.to}
-        item={item}
-        pathname={location.pathname}
-      />
-    ));
+    items
+      .filter((item) => ItemView(item))
+      .map((item) => (
+        <NavMenuItem
+          key={item.to || item.label}
+          item={item}
+          pathname={location.pathname}
+          ItemView={ItemView}
+        />
+      ));
 
   return (
     <Sidebar>

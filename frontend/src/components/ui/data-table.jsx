@@ -87,13 +87,12 @@ export function DataTable({ columns, data, filterColumn, filterPlaceholder }) {
                     className="bg-background rounded-md hover:bg-accent hover:text-accent-foreground transition delay-40 duration-300 ease-in-out hover:-translate-y-1.5 hover:scale-100"
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="py-3 px-4 text-sm first:rounded-l-md last:rounded-r-md">
+                      <TableCell key={cell.id} className="py-3 px-4 text-sm first:rounded-l-md last:rounded-r-md text-muted-foreground">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}
                   </TableRow>
                 ))}
-                {/* Adiciona linhas de preenchimento para altura fixa */}
                 {Array.from({ length: Math.max(0, 5 - table.getRowModel().rows.length) }).map((_, i) => (
                   <TableRow key={`padding-${i}`} style={{ height: '53px' }}>
                     <TableCell colSpan={columns.length}>&nbsp;</TableCell>
