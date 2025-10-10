@@ -67,7 +67,7 @@ export default function ManagerView() {
                 <Ambulance className="h-5 w-5 md:h-6 md:w-6 text-chart-4 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <div className="text-lg md:text-xl font-bold text-primary">{motoristas.length}</div>
-                  <div className="text-sm md:text-base whitespace-nowrap">Ambulâncias Livres</div>
+                  <div className="text-sm whitespace-nowrap">Ambulâncias Livres</div>
                 </div>
               </CardContent>
             </Card>
