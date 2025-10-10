@@ -184,15 +184,6 @@ export default function UserProfileView() {
             formData={formData}
             setFormData={setFormData}
           />
-          <InfoItem
-            icon={Shield}
-            label="Cargo"
-            value={ROLE_LABELS[user?.cargo] || "Não informado"}
-            editable={false}
-            editMode={editMode}
-            formData={formData}
-            setFormData={setFormData}
-          />
         </CardContent>
       </Card>
 
