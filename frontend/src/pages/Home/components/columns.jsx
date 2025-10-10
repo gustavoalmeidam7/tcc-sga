@@ -1,5 +1,5 @@
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
-
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,10 +9,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { formatarDataHora } from "@/lib/date-utils";
 
 export const columns_viagens = [
   {
-    accessorKey: "paciente",
+    accessorKey: "inicio",
     header: ({ column }) => {
       return (
         <Button
@@ -20,29 +21,44 @@ export const columns_viagens = [
           className="text-base font-bold p-0 h-9"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Usuario
+          Data/Hora
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
+    cell: ({ row }) => formatarDataHora(row.original.inicio),
   },
   {
-    accessorKey: "destino",
+    accessorKey: "local_inicio",
+    header: "Origem",
+    cell: ({ row }) => (
+      <div className="max-w-[150px] truncate" title={row.original.local_inicio}>
+        {row.original.local_inicio}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "local_fim",
     header: "Destino",
+    cell: ({ row }) => (
+      <div className="max-w-[150px] truncate" title={row.original.local_fim}>
+        {row.original.local_fim}
+      </div>
+    ),
   },
   {
-    accessorKey: "status",
+    accessorKey: "realizado",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.getValue("status");
-      const variant = {
-        Aguardando: "bg-chart-4/20 text-chart-4 font-semibold",
-        Progresso: "bg-primary/20 text-primary font-semibold",
-        Concluido: "bg-green-500/20 text-green-600 font-semibold",
-        Cancelado: "bg-destructive/20 text-destructive font-semibold",
-      }[status] ?? "bg-muted/20 text-muted-foreground";
+      const realizado = row.original.realizado;
+      const statusMap = {
+        0: { label: "Pendente", className: "bg-yellow-500 hover:bg-yellow-600" },
+        1: { label: "Em Progresso", className: "bg-blue-500 hover:bg-blue-600" },
+        2: { label: "Concluído", className: "bg-green-500 hover:bg-green-600" },
+      };
+      const status = statusMap[realizado] || { label: "Desconhecido", className: "bg-gray-500" };
 
-      return <div className={`px-2 py-1 rounded-full text-xs text-center w-24 ${variant}`}>{status}</div>;
+      return <Badge className={status.className}>{status.label}</Badge>;
     },
   },
   {
@@ -100,7 +116,7 @@ export const columns_motoristas = [
           Ativo: "bg-primary/20 text-primary font-semibold",
           Inativo: "bg-destructive/20 text-destructive font-semibold",
         }[status] ?? "bg-muted/20 text-muted-foreground";
-  
+
         return <div className={`px-2 py-1 rounded-full text-xs text-center w-20 ${variant}`}>{status}</div>;
       },
   },

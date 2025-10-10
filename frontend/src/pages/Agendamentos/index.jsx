@@ -1,16 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getTravels, deleteTravel } from "@/services/travelService";
 import { DataTable } from "@/components/ui/data-table";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Calendar,
-  Trash2,
-  Loader2,
-  AlertCircle,
-} from "lucide-react";
+import { Loader2, AlertCircle, Trash2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -20,147 +15,38 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { formatarDataHora } from "@/lib/date-utils";
+import { createColumns } from "./columns";
 
 function Agendamentos() {
-  const [viagens, setViagens] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const queryClient = useQueryClient();
   const [viagemExcluir, setViagemExcluir] = useState(null);
-  const [excluindo, setExcluindo] = useState(false);
 
-  useEffect(() => {
-    carregarViagens();
-  }, []);
+  const {
+    data: viagens = [],
+    isLoading: loading,
+    error: queryError
+  } = useQuery({
+    queryKey: ['travels', 'user'],
+    queryFn: () => getTravels(100, 0),
+    staleTime: 1000 * 60 * 2, 
+  });
 
-  const carregarViagens = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const response = await getTravels(100, 0);
-
-      const dados = Array.isArray(response) ? response : (response.data || []);
-      setViagens(dados);
-    } catch (err) {
-      console.error("Erro ao carregar viagens:", err);
-      setError("Erro ao carregar seus agendamentos. Tente novamente.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleExcluir = async () => {
-    if (!viagemExcluir) return;
-
-    setExcluindo(true);
-    try {
-      await deleteTravel(viagemExcluir.id);
-      setViagens(viagens.filter((v) => v.id !== viagemExcluir.id));
+  const deleteMutation = useMutation({
+    mutationFn: deleteTravel,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['travels'] });
       setViagemExcluir(null);
-    } catch (err) {
-      console.error("Erro ao excluir viagem:", err);
-      setError("Erro ao excluir viagem. Tente novamente.");
-    } finally {
-      setExcluindo(false);
-    }
+    },
+  });
+
+  const handleExcluir = () => {
+    if (!viagemExcluir) return;
+    deleteMutation.mutate(viagemExcluir.id);
   };
 
+  const error = queryError?.message || deleteMutation.error?.message;
 
-  const getStatusViagem = (viagem) => {
-    const agora = new Date();
-    const inicio = new Date(viagem.inicio);
-    const fim = new Date(viagem.fim);
-
-    if (agora < inicio) return "pendente";
-    if (agora >= inicio && agora <= fim) return "em_andamento";
-    return "concluida";
-  };
-
-  const getStatusBadge = (status) => {
-    const badges = {
-      pendente: { label: "Pendente", className: "bg-yellow-500 hover:bg-yellow-600" },
-      em_andamento: { label: "Em andamento", className: "bg-blue-500 hover:bg-blue-600" },
-      concluida: { label: "Concluída", className: "bg-green-500 hover:bg-green-600" },
-    };
-    return badges[status] || badges.pendente;
-  };
-
-  const columns = [
-    {
-      accessorKey: "inicio",
-      header: "Data e Hora",
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-primary" />
-          <span>{formatarDataHora(row.original.inicio)}</span>
-        </div>
-      ),
-      enableColumnFilter: true,
-    },
-    {
-      accessorKey: "local_inicio",
-      header: "Origem",
-      cell: ({ row }) => (
-        <div className="max-w-[200px] truncate" title={row.original.local_inicio}>
-          {row.original.local_inicio}
-        </div>
-      ),
-      enableColumnFilter: true,
-    },
-    {
-      accessorKey: "local_fim",
-      header: "Destino",
-      cell: ({ row }) => (
-        <div className="max-w-[200px] truncate" title={row.original.local_fim}>
-          {row.original.local_fim}
-        </div>
-      ),
-      enableColumnFilter: true,
-    },
-    {
-      accessorKey: "duracao",
-      header: "Duração",
-      cell: ({ row }) => {
-        const duracao = Math.round(
-          (new Date(row.original.fim) - new Date(row.original.inicio)) / 60000
-        );
-        return <span>{duracao} min</span>;
-      },
-      enableColumnFilter: false,
-    },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const status = getStatusViagem(row.original);
-        const badgeInfo = getStatusBadge(status);
-        return <Badge className={badgeInfo.className}>{badgeInfo.label}</Badge>;
-      },
-      enableColumnFilter: true,
-      filterFn: (row, id, value) => {
-        const status = getStatusViagem(row.original);
-        return status.toLowerCase().includes(value.toLowerCase());
-      },
-    },
-    {
-      id: "actions",
-      header: "Ações",
-      cell: ({ row }) => {
-        const status = getStatusViagem(row.original);
-        return (
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => setViagemExcluir(row.original)}
-            disabled={status === "em_andamento"}
-          >
-            <Trash2 className="h-4 w-4 mr-1" />
-            Excluir
-          </Button>
-        );
-      },
-      enableColumnFilter: false,
-    },
-  ];
+  const columns = useMemo(() => createColumns(setViagemExcluir), []);
 
   return (
     <main className="space-y-4 lg:space-y-5 lg:container lg:mx-auto pb-6">
@@ -235,16 +121,16 @@ function Agendamentos() {
             <Button
               variant="outline"
               onClick={() => setViagemExcluir(null)}
-              disabled={excluindo}
+              disabled={deleteMutation.isPending}
             >
               Cancelar
             </Button>
             <Button
               variant="destructive"
               onClick={handleExcluir}
-              disabled={excluindo}
+              disabled={deleteMutation.isPending}
             >
-              {excluindo ? (
+              {deleteMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Excluindo...

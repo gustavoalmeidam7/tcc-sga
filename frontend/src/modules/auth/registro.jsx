@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { useAuth } from '@/hooks/useAuth'
 import { cn } from '@/lib/utils'
+import { formatCPF, formatPhone, unmaskCPF, unmaskPhone } from '@/lib/format-utils'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
@@ -59,23 +60,6 @@ export function RegisterForm({ className, ...props }) {
     },
   });
 
-  const formatCPF = (value) => {
-    return value
-      .replace(/\D/g, '')
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d{1,2})/, '$1-$2')
-      .replace(/(-\d{2})\d+?$/, '$1');
-  };
-
-  const formatPhone = (value) => {
-    return value
-      .replace(/\D/g, '')
-      .replace(/(\d{2})(\d)/, '($1) $2')
-      .replace(/(\d{5})(\d)/, '$1-$2')
-      .replace(/(-\d{4})\d+?$/, '$1');
-  };
-
   async function onSubmit(values) {
     if (authError) clearError();
     setSuccess(null);
@@ -84,8 +68,8 @@ export function RegisterForm({ className, ...props }) {
       const userData = {
         nome: values.nome.trim(),
         email: values.email.trim().toLowerCase(),
-        cpf: values.cpf.replace(/\D/g, ''),
-        telefone: values.telefone.replace(/\D/g, ''),
+        cpf: unmaskCPF(values.cpf),
+        telefone: unmaskPhone(values.telefone),
         nascimento: values.nascimento,
         senha: values.senha,
       };

@@ -34,7 +34,19 @@ API.interceptors.response.use(
       });
     }
 
-    const { status } = error.response;
+    const { status, data } = error.response;
+
+    // Backend retorna erros em { "Erros": [...] } ou { "detail": "..." }
+    const backendErrors = data?.Erros;
+    let errorMessage = 'Erro desconhecido';
+
+    if (backendErrors && Array.isArray(backendErrors) && backendErrors.length > 0) {
+      // Se houver múltiplos erros, junta com vírgula
+      errorMessage = backendErrors.join(', ');
+    } else if (data?.detail) {
+      // FastAPI retorna "detail" em alguns erros
+      errorMessage = data.detail;
+    }
 
     if (status === 401) {
       clearAuthToken();
@@ -52,25 +64,36 @@ API.interceptors.response.use(
     if (status === 403) {
       return Promise.reject({
         ...error,
-        message: 'Você não tem permissão'
+        message: errorMessage || 'Você não tem permissão para realizar esta ação'
       });
     }
 
     if (status === 404) {
       return Promise.reject({
         ...error,
-        message: 'não encontrado.'
+        message: errorMessage || 'Recurso não encontrado.'
+      });
+    }
+
+    if (status === 409) {
+      // Conflito (ex: email já existe, CPF duplicado)
+      return Promise.reject({
+        ...error,
+        message: errorMessage
       });
     }
 
     if (status >= 500) {
       return Promise.reject({
         ...error,
-        message: 'Erro no servidor, tente novamente.'
+        message: 'Erro no servidor. Tente novamente mais tarde.'
       });
     }
 
-    return Promise.reject(error);
+    return Promise.reject({
+      ...error,
+      message: errorMessage
+    });
   }
 );
 

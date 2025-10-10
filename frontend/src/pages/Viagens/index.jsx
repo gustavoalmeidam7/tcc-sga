@@ -8,12 +8,20 @@ import { DadosPaciente } from "./components/DadosPaciente";
 import { ModalConfirmacao } from "./components/ModalConfirmacao";
 import { createTravel } from "@/services/travelService";
 import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 function Viagens() {
   const viagem = useViagem();
-  const [enviando, setEnviando] = useState(false);
+  const queryClient = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const [dadosViagemConfirmada, setDadosViagemConfirmada] = useState(null);
+
+  const createTravelMutation = useMutation({
+    mutationFn: createTravel,
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({ queryKey: ['travels'] });
+    },
+  });
 
   useRotaCalculation(viagem.coordOrigem, viagem.coordDestino, (resultado) => {
     viagem.setLoading(true);
@@ -65,7 +73,6 @@ function Viagens() {
       return;
     }
 
-    setEnviando(true);
     viagem.setError("");
 
     try {
@@ -86,34 +93,8 @@ function Viagens() {
         local_fim: viagem.destino,
       };
 
-      const response = await createTravel(dadosBackend);
-
-      const dadosCompletos = {
-        ...response,
-        origem: viagem.origem,
-        destino: viagem.destino,
-        coordenadas: {
-          origem: viagem.coordOrigem,
-          destino: viagem.coordDestino,
-        },
-        rota: viagem.rota,
-        distancia: `${viagem.distancia} km`,
-        duracao: `${viagem.duracao} min`,
-        paciente: {
-          nome: viagem.nomePaciente,
-          cpf: viagem.cpfPaciente,
-          estadoSaude: viagem.estadoSaude,
-        },
-        agendamento: {
-          data: viagem.dataAgendamento,
-          hora: viagem.horaAgendamento,
-        },
-        observacoes: viagem.observacoes,
-      };
-
-      window.ultimaViagem = dadosCompletos;
-      console.log("Viagem criada no backend:", response);
-      console.log("Dados completos:", dadosCompletos);
+      // Usa mutation do React Query que invalida cache automaticamente
+      await createTravelMutation.mutateAsync(dadosBackend);
 
       setDadosViagemConfirmada({
         nomePaciente: viagem.nomePaciente,
@@ -137,8 +118,6 @@ function Viagens() {
         : error.message || "Erro ao criar viagem. Tente novamente.";
 
       viagem.setError(mensagemErro);
-    } finally {
-      setEnviando(false);
     }
   };
 
@@ -228,7 +207,7 @@ function Viagens() {
               observacoes={viagem.observacoes}
               setObservacoes={viagem.setObservacoes}
               error={viagem.error}
-              enviando={enviando}
+              enviando={createTravelMutation.isPending}
               onVoltar={handleVoltarTela}
               onConfirmar={handleConfirmarViagem}
             />
