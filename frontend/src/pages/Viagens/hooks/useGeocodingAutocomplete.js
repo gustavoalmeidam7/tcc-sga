@@ -74,7 +74,7 @@ export function useGeocodingAutocomplete() {
 
     debounceTimeout.current = setTimeout(() => {
       buscarSugestoes(value);
-    }, 500);
+    }, 300);
   };
 
   const handleKeyDown = (e, onSelect) => {

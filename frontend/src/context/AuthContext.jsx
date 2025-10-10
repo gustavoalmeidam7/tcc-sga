@@ -73,36 +73,34 @@ export const AuthProvider = ({ children }) => {
       }
 
       const response = await authService.login(email, senha);
-      const { access_token, user: userData } = response;
-      
+      const { access_token } = response;
+
       if (!access_token) {
         throw new Error('Token não recebido do servidor');
       }
 
       setAuthToken(access_token);
-      
-      if (userData) {
-        setUser(userData);
-      } else {
-        await updateUser(access_token);
-      }
-      
-      return { success: true, user: userData || user };
+
+      const userData = await authService.getMe();
+      setUser(userData);
+
+      return { success: true, user: userData };
     } catch (error) {
       clearAuthToken();
       setUser(null);
-      
-      const errorMessage = error.response?.data?.message || 
-                          error.message || 
+
+      const errorMessage = error.response?.data?.Erros?.[0] ||
+                          error.response?.data?.detail ||
+                          error.message ||
                           'Erro ao fazer login';
-      
+
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {
       setIsLoading(false);
       loginInProgressRef.current = false;
     }
-  }, [updateUser]);
+  }, []);
 
   const logout = useCallback(() => {
     clearAuthToken();
@@ -119,21 +117,22 @@ export const AuthProvider = ({ children }) => {
       }
 
       await authService.register(userData);
-      
+
       const loginResponse = await login(userData.email, userData.senha);
 
       return { success: true, user: loginResponse.user, autoLogin: true };
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 
-                          error.message || 
+      const errorMessage = error.response?.data?.Erros?.[0] ||
+                          error.response?.data?.detail ||
+                          error.message ||
                           'Erro ao criar conta';
-      
+
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {
       setIsLoading(false);
     }
-  }, [updateUser, login]);
+  }, [login]);
 
   const refreshUser = useCallback(async () => {
     const token = getAuthToken();

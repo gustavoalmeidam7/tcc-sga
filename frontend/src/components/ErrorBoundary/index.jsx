@@ -20,7 +20,6 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    // Log do erro (pode integrar com serviço de monitoramento como Sentry)
     console.error('ErrorBoundary caught an error:', error, errorInfo);
 
     this.setState(prevState => ({
@@ -29,7 +28,6 @@ class ErrorBoundary extends React.Component {
       errorCount: prevState.errorCount + 1
     }));
 
-    // Se houver muitos erros consecutivos, algo está muito errado
     if (this.state.errorCount > 5) {
       console.error('Muitos erros consecutivos detectados!');
     }
@@ -86,14 +84,13 @@ function ErrorFallback({ error, errorInfo, resetError }) {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-center text-muted-foreground">
-            Desculpe, encontramos um erro inesperado. Nossa equipe foi notificada
-            e estamos trabalhando para resolver o problema.
+            Desculpe, encontramos um erro inesperado. Nossa equipe está trabalhando para resolver o problema.
           </p>
 
           {isDevelopment && error && (
             <div className="mt-6 p-4 bg-muted rounded-lg">
               <p className="font-semibold text-sm text-destructive mb-2">
-                Detalhes do erro (visível apenas em desenvolvimento):
+                Detalhes do erro:
               </p>
               <pre className="text-xs overflow-auto max-h-40 text-foreground">
                 {error.toString()}

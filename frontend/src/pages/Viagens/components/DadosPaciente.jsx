@@ -18,6 +18,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { formatCPF } from "@/lib/format-utils";
 
 export function DadosPaciente({
   origem,
@@ -41,14 +42,6 @@ export function DadosPaciente({
   onVoltar,
   onConfirmar,
 }) {
-  const formatCPF = (value) => {
-    return value
-      .replace(/\D/g, '')
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d{1,2})/, '$1-$2')
-      .replace(/(-\d{2})\d+?$/, '$1');
-  };
   return (
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
       <div className="space-y-4">
