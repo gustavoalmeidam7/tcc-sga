@@ -10,6 +10,7 @@ import { ModalConfirmacao } from "./components/ModalConfirmacao";
 import { createTravel } from "@/services/travelService";
 import { useState, useCallback, useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 function Viagens() {
   const viagem = useViagem();
@@ -22,6 +23,20 @@ function Viagens() {
     mutationFn: createTravel,
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ['travels'] });
+      toast.success('Viagem criada com sucesso!', {
+        description: 'A viagem foi agendada e está disponível na lista de agendamentos.',
+        duration: 5000,
+      });
+    },
+    onError: (error) => {
+      const mensagemErro = error.response?.data?.Erros
+        ? Object.values(error.response.data.Erros).join(", ")
+        : error.message || "Erro ao criar viagem";
+
+      toast.error('Erro ao criar viagem', {
+        description: mensagemErro,
+        duration: 6000,
+      });
     },
   });
 
@@ -38,7 +53,6 @@ function Viagens() {
     });
   });
 
-  // Memoiza callbacks para evitar recriação em cada render
   const handleAvancarTela = useCallback(() => {
     if (!viagem.coordOrigem || !viagem.coordDestino) {
       viagem.setError("Selecione origem e destino");

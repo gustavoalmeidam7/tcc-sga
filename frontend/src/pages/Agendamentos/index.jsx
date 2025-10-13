@@ -5,7 +5,9 @@ import { getTravels, deleteTravel } from "@/services/travelService";
 import { DataTable } from "@/components/ui/data-table";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, AlertCircle, Trash2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -36,6 +38,20 @@ function Agendamentos() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['travels'] });
       setViagemExcluir(null);
+      toast.error('Viagem excluída com sucesso!', {
+        description: 'O agendamento foi removido da lista.',
+        duration: 4000,
+      });
+    },
+    onError: (error) => {
+      const mensagemErro = error.response?.data?.Erros
+        ? Object.values(error.response.data.Erros).join(", ")
+        : error.message || "Erro ao excluir viagem";
+
+      toast.error('Erro ao excluir viagem', {
+        description: mensagemErro,
+        duration: 5000,
+      });
     },
   });
 
@@ -44,7 +60,15 @@ function Agendamentos() {
     deleteMutation.mutate(viagemExcluir.id);
   };
 
-  const error = queryError?.message || deleteMutation.error?.message;
+  // Mostrar toast quando houver erro na query
+  useEffect(() => {
+    if (queryError) {
+      toast.error('Erro ao carregar viagens', {
+        description: queryError.message || 'Não foi possível carregar seus agendamentos.',
+        duration: 5000,
+      });
+    }
+  }, [queryError]);
 
   const columns = useMemo(() => createColumns(setViagemExcluir), []);
 
@@ -65,17 +89,6 @@ function Agendamentos() {
         </div>
         <div className="absolute top-0 right-0 w-32 h-32 md:w-48 md:h-48 bg-primary/5 rounded-full blur-3xl" />
       </motion.header>
-
-      {error && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="p-4 rounded-lg bg-destructive/10 text-destructive border border-destructive/20 flex items-center gap-2"
-        >
-          <AlertCircle className="h-5 w-5 flex-shrink-0" />
-          <span>{error}</span>
-        </motion.div>
-      )}
 
       <Card>
         <CardContent className="p-6">

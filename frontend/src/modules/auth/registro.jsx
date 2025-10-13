@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
@@ -10,8 +9,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { CheckCircle2, XCircle, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 import img_logo from '@/assets/Logo_Maior.webp'
 
 const formSchema = z.object({
@@ -45,7 +44,6 @@ const formSchema = z.object({
 export function RegisterForm({ className, ...props }) {
   const { register, isLoading: authLoading, error: authError, clearError } = useAuth();
   const navigate = useNavigate();
-  const [success, setSuccess] = useState(null);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -62,7 +60,6 @@ export function RegisterForm({ className, ...props }) {
 
   async function onSubmit(values) {
     if (authError) clearError();
-    setSuccess(null);
 
     try {
       const userData = {
@@ -77,15 +74,29 @@ export function RegisterForm({ className, ...props }) {
       const result = await register(userData);
 
       if (result?.autoLogin) {
-        setSuccess('Cadastro realizado com sucesso! Redirecionando...');
+        toast.success('Cadastro realizado com sucesso!', {
+          description: 'Você será redirecionado para o sistema...',
+          duration: 3000,
+        });
         setTimeout(() => navigate('/home'), 500);
       } else {
-        setSuccess('Cadastro realizado com sucesso! Você será redirecionado para o login.');
+        toast.success('Cadastro realizado com sucesso!', {
+          description: 'Você será redirecionado para o login.',
+          duration: 3000,
+        });
         setTimeout(() => navigate('/login'), 500);
       }
 
     } catch (err) {
       console.error('Erro no cadastro:', err);
+      // O erro já está sendo tratado no AuthContext e setado no authError
+      // Aqui só exibimos o toast se houver erro
+      if (err.message) {
+        toast.error('Erro no cadastro', {
+          description: err.message,
+          duration: 5000,
+        });
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
@@ -103,20 +114,6 @@ export function RegisterForm({ className, ...props }) {
                     Insira seus dados para se cadastrar na plataforma SGA.
                   </p>
                 </div>
-
-                {authError && (
-                  <Alert variant="destructive">
-                    <XCircle className="h-4 w-4" />
-                    <AlertDescription>{authError}</AlertDescription>
-                  </Alert>
-                )}
-
-                {success && (
-                  <Alert className="border-green-500 bg-green-50">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    <AlertDescription className="text-green-600">{success}</AlertDescription>
-                  </Alert>
-                )}
 
                 <FormField
                   control={form.control}
@@ -255,7 +252,7 @@ export function RegisterForm({ className, ...props }) {
                   <Button
                     type="submit"
                     className="w-full mt-2"
-                    disabled={authLoading || !!success}
+                    disabled={authLoading}
                   >
                     {authLoading ? (
                       <>

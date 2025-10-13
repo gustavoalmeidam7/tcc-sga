@@ -188,7 +188,7 @@ function DadosPacienteComponent({
         <Button
           onClick={onVoltar}
           variant="outline"
-          className="w-full sm:w-auto h-12 md:h-10 text-base md:text-lg font-bold"
+          className="w-full sm:w-auto h-12 md:h-10 text-base md:text-lg font-bold text-foreground"
           size="lg"
           disabled={enviando}
         >
@@ -198,7 +198,7 @@ function DadosPacienteComponent({
 
         <Button
           onClick={onConfirmar}
-          className="h-12 md:h-10 w-full sm:w-auto text-base md:text-lg font-bold bg-gradient-to-r from-primary to-primary/80"
+          className="h-12 md:h-10 w-full sm:w-auto text-base md:text-lg font-bold bg-gradient-to-r from-primary to-primary/80 text-foreground"
           size="lg"
           disabled={enviando}
         >

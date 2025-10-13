@@ -145,7 +145,7 @@ function FormularioRotaComponent({
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <Button
             onClick={onAvancar}
-            className="w-full h-12 md:h-14 text-base md:text-lg font-bold"
+            className="w-full h-12 md:h-14 text-base md:text-lg font-bold text-accent-foreground"
             size="lg"
           >
             Avançar para Dados do Paciente
