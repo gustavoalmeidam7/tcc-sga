@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
@@ -10,8 +9,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import img_logo from '@/assets/Logo.webp'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { CheckCircle2, XCircle, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Por favor, insira um email válido.' }),
@@ -23,7 +22,6 @@ export function LoginForm({ className, ...props }) {
   const navigate = useNavigate()
   const location = useLocation()
   const from = location.state?.from?.pathname || '/'
-  const [success, setSuccess] = useState(null)
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -32,14 +30,22 @@ export function LoginForm({ className, ...props }) {
 
   async function onSubmit(values) {
     if (authError) clearError();
-    setSuccess(null);
 
     try {
       await login(values.email, values.senha);
-      setSuccess('Login bem-sucedido! Redirecionando...');
+      toast.success('Login realizado com sucesso!', {
+        description: 'Redirecionando para o sistema...',
+        duration: 3000,
+      });
       setTimeout(() => navigate(from, { replace: true }), 500);
     } catch (err) {
       console.error('Erro no login:', err);
+      if (err.message) {
+        toast.error('Erro no login', {
+          description: err.message,
+          duration: 5000,
+        });
+      }
     }
   }
 
@@ -55,20 +61,6 @@ export function LoginForm({ className, ...props }) {
                   <p className="text-muted-foreground text-balance">Realize login com sua conta SGA</p>
                 </div>
 
-                {authError && (
-                  <Alert variant="destructive">
-                    <XCircle className="h-4 w-4" />
-                    <AlertDescription>{authError}</AlertDescription>
-                  </Alert>
-                )}
-
-                {success && (
-                  <Alert className="border-green-500 bg-green-50">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    <AlertDescription className="text-green-600">{success}</AlertDescription>
-                  </Alert>
-                )}
-
                 <FormField
                   control={form.control}
                   name="email"
@@ -76,7 +68,14 @@ export function LoginForm({ className, ...props }) {
                     <FormItem className="grid gap-3">
                       <FormLabel className="text-foreground">Email</FormLabel>
                       <FormControl>
-                        <Input type="email" placeholder="m@example.com" {...field} />
+                        <Input
+                          type="email"
+                          placeholder="m@example.com"
+                          autoComplete="email"
+                          aria-label="Endereço de email"
+                          aria-required="true"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage className="text-destructive-foreground" />
                     </FormItem>
@@ -98,16 +97,27 @@ export function LoginForm({ className, ...props }) {
                         </Link>
                       </div>
                       <FormControl>
-                        <Input type="password" {...field} />
+                        <Input
+                          type="password"
+                          autoComplete="current-password"
+                          aria-label="Senha"
+                          aria-required="true"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage className="text-destructive-foreground" />
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="w-full" disabled={authLoading || !!success}>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={authLoading}
+                  aria-label={authLoading ? "Entrando no sistema" : "Realizar login"}
+                >
                   {authLoading ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                       Entrando...
                     </>
                   ) : (

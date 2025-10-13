@@ -4,11 +4,12 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
-import { User, Mail, Calendar, Phone, Shield, Pencil, Save, X, AlertCircle, Truck, MapPin } from "lucide-react";
+import { User, Mail, Calendar, Phone, Shield, Pencil, Save, X, Truck, MapPin } from "lucide-react";
 import { ROLE_LABELS } from "@/lib/roles";
 import authService from "@/services/authService";
 import { formatarData } from "@/lib/date-utils";
 import LoadingSpinner from "@/components/layout/loading";
+import { toast } from "sonner";
 
 const InfoItem = ({ icon: Icon, label, value, field, editable = true, type = "text", editMode, formData, setFormData }) => (
   <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50">
@@ -33,8 +34,6 @@ export default function DriverProfileView() {
   const { user, updateUserContext } = useAuth();
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [formData, setFormData] = useState({
     nome: user?.nome || "",
     email: user?.email || "",
@@ -43,8 +42,6 @@ export default function DriverProfileView() {
 
   const handleSalvar = async () => {
     setLoading(true);
-    setError("");
-    setSuccess("");
 
     try {
       const updateData = {
@@ -60,11 +57,18 @@ export default function DriverProfileView() {
         updateUserContext(updatedUser);
       }
 
-      setSuccess("Perfil atualizado com sucesso!");
+      toast.success('Perfil atualizado com sucesso!', {
+        description: 'Suas informações foram salvas.',
+        duration: 4000,
+      });
       setEditMode(false);
     } catch (err) {
       console.error("Erro ao atualizar perfil:", err);
-      setError(err.response?.data?.detail || "Erro ao atualizar perfil. Tente novamente.");
+      const mensagemErro = err.response?.data?.detail || "Erro ao atualizar perfil. Tente novamente.";
+      toast.error('Erro ao atualizar perfil', {
+        description: mensagemErro,
+        duration: 5000,
+      });
     } finally {
       setLoading(false);
     }
@@ -76,8 +80,6 @@ export default function DriverProfileView() {
       email: user?.email || "",
       telefone: user?.telefone || "",
     });
-    setError("");
-    setSuccess("");
     setEditMode(false);
   };
 
@@ -100,28 +102,6 @@ export default function DriverProfileView() {
         </div>
         <div className="absolute top-0 right-0 w-32 h-32 md:w-48 md:h-48 bg-primary/5 rounded-full blur-3xl" />
       </motion.header>
-
-      {error && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="p-4 rounded-lg bg-destructive/10 text-destructive border border-destructive/20 flex items-center gap-2"
-        >
-          <AlertCircle className="h-5 w-5 flex-shrink-0" />
-          <span>{error}</span>
-        </motion.div>
-      )}
-
-      {success && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="p-4 rounded-lg bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20 flex items-center gap-2"
-        >
-          <AlertCircle className="h-5 w-5 flex-shrink-0" />
-          <span>{success}</span>
-        </motion.div>
-      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>

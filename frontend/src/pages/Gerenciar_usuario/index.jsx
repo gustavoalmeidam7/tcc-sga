@@ -4,9 +4,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, AlertCircle, Pencil } from "lucide-react";
+import { Loader2, Pencil } from "lucide-react";
 import { ROLE_LABELS, ROLES } from "@/lib/roles";
 import authService from "@/services/authService";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -27,7 +28,6 @@ import { formatarData } from "@/lib/date-utils";
 function Usuarios() {
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [usuarioEdit, setUsuarioEdit] = useState(null);
   const [novoCargo, setNovoCargo] = useState("");
 
@@ -37,14 +37,16 @@ function Usuarios() {
 
   const carregarUsuarios = async () => {
     setLoading(true);
-    setError("");
     try {
       const response = await authService.getAllUsers();
       const dados = Array.isArray(response) ? response : (response.data || []);
       setUsuarios(dados);
     } catch (err) {
       console.error("Erro ao carregar usuários:", err);
-      setError("Erro ao carregar usuários. Tente novamente.");
+      toast.error('Erro ao carregar usuários', {
+        description: 'Não foi possível carregar a lista de usuários. Tente novamente.',
+        duration: 5000,
+      });
     } finally {
       setLoading(false);
     }
@@ -152,18 +154,6 @@ function Usuarios() {
         </div>
         <div className="absolute top-0 right-0 w-32 h-32 md:w-48 md:h-48 bg-primary/5 rounded-full blur-3xl" />
       </motion.header>
-
-      {/* Error */}
-      {error && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="p-4 rounded-lg bg-destructive/10 text-destructive border border-destructive/20 flex items-center gap-2"
-        >
-          <AlertCircle className="h-5 w-5 flex-shrink-0" />
-          <span>{error}</span>
-        </motion.div>
-      )}
 
       {/* DataTable */}
       <Card>

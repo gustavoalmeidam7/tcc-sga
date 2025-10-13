@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, memo } from "react";
 import { MapContainer, TileLayer, Marker, Polyline, Popup, useMap, LayersControl } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
@@ -53,7 +53,7 @@ function MapUpdater({ center, zoom }) {
 }
 
 
-export function MapaRota({
+function MapaRotaComponent({
   center,
   zoom,
   coordOrigem,
@@ -174,3 +174,5 @@ export function MapaRota({
     </div>
   );
 }
+
+export const MapaRota = memo(MapaRotaComponent);

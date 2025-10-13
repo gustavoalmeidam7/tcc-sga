@@ -1,3 +1,4 @@
+import { memo } from "react";
 import {
   Card,
   CardHeader,
@@ -18,7 +19,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AutocompleteInput } from "./AutocompleteInput";
 import { useGeocodingAutocomplete } from "../hooks/useGeocodingAutocomplete";
 
-export function FormularioRota({
+function FormularioRotaComponent({
   origem,
   destino,
   setOrigem,
@@ -144,7 +145,7 @@ export function FormularioRota({
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <Button
             onClick={onAvancar}
-            className="w-full h-12 md:h-14 text-base md:text-lg font-bold"
+            className="w-full h-12 md:h-14 text-base md:text-lg font-bold text-accent-foreground"
             size="lg"
           >
             Avançar para Dados do Paciente
@@ -166,3 +167,5 @@ export function FormularioRota({
     </div>
   );
 }
+
+export const FormularioRota = memo(FormularioRotaComponent);

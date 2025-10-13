@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
@@ -10,8 +9,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { CheckCircle2, XCircle, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 import img_logo from '@/assets/Logo_Maior.webp'
 
 const formSchema = z.object({
@@ -45,7 +44,6 @@ const formSchema = z.object({
 export function RegisterForm({ className, ...props }) {
   const { register, isLoading: authLoading, error: authError, clearError } = useAuth();
   const navigate = useNavigate();
-  const [success, setSuccess] = useState(null);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -62,7 +60,6 @@ export function RegisterForm({ className, ...props }) {
 
   async function onSubmit(values) {
     if (authError) clearError();
-    setSuccess(null);
 
     try {
       const userData = {
@@ -77,15 +74,27 @@ export function RegisterForm({ className, ...props }) {
       const result = await register(userData);
 
       if (result?.autoLogin) {
-        setSuccess('Cadastro realizado com sucesso! Redirecionando...');
+        toast.success('Cadastro realizado com sucesso!', {
+          description: 'Você será redirecionado para o sistema...',
+          duration: 3000,
+        });
         setTimeout(() => navigate('/home'), 500);
       } else {
-        setSuccess('Cadastro realizado com sucesso! Você será redirecionado para o login.');
+        toast.success('Cadastro realizado com sucesso!', {
+          description: 'Você será redirecionado para o login.',
+          duration: 3000,
+        });
         setTimeout(() => navigate('/login'), 500);
       }
 
     } catch (err) {
       console.error('Erro no cadastro:', err);
+      if (err.message) {
+        toast.error('Erro no cadastro', {
+          description: err.message,
+          duration: 5000,
+        });
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
@@ -104,20 +113,6 @@ export function RegisterForm({ className, ...props }) {
                   </p>
                 </div>
 
-                {authError && (
-                  <Alert variant="destructive">
-                    <XCircle className="h-4 w-4" />
-                    <AlertDescription>{authError}</AlertDescription>
-                  </Alert>
-                )}
-
-                {success && (
-                  <Alert className="border-green-500 bg-green-50">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    <AlertDescription className="text-green-600">{success}</AlertDescription>
-                  </Alert>
-                )}
-
                 <FormField
                   control={form.control}
                   name="nome"
@@ -127,6 +122,9 @@ export function RegisterForm({ className, ...props }) {
                       <FormControl>
                         <Input
                           placeholder="Seu nome"
+                          autoComplete="name"
+                          aria-label="Nome completo"
+                          aria-required="true"
                           {...field}
                           disabled={authLoading}
                         />
@@ -146,6 +144,9 @@ export function RegisterForm({ className, ...props }) {
                         <Input
                           type="email"
                           placeholder="m@example.com"
+                          autoComplete="email"
+                          aria-label="Endereço de email"
+                          aria-required="true"
                           {...field}
                           disabled={authLoading}
                         />
@@ -164,6 +165,9 @@ export function RegisterForm({ className, ...props }) {
                       <FormControl>
                         <Input
                           placeholder="000.000.000-00"
+                          inputMode="numeric"
+                          aria-label="CPF"
+                          aria-required="true"
                           {...field}
                           onChange={(e) => field.onChange(formatCPF(e.target.value))}
                           maxLength={14}
@@ -185,6 +189,10 @@ export function RegisterForm({ className, ...props }) {
                         <Input
                           type="tel"
                           placeholder="(00) 00000-0000"
+                          autoComplete="tel"
+                          inputMode="tel"
+                          aria-label="Telefone"
+                          aria-required="true"
                           {...field}
                           onChange={(e) => field.onChange(formatPhone(e.target.value))}
                           maxLength={15}
@@ -205,6 +213,9 @@ export function RegisterForm({ className, ...props }) {
                       <FormControl>
                         <Input
                           type="date"
+                          autoComplete="bday"
+                          aria-label="Data de nascimento"
+                          aria-required="true"
                           {...field}
                           max={new Date().toISOString().split('T')[0]}
                           disabled={authLoading}
@@ -224,6 +235,10 @@ export function RegisterForm({ className, ...props }) {
                       <FormControl>
                         <Input
                           type="password"
+                          autoComplete="new-password"
+                          aria-label="Senha"
+                          aria-required="true"
+                          minLength={8}
                           {...field}
                           disabled={authLoading}
                         />
@@ -242,6 +257,9 @@ export function RegisterForm({ className, ...props }) {
                       <FormControl>
                         <Input
                           type="password"
+                          autoComplete="new-password"
+                          aria-label="Confirmar senha"
+                          aria-required="true"
                           {...field}
                           disabled={authLoading}
                         />
@@ -255,7 +273,7 @@ export function RegisterForm({ className, ...props }) {
                   <Button
                     type="submit"
                     className="w-full mt-2"
-                    disabled={authLoading || !!success}
+                    disabled={authLoading}
                   >
                     {authLoading ? (
                       <>

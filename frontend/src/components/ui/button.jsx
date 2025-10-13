@@ -16,7 +16,10 @@ function Button({
   return (
     <Comp
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }), "cursor-pointer")}
+      className={cn(
+        buttonVariants({ variant, size, className }),
+        "cursor-pointer transition-all duration-200 active:scale-95 hover:scale-105"
+      )}
       {...props} />
   );
 }

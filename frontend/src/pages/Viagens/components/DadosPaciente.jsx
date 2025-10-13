@@ -1,3 +1,4 @@
+import { memo } from "react";
 import {
   Card,
   CardHeader,
@@ -20,7 +21,7 @@ import {
 import { motion } from "framer-motion";
 import { formatCPF } from "@/lib/format-utils";
 
-export function DadosPaciente({
+function DadosPacienteComponent({
   origem,
   destino,
   distancia,
@@ -37,6 +38,7 @@ export function DadosPaciente({
   setHoraAgendamento,
   observacoes,
   setObservacoes,
+  dataMinima,
   error,
   enviando = false,
   onVoltar,
@@ -131,13 +133,18 @@ export function DadosPaciente({
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="dataAgendamento">Data *</Label>
+                <Label htmlFor="dataAgendamento">
+                  Data *
+                  <span className="text-xs text-muted-foreground ml-2">
+                    (mín: 1 dia útil de antecedência)
+                  </span>
+                </Label>
                 <Input
                   id="dataAgendamento"
                   type="date"
                   value={dataAgendamento}
                   onChange={(e) => setDataAgendamento(e.target.value)}
-                  min={new Date().toISOString().split('T')[0]}
+                  min={dataMinima}
                 />
               </div>
 
@@ -166,11 +173,22 @@ export function DadosPaciente({
         </Card>
       </div>
 
+      {error && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="xl:col-span-2 p-3 md:p-4 rounded-lg bg-destructive/10 text-destructive border border-destructive/20 flex items-center gap-2"
+        >
+          <AlertCircle className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
+          <span className="text-sm md:text-base">{error}</span>
+        </motion.div>
+      )}
+
       <div className="xl:col-span-2 flex flex-col sm:flex-row gap-3">
         <Button
           onClick={onVoltar}
           variant="outline"
-          className="w-full sm:w-auto h-12 md:h-10 text-base md:text-lg font-bold"
+          className="w-full sm:w-auto h-12 md:h-10 text-base md:text-lg font-bold text-foreground"
           size="lg"
           disabled={enviando}
         >
@@ -180,7 +198,7 @@ export function DadosPaciente({
 
         <Button
           onClick={onConfirmar}
-          className="h-12 md:h-10 w-full sm:w-auto text-base md:text-lg font-bold bg-gradient-to-r from-primary to-primary/80"
+          className="h-12 md:h-10 w-full sm:w-auto text-base md:text-lg font-bold bg-gradient-to-r from-primary to-primary/80 text-foreground"
           size="lg"
           disabled={enviando}
         >
@@ -197,17 +215,8 @@ export function DadosPaciente({
           )}
         </Button>
       </div>
-
-      {error && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="xl:col-span-2 p-3 md:p-4 rounded-lg bg-destructive/10 text-destructive border border-destructive/20 flex items-center gap-2"
-        >
-          <AlertCircle className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
-          <span className="text-sm md:text-base">{error}</span>
-        </motion.div>
-      )}
     </div>
   );
 }
+
+export const DadosPaciente = memo(DadosPacienteComponent);

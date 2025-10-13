@@ -12,6 +12,7 @@ import { AnimatePresence } from "framer-motion";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import Header from "@/components/layout/header";
+import { Toaster } from "@/components/ui/sonner";
 
 function AppRoutes() {
   const location = useLocation();
@@ -41,6 +42,7 @@ export default function App() {
         <ThemeProvider>
           <AuthProvider>
             <OfflineIndicator />
+            <Toaster position="top-right" richColors closeButton />
             <SidebarProvider>
               <AppSidebar />
               <SidebarInset className="flex flex-col min-h-screen justify-between">
