@@ -68,7 +68,14 @@ export function LoginForm({ className, ...props }) {
                     <FormItem className="grid gap-3">
                       <FormLabel className="text-foreground">Email</FormLabel>
                       <FormControl>
-                        <Input type="email" placeholder="m@example.com" {...field} />
+                        <Input
+                          type="email"
+                          placeholder="m@example.com"
+                          autoComplete="email"
+                          aria-label="Endereço de email"
+                          aria-required="true"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage className="text-destructive-foreground" />
                     </FormItem>
@@ -90,16 +97,27 @@ export function LoginForm({ className, ...props }) {
                         </Link>
                       </div>
                       <FormControl>
-                        <Input type="password" {...field} />
+                        <Input
+                          type="password"
+                          autoComplete="current-password"
+                          aria-label="Senha"
+                          aria-required="true"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage className="text-destructive-foreground" />
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="w-full" disabled={authLoading}>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={authLoading}
+                  aria-label={authLoading ? "Entrando no sistema" : "Realizar login"}
+                >
                   {authLoading ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                       Entrando...
                     </>
                   ) : (

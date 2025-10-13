@@ -89,8 +89,6 @@ export function RegisterForm({ className, ...props }) {
 
     } catch (err) {
       console.error('Erro no cadastro:', err);
-      // O erro já está sendo tratado no AuthContext e setado no authError
-      // Aqui só exibimos o toast se houver erro
       if (err.message) {
         toast.error('Erro no cadastro', {
           description: err.message,
@@ -124,6 +122,9 @@ export function RegisterForm({ className, ...props }) {
                       <FormControl>
                         <Input
                           placeholder="Seu nome"
+                          autoComplete="name"
+                          aria-label="Nome completo"
+                          aria-required="true"
                           {...field}
                           disabled={authLoading}
                         />
@@ -143,6 +144,9 @@ export function RegisterForm({ className, ...props }) {
                         <Input
                           type="email"
                           placeholder="m@example.com"
+                          autoComplete="email"
+                          aria-label="Endereço de email"
+                          aria-required="true"
                           {...field}
                           disabled={authLoading}
                         />
@@ -161,6 +165,9 @@ export function RegisterForm({ className, ...props }) {
                       <FormControl>
                         <Input
                           placeholder="000.000.000-00"
+                          inputMode="numeric"
+                          aria-label="CPF"
+                          aria-required="true"
                           {...field}
                           onChange={(e) => field.onChange(formatCPF(e.target.value))}
                           maxLength={14}
@@ -182,6 +189,10 @@ export function RegisterForm({ className, ...props }) {
                         <Input
                           type="tel"
                           placeholder="(00) 00000-0000"
+                          autoComplete="tel"
+                          inputMode="tel"
+                          aria-label="Telefone"
+                          aria-required="true"
                           {...field}
                           onChange={(e) => field.onChange(formatPhone(e.target.value))}
                           maxLength={15}
@@ -202,6 +213,9 @@ export function RegisterForm({ className, ...props }) {
                       <FormControl>
                         <Input
                           type="date"
+                          autoComplete="bday"
+                          aria-label="Data de nascimento"
+                          aria-required="true"
                           {...field}
                           max={new Date().toISOString().split('T')[0]}
                           disabled={authLoading}
@@ -221,6 +235,10 @@ export function RegisterForm({ className, ...props }) {
                       <FormControl>
                         <Input
                           type="password"
+                          autoComplete="new-password"
+                          aria-label="Senha"
+                          aria-required="true"
+                          minLength={8}
                           {...field}
                           disabled={authLoading}
                         />
@@ -239,6 +257,9 @@ export function RegisterForm({ className, ...props }) {
                       <FormControl>
                         <Input
                           type="password"
+                          autoComplete="new-password"
+                          aria-label="Confirmar senha"
+                          aria-required="true"
                           {...field}
                           disabled={authLoading}
                         />

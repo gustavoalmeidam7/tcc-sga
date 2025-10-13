@@ -60,7 +60,6 @@ function Agendamentos() {
     deleteMutation.mutate(viagemExcluir.id);
   };
 
-  // Mostrar toast quando houver erro na query
   useEffect(() => {
     if (queryError) {
       toast.error('Erro ao carregar viagens', {
