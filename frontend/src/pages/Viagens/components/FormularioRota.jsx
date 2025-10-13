@@ -1,3 +1,4 @@
+import { memo } from "react";
 import {
   Card,
   CardHeader,
@@ -18,7 +19,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AutocompleteInput } from "./AutocompleteInput";
 import { useGeocodingAutocomplete } from "../hooks/useGeocodingAutocomplete";
 
-export function FormularioRota({
+function FormularioRotaComponent({
   origem,
   destino,
   setOrigem,
@@ -166,3 +167,5 @@ export function FormularioRota({
     </div>
   );
 }
+
+export const FormularioRota = memo(FormularioRotaComponent);

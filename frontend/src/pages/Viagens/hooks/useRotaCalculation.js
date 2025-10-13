@@ -1,6 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export function useRotaCalculation(coordOrigem, coordDestino, onRotaCalculada) {
+  const debounceTimerRef = useRef(null);
+
   const calcularRota = async (origem, destino) => {
     try {
       const response = await fetch(
@@ -30,15 +32,24 @@ export function useRotaCalculation(coordOrigem, coordDestino, onRotaCalculada) {
   };
 
   useEffect(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
     if (coordOrigem && coordDestino) {
-      const calcular = async () => {
+      debounceTimerRef.current = setTimeout(async () => {
         const resultado = await calcularRota(coordOrigem, coordDestino);
         if (resultado && onRotaCalculada) {
           onRotaCalculada(resultado);
         }
-      };
-      calcular();
+      }, 500);
     }
+
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
   }, [coordOrigem, coordDestino]);
 
   return { calcularRota };

@@ -1,18 +1,20 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useViagem } from "./hooks/useViagem";
 import { useRotaCalculation } from "./hooks/useRotaCalculation";
+import { useValidacaoAgendamento } from "./hooks/useValidacaoAgendamento";
 import { ProgressIndicator } from "./components/ProgressIndicator";
 import { FormularioRota } from "./components/FormularioRota";
 import { MapaRota } from "./components/MapaRota";
 import { DadosPaciente } from "./components/DadosPaciente";
 import { ModalConfirmacao } from "./components/ModalConfirmacao";
 import { createTravel } from "@/services/travelService";
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 function Viagens() {
   const viagem = useViagem();
   const queryClient = useQueryClient();
+  const { validarAgendamento, getDataMinimaFormatada } = useValidacaoAgendamento();
   const [modalOpen, setModalOpen] = useState(false);
   const [dadosViagemConfirmada, setDadosViagemConfirmada] = useState(null);
 
@@ -24,30 +26,33 @@ function Viagens() {
   });
 
   useRotaCalculation(viagem.coordOrigem, viagem.coordDestino, (resultado) => {
-    viagem.setLoading(true);
-    viagem.setRota(resultado.coordinates);
-    viagem.setDistancia(resultado.distancia);
-    viagem.setDuracao(resultado.duracao);
-
     const centerLat = (viagem.coordOrigem[0] + viagem.coordDestino[0]) / 2;
     const centerLng = (viagem.coordOrigem[1] + viagem.coordDestino[1]) / 2;
-    viagem.setCenter([centerLat, centerLng]);
-    viagem.setZoom(12);
-    viagem.setLoading(false);
+
+    viagem.setRotaCompleta({
+      rota: resultado.coordinates,
+      distancia: resultado.distancia,
+      duracao: resultado.duracao,
+      center: [centerLat, centerLng],
+      zoom: 12,
+    });
   });
 
-  const handleAvancarTela = () => {
+  // Memoiza callbacks para evitar recriação em cada render
+  const handleAvancarTela = useCallback(() => {
     if (!viagem.coordOrigem || !viagem.coordDestino) {
       viagem.setError("Selecione origem e destino");
       return;
     }
     viagem.setError("");
     viagem.setTelaAtual(2);
-  };
+  }, [viagem.coordOrigem, viagem.coordDestino, viagem.setError, viagem.setTelaAtual]);
 
-  const handleVoltarTela = () => {
+  const handleVoltarTela = useCallback(() => {
     viagem.setTelaAtual(1);
-  };
+  }, [viagem.setTelaAtual]);
+
+  const dataMinima = useMemo(() => getDataMinimaFormatada(1), [getDataMinimaFormatada]);
 
   const handleConfirmarViagem = async () => {
     if (!viagem.nomePaciente || !viagem.cpfPaciente || !viagem.dataAgendamento || !viagem.horaAgendamento) {
@@ -55,21 +60,15 @@ function Viagens() {
       return;
     }
 
-    const inicio = new Date(`${viagem.dataAgendamento}T${viagem.horaAgendamento}`);
-    const agora = new Date();
-    const margemSeguranca = new Date(agora.getTime() + 5 * 60000);
+    const validacao = validarAgendamento(
+      viagem.dataAgendamento,
+      viagem.horaAgendamento,
+      viagem.duracao,
+      1 
+    );
 
-    if (inicio <= margemSeguranca) {
-      const horaFormatada = inicio.toLocaleTimeString("pt-BR", {
-        hour: "2-digit",
-        minute: "2-digit"
-      });
-      const dataFormatada = inicio.toLocaleDateString("pt-BR");
-
-      viagem.setError(
-        `O agendamento deve ser para pelo menos 5 minutos no futuro. ` +
-        `Você tentou agendar para ${dataFormatada} às ${horaFormatada}`
-      );
+    if (!validacao.valido) {
+      viagem.setError(validacao.mensagem);
       return;
     }
 
@@ -77,6 +76,7 @@ function Viagens() {
 
     try {
       const inicioLocal = `${viagem.dataAgendamento}T${viagem.horaAgendamento}:00`;
+      const inicio = new Date(inicioLocal);
       const fim = new Date(inicio.getTime() + viagem.duracao * 60000);
 
       const fimAno = fim.getFullYear();
@@ -93,7 +93,6 @@ function Viagens() {
         local_fim: viagem.destino,
       };
 
-      // Usa mutation do React Query que invalida cache automaticamente
       await createTravelMutation.mutateAsync(dadosBackend);
 
       setDadosViagemConfirmada({
@@ -206,6 +205,7 @@ function Viagens() {
               setHoraAgendamento={viagem.setHoraAgendamento}
               observacoes={viagem.observacoes}
               setObservacoes={viagem.setObservacoes}
+              dataMinima={dataMinima}
               error={viagem.error}
               enviando={createTravelMutation.isPending}
               onVoltar={handleVoltarTela}
