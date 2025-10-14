@@ -35,13 +35,6 @@ const destinoIcon = L.AwesomeMarkers.icon({
   iconColor: 'white'
 });
 
-const ambulanciaIcon = L.AwesomeMarkers.icon({
-  icon: 'ambulance',
-  markerColor: 'blue',
-  prefix: 'fa',
-  iconColor: 'white'
-});
-
 function MapUpdater({ center, zoom }) {
   const map = useMap();
   useEffect(() => {

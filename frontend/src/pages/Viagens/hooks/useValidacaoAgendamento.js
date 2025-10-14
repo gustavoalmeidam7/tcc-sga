@@ -1,5 +1,3 @@
-import { useMemo } from "react";
-
 export function useValidacaoAgendamento() {
 
   const isDiaUtil = (data) => {
