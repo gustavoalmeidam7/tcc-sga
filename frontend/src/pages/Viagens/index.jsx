@@ -105,8 +105,14 @@ function Viagens() {
         fim: fimLocal,
         local_inicio: viagem.origem,
         local_fim: viagem.destino,
+        /*  Enviar lat e long ao inves de endereços
+        lat_inicio: viagem.coordOrigem[0],
+        long_inicio: viagem.coordOrigem[1],                                                                
+        lat_fim: viagem.coordDestino[0],                                                                
+        long_fim: viagem.coordDestino[1],
+        */
       };
-
+      
       await createTravelMutation.mutateAsync(dadosBackend);
 
       setDadosViagemConfirmada({
