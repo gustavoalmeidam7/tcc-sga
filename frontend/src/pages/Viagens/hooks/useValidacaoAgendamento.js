@@ -1,11 +1,11 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 export function useValidacaoAgendamento() {
 
-  const isDiaUtil = (data) => {
+  const isDiaUtil = useCallback((data) => {
     const diaSemana = data.getDay();
     return diaSemana >= 1 && diaSemana <= 5;
-  };
+  }, []);
 
   const proximoDiaUtil = (data) => {
     const novaData = new Date(data);
@@ -115,11 +115,11 @@ export function useValidacaoAgendamento() {
     return `${ano}-${mes}-${dia}`;
   };
 
-  return {
+  return useMemo(() => ({
     validarAgendamento,
     calcularDataMinimaAgendamento,
     getDataMinimaFormatada,
     isDiaUtil,
     calcularDiasUteis,
-  };
+  }), [isDiaUtil]);
 }

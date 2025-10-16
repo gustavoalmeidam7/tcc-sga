@@ -35,20 +35,33 @@ const destinoIcon = L.AwesomeMarkers.icon({
   iconColor: 'white'
 });
 
-const ambulanciaIcon = L.AwesomeMarkers.icon({
-  icon: 'ambulance',
-  markerColor: 'blue',
-  prefix: 'fa',
-  iconColor: 'white'
-});
-
-function MapUpdater({ center, zoom }) {
+function MapUpdater({ center, zoom, rota, coordOrigem, coordDestino }) {
   const map = useMap();
+
   useEffect(() => {
-    if (center) {
+    if (rota && rota.length > 0) {
+      const bounds = L.latLngBounds(rota);
+      map.fitBounds(bounds, {
+        padding: [50, 50],
+        maxZoom: 15,
+        animate: true,
+        duration: 1.5
+      });
+    }
+    else if (coordOrigem && coordDestino) {
+      const bounds = L.latLngBounds([coordOrigem, coordDestino]);
+      map.fitBounds(bounds, {
+        padding: [50, 50],
+        maxZoom: 15,
+        animate: true,
+        duration: 1.5
+      });
+    }
+    else if (center) {
       map.flyTo(center, zoom, { duration: 1.5 });
     }
-  }, [center, zoom, map]);
+  }, [center, zoom, map, rota, coordOrigem, coordDestino]);
+
   return null;
 }
 
@@ -94,7 +107,13 @@ function MapaRotaComponent({
               minZoom={4}
               maxZoom={18}
             >
-              <MapUpdater center={center} zoom={zoom} />
+              <MapUpdater
+                center={center}
+                zoom={zoom}
+                rota={rota}
+                coordOrigem={coordOrigem}
+                coordDestino={coordDestino}
+              />
 
               <LayersControl position="topright">
                 <LayersControl.BaseLayer checked name="OpenStreetMap">

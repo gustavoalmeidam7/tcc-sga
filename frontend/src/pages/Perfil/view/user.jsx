@@ -83,7 +83,7 @@ export default function UserProfileView() {
   };
 
   return (
-    <main className="space-y-6 lg:container lg:mx-auto pb-6">
+    <main className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
       {loading && <LoadingSpinner fullScreen text="Salvando alterações..." />}
 
       <motion.header
@@ -102,71 +102,72 @@ export default function UserProfileView() {
         <div className="absolute top-0 right-0 w-32 h-32 md:w-48 md:h-48 bg-primary/5 rounded-full blur-3xl" />
       </motion.header>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Informações Pessoais</CardTitle>
-          {!editMode ? (
-            <Button variant="outline" size="sm" onClick={() => setEditMode(true)}>
-              <Pencil className="h-4 w-4 mr-2" />
-              Editar
-            </Button>
-          ) : (
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={handleCancelar} disabled={loading}>
-                <X className="h-4 w-4 mr-2" />
-                Cancelar
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Informações Pessoais</CardTitle>
+            {!editMode ? (
+              <Button variant="outline" size="sm" onClick={() => setEditMode(true)}>
+                <Pencil className="h-4 w-4 mr-2" />
+                Editar
               </Button>
-              <Button size="sm" onClick={handleSalvar} disabled={loading}>
-                <Save className="h-4 w-4 mr-2" />
-                Salvar
-              </Button>
-            </div>
-          )}
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <InfoItem
-            icon={User}
-            label="Nome Completo"
-            value={user?.nome || "Não informado"}
-            field="nome"
-            type="text"
-            editMode={editMode}
-            formData={formData}
-            setFormData={setFormData}
-          />
-          <InfoItem
-            icon={Mail}
-            label="E-mail"
-            value={user?.email || "Não informado"}
-            field="email"
-            type="email"
-            editMode={editMode}
-            formData={formData}
-            setFormData={setFormData}
-          />
-          <InfoItem
-            icon={Phone}
-            label="Telefone"
-            value={user?.telefone || "Não informado"}
-            field="telefone"
-            type="tel"
-            editMode={editMode}
-            formData={formData}
-            setFormData={setFormData}
-          />
-          <InfoItem
-            icon={Calendar}
-            label="Data de Nascimento"
-            value={formatarData(user?.nascimento)}
-            editable={false}
-            editMode={editMode}
-            formData={formData}
-            setFormData={setFormData}
-          />
-        </CardContent>
-      </Card>
+            ) : (
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={handleCancelar} disabled={loading}>
+                  <X className="h-4 w-4 mr-2" />
+                  Cancelar
+                </Button>
+                <Button size="sm" onClick={handleSalvar} disabled={loading}>
+                  <Save className="h-4 w-4 mr-2" />
+                  Salvar
+                </Button>
+              </div>
+            )}
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <InfoItem
+              icon={User}
+              label="Nome Completo"
+              value={user?.nome || "Não informado"}
+              field="nome"
+              type="text"
+              editMode={editMode}
+              formData={formData}
+              setFormData={setFormData}
+            />
+            <InfoItem
+              icon={Mail}
+              label="E-mail"
+              value={user?.email || "Não informado"}
+              field="email"
+              type="email"
+              editMode={editMode}
+              formData={formData}
+              setFormData={setFormData}
+            />
+            <InfoItem
+              icon={Phone}
+              label="Telefone"
+              value={user?.telefone || "Não informado"}
+              field="telefone"
+              type="tel"
+              editMode={editMode}
+              formData={formData}
+              setFormData={setFormData}
+            />
+            <InfoItem
+              icon={Calendar}
+              label="Data de Nascimento"
+              value={formatarData(user?.nascimento)}
+              editable={false}
+              editMode={editMode}
+              formData={formData}
+              setFormData={setFormData}
+            />
+          </CardContent>
+        </Card>
 
-      <Card>
+        <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <AlertCircle className="h-5 w-5" />
@@ -180,7 +181,8 @@ export default function UserProfileView() {
             <p>• Entre em contato com o suporte se precisar de ajuda</p>
           </div>
         </CardContent>
-      </Card>
+        </Card>
+      </div>
     </main>
   );
 }

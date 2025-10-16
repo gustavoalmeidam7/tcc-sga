@@ -93,7 +93,9 @@ export function DataTable({ columns, data, filterColumn, filterPlaceholder }) {
                     ))}
                   </TableRow>
                 ))}
-                {Array.from({ length: Math.max(0, 5 - table.getRowModel().rows.length) }).map((_, i) => (
+                {Array.from({
+                  length: Math.max(0, table.getState().pagination.pageSize - table.getRowModel().rows.length)
+                }).map((_, i) => (
                   <TableRow key={`padding-${i}`} style={{ height: '53px' }}>
                     <TableCell colSpan={columns.length}>&nbsp;</TableCell>
                   </TableRow>
@@ -109,23 +111,53 @@ export function DataTable({ columns, data, filterColumn, filterPlaceholder }) {
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Anterior
-        </Button>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Próximo
-        </Button>
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4">
+        <div className="flex items-center space-x-2">
+          <p className="text-sm text-muted-foreground">
+            Linhas por página:
+          </p>
+          <select
+            value={table.getState().pagination.pageSize}
+            onChange={(e) => {
+              table.setPageSize(Number(e.target.value));
+            }}
+            className="h-8 w-[70px] rounded-md border border-input bg-background px-2 text-sm cursor-pointer"
+          >
+            {[5, 10, 25].map((pageSize) => (
+              <option key={pageSize} value={pageSize}>
+                {pageSize}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex items-center space-x-4 sm:space-x-6">
+          <span className="flex items-center gap-1 text-sm text-muted-foreground">
+            <span className="hidden sm:inline">Página</span>
+            <strong>
+              {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
+            </strong>
+          </span>
+
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              Anterior
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              Próximo
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );

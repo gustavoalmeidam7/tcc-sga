@@ -55,9 +55,9 @@ function Usuarios() {
 
   const getRoleBadgeColor = (cargo) => {
     const colors = {
-      0: "bg-blue-500 hover:bg-blue-600",    // USER
-      1: "bg-orange-500 hover:bg-orange-600", // DRIVER
-      2: "bg-purple-500 hover:bg-purple-600", // MANAGER
+      0: "bg-blue-500 hover:bg-blue-600",
+      1: "bg-orange-500 hover:bg-orange-600",
+      2: "bg-purple-500 hover:bg-purple-600",
     };
     return colors[cargo] || "bg-gray-500";
   };
@@ -70,9 +70,6 @@ function Usuarios() {
   const handleSalvarCargo = async () => {
     if (!usuarioEdit) return;
 
-    // TODO: Implementar quando backend tiver endpoint para gerente atualizar cargo de outros usuários
-    // Por enquanto, apenas fecha o modal
-    console.log("Atualizar cargo do usuário:", usuarioEdit.id, "para:", novoCargo);
     setUsuarioEdit(null);
     setNovoCargo("");
   };
@@ -138,7 +135,6 @@ function Usuarios() {
 
   return (
     <main className="space-y-4 lg:space-y-5 lg:container lg:mx-auto pb-6">
-      {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -155,7 +151,6 @@ function Usuarios() {
         <div className="absolute top-0 right-0 w-32 h-32 md:w-48 md:h-48 bg-primary/5 rounded-full blur-3xl" />
       </motion.header>
 
-      {/* DataTable */}
       <Card>
         <CardContent className="p-6">
           {loading ? (
@@ -173,7 +168,6 @@ function Usuarios() {
         </CardContent>
       </Card>
 
-      {/* Modal de Edição de Cargo */}
       <Dialog open={!!usuarioEdit} onOpenChange={() => setUsuarioEdit(null)}>
         <DialogContent>
           <DialogHeader>

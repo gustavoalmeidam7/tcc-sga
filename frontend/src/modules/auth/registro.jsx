@@ -21,9 +21,17 @@ const formSchema = z.object({
   email: z.string()
     .email({ message: 'Por favor, insira um email válido.' }),
   
-  cpf: z.string()
-    .min(11, { message: 'O CPF deve ter 11 dígitos.' }),
-  
+  cpf: z.string().refine((cpf) => {
+    if (typeof cpf !== "string") return false;
+    cpf = cpf.replace(/[^\d]+/g, "");
+    if (cpf.length !== 11 || !!cpf.match(/(\d)\1{10}/)) return false;
+    const cpfDigits = cpf.split("").map((el) => +el);
+    const rest = (count) => {
+      return (((cpfDigits.slice(0, count - 12).reduce((soma, el, index) => soma + el * (count - index), 0) * 10) % 11) % 10);
+    };
+    return rest(10) === cpfDigits[9] && rest(11) === cpfDigits[10];
+  }, "CPF inválido"),
+
   telefone: z.string()
     .min(10, { message: 'Insira um número de telefone válido.' }),
   

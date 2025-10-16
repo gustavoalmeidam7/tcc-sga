@@ -1,9 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 
 export function useRotaCalculation(coordOrigem, coordDestino, onRotaCalculada) {
   const debounceTimerRef = useRef(null);
 
-  const calcularRota = async (origem, destino) => {
+  const calcularRota = useCallback(async (origem, destino) => {
     try {
       const response = await fetch(
         `https://router.project-osrm.org/route/v1/driving/${origem[1]},${origem[0]};${destino[1]},${destino[0]}?overview=full&geometries=geojson`
@@ -29,7 +29,7 @@ export function useRotaCalculation(coordOrigem, coordDestino, onRotaCalculada) {
       console.error("Erro ao calcular rota:", err);
       return null;
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (debounceTimerRef.current) {
@@ -50,7 +50,7 @@ export function useRotaCalculation(coordOrigem, coordDestino, onRotaCalculada) {
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [coordOrigem, coordDestino]);
+  }, [coordOrigem, coordDestino, onRotaCalculada, calcularRota]);
 
   return { calcularRota };
 }

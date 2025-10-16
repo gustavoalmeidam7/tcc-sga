@@ -16,6 +16,7 @@ const Perfil = lazy(() => import("./pages/Perfil"));
 const RecSenha = lazy(() => import("./pages/Rec_senha"));
 const SaibaMais = lazy(() => import("./pages/Saiba_mais"));
 const Suporte = lazy(() => import("./pages/Suporte"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 export const appRoutes = [
   { path: "/", element: <AnimatedPage><LandingPage /></AnimatedPage>, label: "Landing Page" },
@@ -32,5 +33,5 @@ export const appRoutes = [
   { path: "/agendamentos", element: <PrivateRoute><AnimatedPage><Agendamentos /></AnimatedPage></PrivateRoute>, label: "Meus Agendamentos" },
   { path: "/perfil", element: <PrivateRoute><AnimatedPage><Perfil /></AnimatedPage></PrivateRoute>, label: "Meu Perfil" },
 
-  { path: "*", element: <AnimatedPage><div>404 - Página não encontrada</div></AnimatedPage>, label: "Página Não Encontrada" },
+  { path: "*", element: <AnimatedPage><NotFound /></AnimatedPage>, label: "Página Não Encontrada" },
 ];
