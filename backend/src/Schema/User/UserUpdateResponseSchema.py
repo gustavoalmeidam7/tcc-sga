@@ -5,11 +5,11 @@ from src.Schema.User.UserRoleEnum import UserRole
 
 from typing import Annotated
 from datetime import date
-import uuid
+from uuid import uuid4, UUID
 
 class UserUpdateResponseSchema(BaseModel):
-    id        : Annotated[uuid.UUID,Field()]              = uuid.uuid4()
-    email     : Annotated[EmailStr, Field(max_length=45)] = "ronaldo@mail.com"
-    nome      : Annotated[str,      Field(max_length=50)] = "Ronaldo de Assis Moreira"
-    telefone  : Annotated[str,      Field(max_length=12)] = "51991234567"
-    cargo     : Annotated[int,      Field()]              = UserRole.USER
+    id        : Annotated[UUID,     Field(example=uuid4)]
+    email     : Annotated[EmailStr, Field(example="ronaldo@mail.com", max_length=45)]
+    nome      : Annotated[str,      Field(example="Ronaldo de Assis Moreira", max_length=50)]
+    telefone  : Annotated[str,      Field(example="51991234567", max_length=12)]
+    cargo     : Annotated[int,      Field(example=UserRole.USER)]

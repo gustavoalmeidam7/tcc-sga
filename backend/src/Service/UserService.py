@@ -46,6 +46,9 @@ def find_all_page_dict(page: int = 0, pageSize: int = 25) -> 'list[UserResponseS
 
 def update_user(user: User, updateFields: UserUpdateSchema) -> UserUpdateResponseSchema:
     """ Atualiza um usuário do banco de dados """
-    user = UserRepository.update_by_id(user.id, User(**updateFields.model_dump()))
+    userId = str(user.id)
+
+    user = UserRepository.update_user_by_id(userId, **updateFields.model_dump())
+    UserRepository.create_role_by_user_id(userId, user.cargo)
     UserUpdateResponseSchema.model_validate(user)
     return UserUpdateResponseSchema.model_validate(user)

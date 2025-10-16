@@ -49,3 +49,9 @@ def remove_travel(id: UUID | str) -> TravelDeleteResponseSchema:
     travelDeleteResponse.deletado = True if travel == None else False
 
     return travelDeleteResponse
+
+def find_travel_by_id(travelId: UUID | str) -> Travel | None:
+    """ Encontra uma travel pelo seu ID """
+
+    travelId = unmask_uuid(travelId)
+    return TravelRepository.find_travel_by_id(travelId)

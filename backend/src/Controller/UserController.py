@@ -23,7 +23,7 @@ async def create_user(user: UserCreateSchema) -> 'UserResponseSchema':
 
 @USER_ROUTER.delete("/", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(user: GET_AUTENTHICATED_USER):
-    UserService.delete_by_id(user.id) # type: ignore
+    UserService.delete_by_id(user.id)
 
 @USER_ROUTER.patch("/")
 async def update_user(user: GET_AUTENTHICATED_USER, userUpdate: UserUpdateSchema):
@@ -36,4 +36,3 @@ async def get_user(user: GET_AUTENTHICATED_USER) -> 'UserResponseSchema':
 @USER_ROUTER.get("/getusers")
 async def get_users(user: GET_AUTENTHICATED_USER, page: int = 1, pagesize: int = 15) -> 'list[UserResponseSchema]':
     return UserService.find_all_page_dict(int(page), int(pagesize))
-
