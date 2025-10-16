@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getAuthToken, clearAuthToken } from './tokenStore';
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const API = axios.create({
   baseURL: API_URL,
@@ -36,15 +36,12 @@ API.interceptors.response.use(
 
     const { status, data } = error.response;
 
-    // Backend retorna erros em { "Erros": [...] } ou { "detail": "..." }
     const backendErrors = data?.Erros;
     let errorMessage = 'Erro desconhecido';
 
     if (backendErrors && Array.isArray(backendErrors) && backendErrors.length > 0) {
-      // Se houver múltiplos erros, junta com vírgula
       errorMessage = backendErrors.join(', ');
     } else if (data?.detail) {
-      // FastAPI retorna "detail" em alguns erros
       errorMessage = data.detail;
     }
 
@@ -76,7 +73,6 @@ API.interceptors.response.use(
     }
 
     if (status === 409) {
-      // Conflito (ex: email já existe, CPF duplicado)
       return Promise.reject({
         ...error,
         message: errorMessage

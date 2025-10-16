@@ -1,4 +1,4 @@
-import { useReducer } from "react";
+import { useReducer, useMemo } from "react";
 
 const initialState = {
   telaAtual: 1,
@@ -99,50 +99,31 @@ function viagemReducer(state, action) {
 export function useViagem() {
   const [state, dispatch] = useReducer(viagemReducer, initialState);
 
-  const setTelaAtual = (valor) => dispatch({ type: "SET_TELA_ATUAL", payload: valor });
-  const setOrigem = (valor) => dispatch({ type: "SET_ORIGEM", payload: valor });
-  const setDestino = (valor) => dispatch({ type: "SET_DESTINO", payload: valor });
-  const setCoordOrigem = (valor) => dispatch({ type: "SET_COORD_ORIGEM", payload: valor });
-  const setCoordDestino = (valor) => dispatch({ type: "SET_COORD_DESTINO", payload: valor });
-  const setRota = (valor) => dispatch({ type: "SET_ROTA", payload: valor });
-  const setLoading = (valor) => dispatch({ type: "SET_LOADING", payload: valor });
-  const setError = (valor) => dispatch({ type: "SET_ERROR", payload: valor });
-  const setCenter = (valor) => dispatch({ type: "SET_CENTER", payload: valor });
-  const setZoom = (valor) => dispatch({ type: "SET_ZOOM", payload: valor });
-  const setDistancia = (valor) => dispatch({ type: "SET_DISTANCIA", payload: valor });
-  const setDuracao = (valor) => dispatch({ type: "SET_DURACAO", payload: valor });
-  const setNomePaciente = (valor) => dispatch({ type: "SET_NOME_PACIENTE", payload: valor });
-  const setCpfPaciente = (valor) => dispatch({ type: "SET_CPF_PACIENTE", payload: valor });
-  const setEstadoSaude = (valor) => dispatch({ type: "SET_ESTADO_SAUDE", payload: valor });
-  const setObservacoes = (valor) => dispatch({ type: "SET_OBSERVACOES", payload: valor });
-  const setDataAgendamento = (valor) => dispatch({ type: "SET_DATA_AGENDAMENTO", payload: valor });
-  const setHoraAgendamento = (valor) => dispatch({ type: "SET_HORA_AGENDAMENTO", payload: valor });
-
-  const setRotaCompleta = (dados) => dispatch({ type: "SET_ROTA_COMPLETA", payload: dados });
-
-  const resetarFormulario = () => dispatch({ type: "RESET_FORMULARIO" });
+  const actions = useMemo(() => ({
+    setTelaAtual: (valor) => dispatch({ type: "SET_TELA_ATUAL", payload: valor }),
+    setOrigem: (valor) => dispatch({ type: "SET_ORIGEM", payload: valor }),
+    setDestino: (valor) => dispatch({ type: "SET_DESTINO", payload: valor }),
+    setCoordOrigem: (valor) => dispatch({ type: "SET_COORD_ORIGEM", payload: valor }),
+    setCoordDestino: (valor) => dispatch({ type: "SET_COORD_DESTINO", payload: valor }),
+    setRota: (valor) => dispatch({ type: "SET_ROTA", payload: valor }),
+    setLoading: (valor) => dispatch({ type: "SET_LOADING", payload: valor }),
+    setError: (valor) => dispatch({ type: "SET_ERROR", payload: valor }),
+    setCenter: (valor) => dispatch({ type: "SET_CENTER", payload: valor }),
+    setZoom: (valor) => dispatch({ type: "SET_ZOOM", payload: valor }),
+    setDistancia: (valor) => dispatch({ type: "SET_DISTANCIA", payload: valor }),
+    setDuracao: (valor) => dispatch({ type: "SET_DURACAO", payload: valor }),
+    setNomePaciente: (valor) => dispatch({ type: "SET_NOME_PACIENTE", payload: valor }),
+    setCpfPaciente: (valor) => dispatch({ type: "SET_CPF_PACIENTE", payload: valor }),
+    setEstadoSaude: (valor) => dispatch({ type: "SET_ESTADO_SAUDE", payload: valor }),
+    setObservacoes: (valor) => dispatch({ type: "SET_OBSERVACOES", payload: valor }),
+    setDataAgendamento: (valor) => dispatch({ type: "SET_DATA_AGENDAMENTO", payload: valor }),
+    setHoraAgendamento: (valor) => dispatch({ type: "SET_HORA_AGENDAMENTO", payload: valor }),
+    setRotaCompleta: (dados) => dispatch({ type: "SET_ROTA_COMPLETA", payload: dados }),
+    resetarFormulario: () => dispatch({ type: "RESET_FORMULARIO" }),
+  }), [dispatch]);
 
   return {
     ...state,
-    setTelaAtual,
-    setOrigem,
-    setDestino,
-    setCoordOrigem,
-    setCoordDestino,
-    setRota,
-    setLoading,
-    setError,
-    setCenter,
-    setZoom,
-    setDistancia,
-    setDuracao,
-    setNomePaciente,
-    setCpfPaciente,
-    setEstadoSaude,
-    setObservacoes,
-    setDataAgendamento,
-    setHoraAgendamento,
-    setRotaCompleta,
-    resetarFormulario,
+    ...actions,
   };
 }

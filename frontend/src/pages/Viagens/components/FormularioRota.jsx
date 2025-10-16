@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useCallback } from "react";
 import {
   Card,
   CardHeader,
@@ -35,25 +35,25 @@ function FormularioRotaComponent({
   const origemAutocomplete = useGeocodingAutocomplete();
   const destinoAutocomplete = useGeocodingAutocomplete();
 
-  const handleOrigemChange = (e) => {
+  const handleOrigemChange = useCallback((e) => {
     setOrigem(e.target.value);
     origemAutocomplete.handleInputChange(e.target.value);
-  };
+  }, [setOrigem, origemAutocomplete.handleInputChange]);
 
-  const handleDestinoChange = (e) => {
+  const handleDestinoChange = useCallback((e) => {
     setDestino(e.target.value);
     destinoAutocomplete.handleInputChange(e.target.value);
-  };
+  }, [setDestino, destinoAutocomplete.handleInputChange]);
 
-  const selecionarOrigem = (sugestao) => {
+  const selecionarOrigem = useCallback((sugestao) => {
     setOrigem(sugestao.nome);
     setCoordOrigem([sugestao.lat, sugestao.lon]);
-  };
+  }, [setOrigem, setCoordOrigem]);
 
-  const selecionarDestino = (sugestao) => {
+  const selecionarDestino = useCallback((sugestao) => {
     setDestino(sugestao.nome);
     setCoordDestino([sugestao.lat, sugestao.lon]);
-  };
+  }, [setDestino, setCoordDestino]);
 
   return (
     <div className="xl:col-span-1 space-y-4">
