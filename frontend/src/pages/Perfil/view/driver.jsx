@@ -4,7 +4,8 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
-import { User, Mail, Calendar, Phone, Shield, Pencil, Save, X, Truck, MapPin } from "lucide-react";
+import { useDeleteAccount } from "../hooks/useDeleteAccount";
+import { User, Mail, Calendar, Phone, Shield, Pencil, Save, X, Truck, MapPin, Trash2, AlertTriangle } from "lucide-react";
 import { ROLE_LABELS } from "@/lib/roles";
 import authService from "@/services/authService";
 import { formatarData } from "@/lib/date-utils";
@@ -32,8 +33,10 @@ const InfoItem = ({ icon: Icon, label, value, field, editable = true, type = "te
 
 export default function DriverProfileView() {
   const { user, updateUserContext } = useAuth();
+  const { deleteAccount, isDeleting } = useDeleteAccount();
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [formData, setFormData] = useState({
     nome: user?.nome || "",
     email: user?.email || "",
@@ -81,6 +84,15 @@ export default function DriverProfileView() {
       telefone: user?.telefone || "",
     });
     setEditMode(false);
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      await deleteAccount();
+    } catch (err) {
+    } finally {
+      setShowDeleteConfirm(false);
+    }
   };
 
   return (
@@ -151,6 +163,52 @@ export default function DriverProfileView() {
           <p className="text-sm text-muted-foreground">
             <strong>Nota:</strong> As informações profissionais serão atualizadas automaticamente conforme você realiza viagens e recebe atribuições.
           </p>
+        </CardContent>
+      </Card>
+      <Card className="border-destructive/50">
+        <CardContent className="p-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <h3 className="font-semibold text-sm text-destructive mb-1 flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                Deletar Conta
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Ao deletar sua conta, todos os seus dados serão removidos permanentemente.
+              </p>
+            </div>
+            {!showDeleteConfirm ? (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={isDeleting}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Deletar
+              </Button>
+            ) : (
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowDeleteConfirm(false)}
+                  disabled={isDeleting}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleDeleteAccount}
+                  disabled={isDeleting}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Confirmar
+                </Button>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     </main>

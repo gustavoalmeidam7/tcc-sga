@@ -33,12 +33,18 @@ const updateUser = async (userData) => {
   return response.data;
 };
 
+const deleteUser = async () => {
+  const response = await API.delete('/user/')
+  return response.data;
+};
+
 const authService = {
   login,
   register,
   getMe,
   getAllUsers,
   updateUser,
+  deleteUser,
 };
 
 export default authService;

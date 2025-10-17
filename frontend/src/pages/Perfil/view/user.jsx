@@ -4,7 +4,8 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
-import { User, Mail, Calendar, Phone, Pencil, Save, X, AlertCircle } from "lucide-react";
+import { useDeleteAccount } from "../hooks/useDeleteAccount";
+import { User, Mail, Calendar, Phone, Pencil, Save, X, AlertCircle, Trash2, AlertTriangle } from "lucide-react";
 import authService from "@/services/authService";
 import { formatarData } from "@/lib/date-utils";
 import LoadingSpinner from "@/components/layout/loading";
@@ -31,8 +32,10 @@ const InfoItem = ({ icon: Icon, label, value, field, editable = true, type = "te
 
 export default function UserProfileView() {
   const { user, updateUserContext } = useAuth();
+  const { deleteAccount, isDeleting } = useDeleteAccount();
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [formData, setFormData] = useState({
     nome: user?.nome || "",
     email: user?.email || "",
@@ -80,6 +83,15 @@ export default function UserProfileView() {
       telefone: user?.telefone || "",
     });
     setEditMode(false);
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      await deleteAccount();
+    } catch (err) {
+    } finally {
+      setShowDeleteConfirm(false);
+    }
   };
 
   return (
@@ -183,6 +195,65 @@ export default function UserProfileView() {
         </CardContent>
         </Card>
       </div>
+
+      <Card className="border-destructive/50 bg-destructive/5">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-destructive">
+            <AlertTriangle className="h-5 w-5" />
+            Zona de Perigo
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <h3 className="font-semibold text-sm mb-2">Deletar Conta</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Ao deletar sua conta, todos os seus dados serão removidos permanentemente. Esta ação não pode ser desfeita.
+            </p>
+
+            {!showDeleteConfirm ? (
+              <Button
+                variant="destructive"
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={isDeleting}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Deletar Conta
+              </Button>
+            ) : (
+              <div className="space-y-3 p-4 border border-destructive rounded-lg bg-background">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 text-destructive mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-sm">Tem certeza?</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Esta ação é irreversível. Todos os seus dados serão perdidos permanentemente.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowDeleteConfirm(false)}
+                    disabled={isDeleting}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleDeleteAccount}
+                    disabled={isDeleting}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Confirmar Exclusão
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </main>
   );
 }

@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Clock, TrendingUp, Users, Calendar, AlertCircle } from "lucide-react";
+import { CheckCircle, Clock, TrendingUp, Calendar, AlertCircle } from "lucide-react";
 
 export function ResumoModal({ viagens = [], motoristas = [] }) {
   const estatisticasDia = useMemo(() => {

@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
-import { User, Mail, Calendar, Phone, Shield, Pencil, Save, X, AlertCircle, Users, Truck, TrendingUp, BarChart3 } from "lucide-react";
+import { useDeleteAccount } from "../hooks/useDeleteAccount";
+import { User, Mail, Calendar, Phone, Shield, Pencil, Save, X, AlertCircle, Users, Truck, TrendingUp, BarChart3, Trash2, AlertTriangle } from "lucide-react";
 import { ROLE_LABELS } from "@/lib/roles";
 import authService from "@/services/authService";
 import { formatarData } from "@/lib/date-utils";
@@ -32,13 +34,26 @@ const InfoItem = ({ icon: Icon, label, value, field, editable = true, type = "te
 
 export default function ManagerProfileView() {
   const { user, updateUserContext } = useAuth();
+  const { deleteAccount, isDeleting } = useDeleteAccount();
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [formData, setFormData] = useState({
     nome: user?.nome || "",
     email: user?.email || "",
     telefone: user?.telefone || "",
   });
+
+  const { data: users = [] } = useQuery({
+    queryKey: ['users'],
+    queryFn: () => authService.getAllUsers(),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const motoristas = useMemo(
+    () => users.filter(u => u.cargo === 1),
+    [users]
+  );
 
   const handleSalvar = async () => {
     setLoading(true);
@@ -81,6 +96,15 @@ export default function ManagerProfileView() {
       telefone: user?.telefone || "",
     });
     setEditMode(false);
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      await deleteAccount();
+    } catch (err) {
+    } finally {
+      setShowDeleteConfirm(false);
+    }
   };
 
   return (
@@ -148,7 +172,7 @@ export default function ManagerProfileView() {
                   <Users className="h-5 w-5 text-primary" />
                   <span className="font-medium text-sm">Motoristas Ativos</span>
                 </div>
-                <span className="text-xl font-bold">{user?.motoristasAtivos || 0}</span>
+                <span className="text-xl font-bold">{motoristas.length}</span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                 <div className="flex items-center gap-3">
@@ -181,6 +205,61 @@ export default function ManagerProfileView() {
             <p>• Mantenha suas informações de contato atualizadas para facilitar a comunicação com a equipe</p>
             <p>• Acesse o painel de gestão para visualizar relatórios detalhados</p>
             <p>• Configure notificações para acompanhar as viagens em tempo real</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-destructive/50 bg-destructive/5">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-destructive text-base">
+            <AlertTriangle className="h-5 w-5" />
+            Configurações Avançadas
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <h3 className="font-semibold text-sm mb-1">Deletar Conta</h3>
+              <p className="text-sm text-muted-foreground">
+                Ao deletar sua conta, todos os dados serão removidos permanentemente. Esta ação não pode ser desfeita.
+              </p>
+            </div>
+            <div className="ml-4">
+              {!showDeleteConfirm ? (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  disabled={isDeleting}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Deletar Conta
+                </Button>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <p className="text-xs text-destructive font-semibold">Confirmar exclusão?</p>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowDeleteConfirm(false)}
+                      disabled={isDeleting}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleDeleteAccount}
+                      disabled={isDeleting}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Confirmar
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
