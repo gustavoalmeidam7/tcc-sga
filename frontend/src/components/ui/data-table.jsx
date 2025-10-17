@@ -44,7 +44,7 @@ export function DataTable({ columns, data, filterColumn, filterPlaceholder }) {
   });
 
   return (
-    <div>
+    <div className="flex flex-col" style={{ minHeight: '500px' }}>
       {filterColumn && (
         <div className="flex items-center py-4">
           <Input
@@ -57,7 +57,7 @@ export function DataTable({ columns, data, filterColumn, filterPlaceholder }) {
           />
         </div>
       )}
-      <div className="rounded-md border border-border/20 overflow-hidden">
+      <div className="rounded-md border border-border/20 overflow-hidden flex-1">
         <Table className="border-separate w-full" style={{ borderSpacing: '0 0.5rem' }}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
