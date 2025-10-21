@@ -64,15 +64,19 @@ export function DataTable({ columns, data, filterColumn, filterPlaceholder, rend
           />
         </div>
       )}
-      {/* Desktop View */}
-      <div className="hidden md:block rounded-lg border border-border/40 shadow-sm overflow-hidden flex-1 bg-card">
+      <div className="hidden md:block rounded-lg border border-border/40 shadow-sm flex-1 bg-card px-4 pt-4">
         <Table className="border-separate w-full" style={{ borderSpacing: '0 0.4rem' }}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="bg-muted rounded-md">
-                {headerGroup.headers.map((header) => {
+              <TableRow key={headerGroup.id} className="bg-muted">
+                {headerGroup.headers.map((header, index) => {
+                  const isFirst = index === 0;
+                  const isLast = index === headerGroup.headers.length - 1;
                   return (
-                    <TableHead key={header.id} className="font-bold py-3 text-base first:rounded-l-md last:rounded-r-md">
+                    <TableHead 
+                      key={header.id} 
+                      className={`font-bold py-3 text-base ${isFirst ? 'rounded-l-md' : ''} ${isLast ? 'rounded-r-md' : ''}`}
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -93,14 +97,13 @@ export function DataTable({ columns, data, filterColumn, filterPlaceholder, rend
                     <TableRow
                       data-state={row.getIsSelected() && "selected"}
                       className={`
-                        rounded-md
                         transition-all duration-200 ease-in-out
                         hover:bg-accent/80 hover:shadow-md hover:-translate-y-0.5
                         ${index % 2 === 0 ? 'bg-background' : 'bg-muted/30'}
                       `}
                     >
                       {renderExpandedRow && (
-                        <TableCell className="w-12 py-4 px-4 text-sm first:rounded-l-md">
+                        <TableCell className="w-12 py-4 px-4 text-sm rounded-l-md">
                           <Button
                             variant="ghost"
                             size="sm"
@@ -115,15 +118,22 @@ export function DataTable({ columns, data, filterColumn, filterPlaceholder, rend
                           </Button>
                         </TableCell>
                       )}
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} className="py-4 px-4 text-sm last:rounded-r-md">
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </TableCell>
-                      ))}
+                      {row.getVisibleCells().map((cell, cellIndex) => {
+                        const isFirst = cellIndex === 0 && !renderExpandedRow;
+                        const isLast = cellIndex === row.getVisibleCells().length - 1;
+                        return (
+                          <TableCell 
+                            key={cell.id} 
+                            className={`py-4 px-4 text-sm ${isFirst ? 'rounded-l-md' : ''} ${isLast ? 'rounded-r-md' : ''}`}
+                          >
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
+                        );
+                      })}
                     </TableRow>
                     {row.getIsExpanded() && renderExpandedRow && (
                       <TableRow key={`${row.id}-expanded`}>
-                        <TableCell colSpan={columns.length + (renderExpandedRow ? 1 : 0)} className="p-0">
+                        <TableCell colSpan={columns.length + (renderExpandedRow ? 1 : 0)} className="p-0 rounded-md overflow-hidden">
                           <div className="px-6 py-4 bg-muted/50 border-t border-b">
                             {renderExpandedRow(row.original)}
                           </div>
@@ -151,7 +161,6 @@ export function DataTable({ columns, data, filterColumn, filterPlaceholder, rend
         </Table>
       </div>
 
-      {/* Mobile View - Cards */}
       <div className="md:hidden flex-1 space-y-2 sm:space-y-3">
         {table.getRowModel().rows?.length ? (
           table.getRowModel().rows.map((row, index) => (
@@ -192,7 +201,6 @@ export function DataTable({ columns, data, filterColumn, filterPlaceholder, rend
                     const header = cell.column.columnDef.header;
                     const headerText = typeof header === 'string' ? header : cell.column.id;
 
-                    // Skip rendering if it's an actions column (usually has id "actions")
                     if (cell.column.id === 'actions') {
                       return (
                         <div key={cell.id} className="pt-2 border-t flex justify-end">
