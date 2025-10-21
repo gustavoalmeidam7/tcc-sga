@@ -10,8 +10,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { formatarDataHora } from "@/lib/date-utils";
+import { getTravelStatusLabel, getTravelStatusColors } from "@/lib/travel-status";
 
-export const columns_viagens = [
+export const createColumnsViagens = (navigate) => [
   {
     accessorKey: "inicio",
     header: ({ column }) => {
@@ -50,15 +51,11 @@ export const columns_viagens = [
     accessorKey: "realizado",
     header: "Status",
     cell: ({ row }) => {
-      const realizado = row.original.realizado;
-      const statusMap = {
-        0: { label: "Pendente", className: "bg-yellow-500 hover:bg-yellow-600" },
-        1: { label: "Em Progresso", className: "bg-blue-500 hover:bg-blue-600" },
-        2: { label: "Concluído", className: "bg-green-500 hover:bg-green-600" },
-      };
-      const status = statusMap[realizado] || { label: "Desconhecido", className: "bg-gray-500" };
+      const status = row.original.realizado;
+      const label = getTravelStatusLabel(status);
+      const colors = getTravelStatusColors(status);
 
-      return <Badge className={status.className}>{status.label}</Badge>;
+      return <Badge className={colors.className}>{label}</Badge>;
     },
   },
   {
@@ -82,7 +79,9 @@ export const columns_viagens = [
               Copiar ID da Viagem
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Ver detalhes</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate && navigate(`/viagens/detalhes/${viagem.id}`)}>
+              Ver detalhes
+            </DropdownMenuItem>
             <DropdownMenuItem>Finalizar viagem</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -90,6 +89,8 @@ export const columns_viagens = [
     },
   },
 ];
+
+export const columns_viagens = createColumnsViagens();
 
 export const columns_motoristas = [
   {

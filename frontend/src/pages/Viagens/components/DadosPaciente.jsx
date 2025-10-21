@@ -136,7 +136,7 @@ function DadosPacienteComponent({
                 <Label htmlFor="dataAgendamento">
                   Data *
                   <span className="text-xs text-muted-foreground ml-2">
-                    (mín: 1 dia útil de antecedência)
+                    (mín: 3 dia útil de antecedência)
                   </span>
                 </Label>
                 <Input

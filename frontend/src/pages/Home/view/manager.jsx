@@ -5,11 +5,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { Ambulance, Clock, CheckCircle, User} from "lucide-react";
+import { Ambulance, CheckCircle, User} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { DataTable } from "@/components/ui/data-table";
-import { columns_viagens, columns_motoristas } from "../components/columns";
+import { createColumnsViagens, columns_motoristas } from "../components/columns";
 import { getTravels } from "@/services/travelService";
 import authService from "@/services/authService";
 import { AmbulanciasLivresModal } from "../components/modals/AmbulanciasLivres";
@@ -51,6 +51,11 @@ export default function ManagerView() {
     [users]
   );
 
+  const columns_viagens_with_nav = useMemo(
+    () => createColumnsViagens(navigate),
+    [navigate]
+  );
+
   return (
     <main className="space-y-6 lg:container lg:mx-auto">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -60,25 +65,25 @@ export default function ManagerView() {
           </TextAnimate>
           <p className="text-muted-foreground">Este é o seu centro de comando SGA.</p>
         </div>
-        <div className="w-full max-w-sm grid grid-cols-2 gap-4">
+        <div className="w-full max-w-sm grid grid-cols-2 gap-3 sm:gap-4">
           <div onClick={() => setIsAmbulanciasModalOpen(true)} className="cursor-pointer">
-            <Card className="h-full">
-              <CardContent className="p-2 flex items-center space-x-2 h-full">
-                <Ambulance className="h-5 w-5 md:h-6 md:w-6 text-chart-4 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="text-lg md:text-xl font-bold text-primary">{motoristas.length}</div>
-                  <div className="text-sm whitespace-nowrap">Ambulâncias Livres</div>
+            <Card className="h-full overflow-hidden">
+              <CardContent className="p-2 flex items-center gap-2 h-full">
+                <Ambulance className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-chart-4 flex-shrink-0" />
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <div className="text-base sm:text-lg md:text-xl font-bold text-primary leading-tight">{motoristas.length}</div>
+                  <div className="text-xs md:text-sm leading-tight break-words">Ambulâncias Livres</div>
                 </div>
               </CardContent>
             </Card>
           </div>
           <div onClick={() => setIsResumoModalOpen(true)} className="cursor-pointer">
-            <Card className="h-full">
-              <CardContent className="p-2 flex items-center space-x-2 h-full">
-                <CheckCircle className="h-5 w-5 md:h-6 md:w-6 text-primary flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="text-lg md:text-xl font-bold text-primary">{travels.length}</div>
-                  <div className="text-sm whitespace-nowrap">Ver Resumo</div>
+            <Card className="h-full overflow-hidden">
+              <CardContent className="p-2 flex items-center gap-2 h-full">
+                <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-primary flex-shrink-0" />
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <div className="text-base sm:text-lg md:text-xl font-bold text-primary leading-tight">{travels.length}</div>
+                  <div className="text-xs md:text-sm leading-tight break-words">Ver Resumo</div>
                 </div>
               </CardContent>
             </Card>
@@ -112,7 +117,7 @@ export default function ManagerView() {
               <TabsTrigger value="motoristas" className="text-base data-[state=active]:bg-accent data-[state=active]:shadow-none rounded-t-md rounded-b-none border-b-2 border-transparent data-[state=active]:border-primary">Motoristas Ativos</TabsTrigger>
             </TabsList>
             <TabsContent value="viagens" className="mt-4">
-              <DataTable key="viagens" columns={columns_viagens} data={viagensPendentes} filterColumn="local_inicio" filterPlaceholder="Filtrar por origem..." />
+              <DataTable key="viagens" columns={columns_viagens_with_nav} data={viagensPendentes} filterColumn="local_inicio" filterPlaceholder="Filtrar por origem..." />
             </TabsContent>
             <TabsContent value="motoristas" className="mt-4">
               <DataTable key="motoristas" columns={columns_motoristas} data={motoristas} filterColumn="nome" filterPlaceholder="Filtrar por nome..." />
