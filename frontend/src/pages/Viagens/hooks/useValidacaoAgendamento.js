@@ -1,7 +1,6 @@
 import { useCallback, useMemo } from "react";
 
 export function useValidacaoAgendamento() {
-
   const isDiaUtil = useCallback((data) => {
     const diaSemana = data.getDay();
     return diaSemana >= 1 && diaSemana <= 5;
@@ -36,7 +35,7 @@ export function useValidacaoAgendamento() {
     return diasUteis;
   };
 
-  const calcularDataMinimaAgendamento = (diasUteisAntecedencia = 1) => {
+  const calcularDataMinimaAgendamento = (diasUteisAntecedencia = 3) => {
     let dataMinima = new Date();
     let diasUteisContados = 0;
 
@@ -48,7 +47,7 @@ export function useValidacaoAgendamento() {
     return dataMinima;
   };
 
-  const validarAgendamento = (dataAgendamento, horaAgendamento, duracaoViagemMinutos, diasUteisAntecedencia = 1) => {
+  const validarAgendamento = (dataAgendamento, horaAgendamento, duracaoViagemMinutos, diasUteisAntecedencia = 3) => {
     if (!dataAgendamento || !horaAgendamento) {
       return {
         valido: false,
@@ -107,7 +106,7 @@ export function useValidacaoAgendamento() {
     };
   };
 
-  const getDataMinimaFormatada = (diasUteisAntecedencia = 1) => {
+  const getDataMinimaFormatada = (diasUteisAntecedencia = 3) => {
     const dataMinima = calcularDataMinimaAgendamento(diasUteisAntecedencia);
     const ano = dataMinima.getFullYear();
     const mes = String(dataMinima.getMonth() + 1).padStart(2, '0');

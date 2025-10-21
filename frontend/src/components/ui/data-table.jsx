@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -6,6 +6,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
+  getExpandedRowModel,
 } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";
@@ -18,10 +19,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Card, CardContent } from "@/components/ui/card";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
-export function DataTable({ columns, data, filterColumn, filterPlaceholder }) {
+export function DataTable({ columns, data, filterColumn, filterPlaceholder, renderExpandedRow }) {
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
+  const [expanded, setExpanded] = useState({});
 
   const table = useReactTable({
     data,
@@ -32,6 +36,8 @@ export function DataTable({ columns, data, filterColumn, filterPlaceholder }) {
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
+    onExpandedChange: setExpanded,
     initialState: {
       pagination: {
         pageSize: 5,
@@ -40,25 +46,27 @@ export function DataTable({ columns, data, filterColumn, filterPlaceholder }) {
     state: {
       sorting,
       columnFilters,
+      expanded,
     },
   });
 
   return (
     <div className="flex flex-col" style={{ minHeight: '500px' }}>
       {filterColumn && (
-        <div className="flex items-center py-4">
+        <div className="flex items-center py-3 sm:py-4">
           <Input
             placeholder={filterPlaceholder || 'Filtrar...'}
             value={(table.getColumn(filterColumn)?.getFilterValue()) ?? ""}
             onChange={(event) =>
               table.getColumn(filterColumn)?.setFilterValue(event.target.value)
             }
-            className="max-w-sm"
+            className="w-full sm:max-w-sm text-xs sm:text-sm h-8 sm:h-10"
           />
         </div>
       )}
-      <div className="rounded-md border border-border/20 overflow-hidden flex-1">
-        <Table className="border-separate w-full" style={{ borderSpacing: '0 0.5rem' }}>
+      {/* Desktop View */}
+      <div className="hidden md:block rounded-lg border border-border/40 shadow-sm overflow-hidden flex-1 bg-card">
+        <Table className="border-separate w-full" style={{ borderSpacing: '0 0.4rem' }}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="bg-muted rounded-md">
@@ -80,30 +88,61 @@ export function DataTable({ columns, data, filterColumn, filterPlaceholder }) {
           <TableBody>
             {table.getRowModel().rows?.length ? (
               <>
-                {table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                    className="bg-background rounded-md hover:bg-accent hover:text-accent-foreground transition delay-40 duration-300 ease-in-out hover:-translate-y-1.5 hover:scale-100"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="py-3 px-4 text-sm first:rounded-l-md last:rounded-r-md text-muted-foreground">
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
-                  </TableRow>
+                {table.getRowModel().rows.map((row, index) => (
+                  <Fragment key={row.id}>
+                    <TableRow
+                      data-state={row.getIsSelected() && "selected"}
+                      className={`
+                        rounded-md
+                        transition-all duration-200 ease-in-out
+                        hover:bg-accent/80 hover:shadow-md hover:-translate-y-0.5
+                        ${index % 2 === 0 ? 'bg-background' : 'bg-muted/30'}
+                      `}
+                    >
+                      {renderExpandedRow && (
+                        <TableCell className="w-12 py-4 px-4 text-sm first:rounded-l-md">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => row.toggleExpanded()}
+                            className="h-8 w-8 p-0"
+                          >
+                            {row.getIsExpanded() ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </TableCell>
+                      )}
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id} className="py-4 px-4 text-sm last:rounded-r-md">
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                    {row.getIsExpanded() && renderExpandedRow && (
+                      <TableRow key={`${row.id}-expanded`}>
+                        <TableCell colSpan={columns.length + (renderExpandedRow ? 1 : 0)} className="p-0">
+                          <div className="px-6 py-4 bg-muted/50 border-t border-b">
+                            {renderExpandedRow(row.original)}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </Fragment>
                 ))}
                 {Array.from({
                   length: Math.max(0, table.getState().pagination.pageSize - table.getRowModel().rows.length)
                 }).map((_, i) => (
                   <TableRow key={`padding-${i}`} style={{ height: '53px' }}>
-                    <TableCell colSpan={columns.length}>&nbsp;</TableCell>
+                    <TableCell colSpan={columns.length + (renderExpandedRow ? 1 : 0)}>&nbsp;</TableCell>
                   </TableRow>
                 ))}
               </>
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell colSpan={columns.length + (renderExpandedRow ? 1 : 0)} className="h-24 text-center">
                   Nenhum resultado encontrado.
                 </TableCell>
               </TableRow>
@@ -111,17 +150,99 @@ export function DataTable({ columns, data, filterColumn, filterPlaceholder }) {
           </TableBody>
         </Table>
       </div>
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4">
-        <div className="flex items-center space-x-2">
-          <p className="text-sm text-muted-foreground">
-            Linhas por página:
+
+      {/* Mobile View - Cards */}
+      <div className="md:hidden flex-1 space-y-2 sm:space-y-3">
+        {table.getRowModel().rows?.length ? (
+          table.getRowModel().rows.map((row, index) => (
+            <Card
+              key={row.id}
+              className={`
+                transition-all duration-200 ease-in-out
+                hover:shadow-md hover:-translate-y-0.5
+                overflow-hidden
+                ${index % 2 === 0 ? 'bg-background' : 'bg-muted/30'}
+              `}
+            >
+              <CardContent className="p-4 sm:p-4 space-y-3 sm:space-y-3">
+                {renderExpandedRow && (
+                  <div className="flex justify-end pb-3 border-b">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => row.toggleExpanded()}
+                      className="h-8 text-xs px-3"
+                    >
+                      {row.getIsExpanded() ? (
+                        <>
+                          <ChevronDown className="h-4 w-4 mr-1.5" />
+                          Ocultar detalhes
+                        </>
+                      ) : (
+                        <>
+                          <ChevronRight className="h-4 w-4 mr-1.5" />
+                          Ver detalhes
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+                <div className="space-y-2.5">
+                  {row.getVisibleCells().map((cell) => {
+                    const header = cell.column.columnDef.header;
+                    const headerText = typeof header === 'string' ? header : cell.column.id;
+
+                    // Skip rendering if it's an actions column (usually has id "actions")
+                    if (cell.column.id === 'actions') {
+                      return (
+                        <div key={cell.id} className="pt-2 border-t flex justify-end">
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div key={cell.id} className="grid grid-cols-[auto_1fr] gap-6 sm:gap-8 items-start min-w-0">
+                        <span className="text-xs font-semibold text-foreground whitespace-nowrap">
+                          {headerText}
+                        </span>
+                        <span className="text-sm text-foreground font-medium break-words overflow-hidden">
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                {row.getIsExpanded() && renderExpandedRow && (
+                  <div className="pt-3 mt-3 border-t">
+                    {renderExpandedRow(row.original)}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <Card>
+            <CardContent className="p-4 sm:p-6 text-center">
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Nenhum resultado encontrado.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+      <div className="flex flex-row items-center justify-between gap-2 sm:gap-4 py-3 sm:py-4 flex-wrap">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <p className="text-[10px] sm:text-sm text-muted-foreground whitespace-nowrap">
+            <span className="sm:hidden">Linhas:</span>
+            <span className="hidden sm:inline">Linhas por página:</span>
           </p>
           <select
             value={table.getState().pagination.pageSize}
             onChange={(e) => {
               table.setPageSize(Number(e.target.value));
             }}
-            className="h-8 w-[70px] rounded-md border border-input bg-background px-2 text-sm cursor-pointer"
+            className="h-7 sm:h-8 w-[50px] sm:w-[70px] rounded-md border border-input bg-background px-1 sm:px-2 text-xs sm:text-sm cursor-pointer"
           >
             {[5, 10, 25].map((pageSize) => (
               <option key={pageSize} value={pageSize}>
@@ -131,30 +252,34 @@ export function DataTable({ columns, data, filterColumn, filterPlaceholder }) {
           </select>
         </div>
 
-        <div className="flex items-center space-x-4 sm:space-x-6">
-          <span className="flex items-center gap-1 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <span className="flex items-center gap-1 text-[10px] sm:text-sm text-muted-foreground whitespace-nowrap">
             <span className="hidden sm:inline">Página</span>
             <strong>
               {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
             </strong>
           </span>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <Button
               variant="secondary"
               size="sm"
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
+              className="h-7 sm:h-8 text-[10px] sm:text-sm px-2 sm:px-3"
             >
-              Anterior
+              <span className="sm:hidden">Ant</span>
+              <span className="hidden sm:inline">Anterior</span>
             </Button>
             <Button
               variant="secondary"
               size="sm"
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
+              className="h-7 sm:h-8 text-[10px] sm:text-sm px-2 sm:px-3"
             >
-              Próximo
+              <span className="sm:hidden">Próx</span>
+              <span className="hidden sm:inline">Próximo</span>
             </Button>
           </div>
         </div>

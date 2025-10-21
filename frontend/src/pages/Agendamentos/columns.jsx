@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Trash2 } from "lucide-react";
+import { Calendar, Trash2, Eye } from "lucide-react";
 import { formatarDataHora } from "@/lib/date-utils";
 import { getStatusViagem, getStatusBadge, calcularDuracao } from "./utils";
 
-export const createColumns = (onDelete) => [
+export const createColumns = (onDelete, navigate) => [
   {
     accessorKey: "inicio",
     header: "Data e Hora",
@@ -64,16 +64,18 @@ export const createColumns = (onDelete) => [
     header: "Ações",
     cell: ({ row }) => {
       const status = getStatusViagem(row.original);
+      const viagem = row.original;
       return (
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={() => onDelete(row.original)}
-          disabled={status === "em_andamento"}
-        >
-          <Trash2 className="h-4 w-4 mr-1" />
-          Excluir
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate && navigate(`/viagens/detalhes/${viagem.id}`)}
+          >
+            <Eye className="h-4 w-4 mr-1" />
+            Ver detalhes
+          </Button>
+        </div>
       );
     },
     enableColumnFilter: false,

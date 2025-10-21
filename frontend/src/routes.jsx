@@ -11,7 +11,9 @@ const Registro = lazy(() => import("./pages/Register"));
 const Ambulancias = lazy(() => import("./pages/Gerenciar_ambulancias"));
 const Usuarios = lazy(() => import("./pages/Gerenciar_usuario"));
 const Viagens = lazy(() => import("./pages/Viagens"));
+const DetalhesViagem = lazy(() => import("./pages/Viagens/DetalhesViagem"));
 const Agendamentos = lazy(() => import("./pages/Agendamentos"));
+const Historico = lazy(() => import("./pages/Historico"));
 const Perfil = lazy(() => import("./pages/Perfil"));
 const RecSenha = lazy(() => import("./pages/Rec_senha"));
 const SaibaMais = lazy(() => import("./pages/Saiba_mais"));
@@ -30,7 +32,9 @@ export const appRoutes = [
   { path: "/ambulancias", element: <RoleBasedRoute requiredRole={ROLES.DRIVER}><AnimatedPage><Ambulancias /></AnimatedPage></RoleBasedRoute>, label: "Gerenciar Ambulâncias" },
   { path: "/usuarios", element: <RoleBasedRoute requiredRole={ROLES.MANAGER}><AnimatedPage><Usuarios /></AnimatedPage></RoleBasedRoute>, label: "Gerenciar Usuários" },
   { path: "/viagens", element: <PrivateRoute><AnimatedPage><Viagens /></AnimatedPage></PrivateRoute>, label: "Viagens" },
+  { path: "/viagens/detalhes/:id", element: <PrivateRoute><AnimatedPage><DetalhesViagem /></AnimatedPage></PrivateRoute>, label: "Detalhes da Viagem" },
   { path: "/agendamentos", element: <PrivateRoute><AnimatedPage><Agendamentos /></AnimatedPage></PrivateRoute>, label: "Meus Agendamentos" },
+  { path: "/historico", element: <PrivateRoute><AnimatedPage><Historico /></AnimatedPage></PrivateRoute>, label: "Histórico de Viagens" },
   { path: "/perfil", element: <PrivateRoute><AnimatedPage><Perfil /></AnimatedPage></PrivateRoute>, label: "Meu Perfil" },
 
   { path: "*", element: <AnimatedPage><NotFound /></AnimatedPage>, label: "Página Não Encontrada" },

@@ -5,9 +5,11 @@ import { getTravels, deleteTravel } from "@/services/travelService";
 import { DataTable } from "@/components/ui/data-table";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, Trash2 } from "lucide-react";
+import { Loader2, Trash2, Filter, X } from "lucide-react";
 import { toast } from "sonner";
 import { useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -18,10 +20,18 @@ import {
 } from "@/components/ui/dialog";
 import { formatarDataHora } from "@/lib/date-utils";
 import { createColumns } from "./columns";
+import { useRole } from "@/hooks/use-role";
+import { ROLES } from "@/lib/roles";
+import { TravelStatus, TRAVEL_STATUS_LABELS } from "@/lib/travel-status";
 
 function Agendamentos() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const { userRole } = useRole();
   const [viagemExcluir, setViagemExcluir] = useState(null);
+  const [statusFilter, setStatusFilter] = useState(null);
+
+  const isManager = userRole === ROLES.MANAGER;
 
   const {
     data: viagens = [],
@@ -69,7 +79,18 @@ function Agendamentos() {
     }
   }, [queryError]);
 
-  const columns = useMemo(() => createColumns(setViagemExcluir), []);
+  const viagensFiltradas = useMemo(() => {
+    if (statusFilter === null) return viagens;
+    return viagens.filter(v => v.realizado === statusFilter);
+  }, [viagens, statusFilter]);
+
+  const columns = useMemo(() => createColumns(setViagemExcluir, navigate), [navigate]);
+
+  const statusOptions = [
+    { value: null, label: "Todos os Status", count: viagens.length },
+    { value: TravelStatus.NAO_REALIZADO, label: TRAVEL_STATUS_LABELS[TravelStatus.NAO_REALIZADO], count: viagens.filter(v => v.realizado === TravelStatus.NAO_REALIZADO).length },
+    { value: TravelStatus.EM_PROGRESSO, label: TRAVEL_STATUS_LABELS[TravelStatus.EM_PROGRESSO], count: viagens.filter(v => v.realizado === TravelStatus.EM_PROGRESSO).length },
+  ];
 
   return (
     <main className="space-y-4 lg:space-y-5 lg:container lg:mx-auto pb-6">
@@ -80,10 +101,12 @@ function Agendamentos() {
       >
         <div className="relative z-10">
           <h1 className="text-2xl md:text-2xl font-bold text-foreground mb-1">
-            📋 Meus Agendamentos
+            {isManager ? "🎯 Painel de Viagens" : "📋 Meus Agendamentos"}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Gerencie suas viagens agendadas
+            {isManager
+              ? "Gerencie todas as viagens do sistema e atribua motoristas"
+              : "Gerencie suas viagens agendadas"}
           </p>
         </div>
         <div className="absolute top-0 right-0 w-32 h-32 md:w-48 md:h-48 bg-primary/5 rounded-full blur-3xl" />
@@ -96,12 +119,43 @@ function Agendamentos() {
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
-            <DataTable
-              columns={columns}
-              data={viagens}
-              filterColumn="local_inicio"
-              filterPlaceholder="Buscar por origem..."
-            />
+            <>
+              <div className="mb-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Filtrar por status:</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {statusOptions.map((option) => (
+                    <Badge
+                      key={option.value ?? 'all'}
+                      variant={statusFilter === option.value ? "default" : "outline"}
+                      className="cursor-pointer hover:bg-accent transition-colors px-3 py-1.5"
+                      onClick={() => setStatusFilter(option.value)}
+                    >
+                      {option.label} ({option.count})
+                    </Badge>
+                  ))}
+                  {statusFilter !== null && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setStatusFilter(null)}
+                      className="h-7 px-2"
+                    >
+                      <X className="h-3 w-3 mr-1" />
+                      Limpar
+                    </Button>
+                  )}
+                </div>
+              </div>
+              <DataTable
+                columns={columns}
+                data={viagensFiltradas}
+                filterColumn="local_inicio"
+                filterPlaceholder="Buscar por origem..."
+              />
+            </>
           )}
         </CardContent>
       </Card>

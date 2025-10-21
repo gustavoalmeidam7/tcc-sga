@@ -11,7 +11,7 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <Activity className="h-5 w-5 text-primary" />
-            <span className="font-semibold">SGA</span>
+            <span className="font-semibold text-primary">SGA</span>
             <span className="hidden sm:inline text-sm text-muted-foreground">
               | Sistema de Gestão de Ambulâncias
             </span>

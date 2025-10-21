@@ -42,64 +42,64 @@ export function ResumoModal({ viagens = [], motoristas = [] }) {
   }, [viagens, motoristas]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3 sm:space-y-6">
       <div>
-        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-primary" />
+        <h3 className="text-base sm:text-lg font-semibold mb-2.5 sm:mb-4 flex items-center gap-2">
+          <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
           Resumo de Hoje
         </h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 rounded-full">
-                  <Clock className="h-5 w-5 text-blue-600" />
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-blue-100 rounded-full flex-shrink-0">
+                  <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
                 </div>
-                <div>
-                  <p className="text-2xl font-bold text-primary">{estatisticasDia.total}</p>
-                  <p className="text-xs text-muted-foreground">Total Hoje</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xl sm:text-2xl font-bold text-primary leading-tight">{estatisticasDia.total}</p>
+                  <p className="text-[11px] sm:text-xs text-muted-foreground">Total Hoje</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-yellow-100 rounded-full">
-                  <AlertCircle className="h-5 w-5 text-yellow-600" />
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-yellow-100 rounded-full flex-shrink-0">
+                  <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600" />
                 </div>
-                <div>
-                  <p className="text-2xl font-bold text-yellow-600">{estatisticasDia.pendentes}</p>
-                  <p className="text-xs text-muted-foreground">Pendentes</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 rounded-full">
-                  <TrendingUp className="h-5 w-5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-blue-600">{estatisticasDia.emAndamento}</p>
-                  <p className="text-xs text-muted-foreground">Em Andamento</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xl sm:text-2xl font-bold text-yellow-600 leading-tight">{estatisticasDia.pendentes}</p>
+                  <p className="text-[11px] sm:text-xs text-muted-foreground">Pendentes</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-green-100 rounded-full">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-blue-100 rounded-full flex-shrink-0">
+                  <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
                 </div>
-                <div>
-                  <p className="text-2xl font-bold text-green-600">{estatisticasDia.concluidas}</p>
-                  <p className="text-xs text-muted-foreground">Concluídas</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xl sm:text-2xl font-bold text-blue-600 leading-tight">{estatisticasDia.emAndamento}</p>
+                  <p className="text-[11px] sm:text-xs text-muted-foreground">Em Andamento</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-green-100 rounded-full flex-shrink-0">
+                  <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xl sm:text-2xl font-bold text-green-600 leading-tight">{estatisticasDia.concluidas}</p>
+                  <p className="text-[11px] sm:text-xs text-muted-foreground">Concluídas</p>
                 </div>
               </div>
             </CardContent>
@@ -108,70 +108,76 @@ export function ResumoModal({ viagens = [], motoristas = [] }) {
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <TrendingUp className="h-5 w-5 text-primary" />
+        <h3 className="text-base sm:text-lg font-semibold mb-2.5 sm:mb-4 flex items-center gap-2">
+          <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
           Estatísticas Gerais
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total de Viagens
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary">
-                {estatisticasGerais.totalViagens}
+            <CardContent className="p-3 sm:p-6">
+              <div className="flex items-center justify-between sm:flex-col sm:items-start gap-2">
+                <div>
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 sm:mb-2">
+                    Total de Viagens
+                  </p>
+                  <div className="text-2xl sm:text-3xl font-bold text-primary">
+                    {estatisticasGerais.totalViagens}
+                  </div>
+                </div>
+                <p className="text-[11px] sm:text-xs text-muted-foreground text-right sm:text-left sm:mt-1">
+                  {estatisticasGerais.totalPendentes} pendentes • {estatisticasGerais.totalEmAndamento} em andamento
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {estatisticasGerais.totalPendentes} pendentes • {estatisticasGerais.totalEmAndamento} em andamento
-              </p>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Taxa de Conclusão
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-green-600">
-                {estatisticasGerais.taxaConclusao}%
+            <CardContent className="p-3 sm:p-6">
+              <div className="flex items-center justify-between sm:flex-col sm:items-start gap-2">
+                <div>
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 sm:mb-2">
+                    Taxa de Conclusão
+                  </p>
+                  <div className="text-2xl sm:text-3xl font-bold text-green-600">
+                    {estatisticasGerais.taxaConclusao}%
+                  </div>
+                </div>
+                <p className="text-[11px] sm:text-xs text-muted-foreground text-right sm:text-left sm:mt-1">
+                  {estatisticasGerais.totalConcluidas} de {estatisticasGerais.totalViagens} concluídas
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {estatisticasGerais.totalConcluidas} de {estatisticasGerais.totalViagens} viagens concluídas
-              </p>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Motoristas Ativos
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-blue-600">
-                {estatisticasGerais.totalMotoristas}
+            <CardContent className="p-3 sm:p-6">
+              <div className="flex items-center justify-between sm:flex-col sm:items-start gap-2">
+                <div>
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 sm:mb-2">
+                    Motoristas Ativos
+                  </p>
+                  <div className="text-2xl sm:text-3xl font-bold text-blue-600">
+                    {estatisticasGerais.totalMotoristas}
+                  </div>
+                </div>
+                <p className="text-[11px] sm:text-xs text-muted-foreground text-right sm:text-left sm:mt-1">
+                  Disponíveis no sistema
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Motoristas disponíveis no sistema
-              </p>
             </CardContent>
           </Card>
         </div>
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold mb-4">Distribuição por Status</h3>
+        <h3 className="text-base sm:text-lg font-semibold mb-2.5 sm:mb-4">Distribuição por Status</h3>
         <Card>
-          <CardContent className="p-6">
-            <div className="space-y-4">
+          <CardContent className="p-3 sm:p-6">
+            <div className="space-y-3 sm:space-y-4">
               <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium">Concluídas</span>
-                  <span className="text-sm text-muted-foreground">
+                <div className="flex justify-between items-center mb-1.5 sm:mb-2 gap-2">
+                  <span className="text-xs sm:text-sm font-medium">Concluídas</span>
+                  <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
                     {estatisticasGerais.totalConcluidas} ({estatisticasGerais.taxaConclusao}%)
                   </span>
                 </div>
@@ -184,9 +190,9 @@ export function ResumoModal({ viagens = [], motoristas = [] }) {
               </div>
 
               <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium">Em Andamento</span>
-                  <span className="text-sm text-muted-foreground">
+                <div className="flex justify-between items-center mb-1.5 sm:mb-2 gap-2">
+                  <span className="text-xs sm:text-sm font-medium">Em Andamento</span>
+                  <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
                     {estatisticasGerais.totalEmAndamento} (
                     {estatisticasGerais.totalViagens > 0
                       ? Math.round((estatisticasGerais.totalEmAndamento / estatisticasGerais.totalViagens) * 100)
@@ -206,9 +212,9 @@ export function ResumoModal({ viagens = [], motoristas = [] }) {
               </div>
 
               <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium">Pendentes</span>
-                  <span className="text-sm text-muted-foreground">
+                <div className="flex justify-between items-center mb-1.5 sm:mb-2 gap-2">
+                  <span className="text-xs sm:text-sm font-medium">Pendentes</span>
+                  <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
                     {estatisticasGerais.totalPendentes} (
                     {estatisticasGerais.totalViagens > 0
                       ? Math.round((estatisticasGerais.totalPendentes / estatisticasGerais.totalViagens) * 100)

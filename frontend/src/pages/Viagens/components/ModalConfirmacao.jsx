@@ -100,7 +100,7 @@ export function ModalConfirmacao({
             <div>
               <p className="text-sm font-medium">Data e Hora</p>
               <p className="text-sm text-muted-foreground">
-                {formatarData(new Date(dadosViagem.dataAgendamento).toISOString())} às {dadosViagem.horaAgendamento}
+                {formatarData(`${dadosViagem.dataAgendamento}T${dadosViagem.horaAgendamento}:00`)} às {dadosViagem.horaAgendamento}
               </p>
             </div>
           </motion.div>

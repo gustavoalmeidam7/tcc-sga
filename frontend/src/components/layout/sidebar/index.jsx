@@ -2,7 +2,7 @@ import { memo, useState } from "react";
 import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton, SidebarFooter } from "@/components/ui/sidebar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronsUpDown, Car, Home, Info, LifeBuoy, LogIn, LogOut, Map, Settings, Users, User, ChevronDown, PlusCircle, Calendar } from "lucide-react";
+import { ChevronsUpDown, Car, Home, Info, LifeBuoy, LogIn, LogOut, Map, Settings, Users, User, ChevronDown, PlusCircle, Calendar, History } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/use-role";
@@ -16,8 +16,10 @@ const navItems = [
     icon: Map,
     roles: [ROLES.USER, ROLES.DRIVER, ROLES.MANAGER],
     subItems: [
-      { to: "/viagens", icon: PlusCircle, label: "Nova Viagem", roles: [ROLES.USER, ROLES.MANAGER] },
-      { to: "/agendamentos", icon: Calendar, label: "Meus Agendamentos", roles: [ROLES.USER, ROLES.DRIVER, ROLES.MANAGER] },
+      { to: "/viagens", icon: PlusCircle, label: "Nova Viagem", roles: [ROLES.USER] },
+      { to: "/agendamentos", icon: Calendar, label: "Meus Agendamentos", roles: [ROLES.USER] },
+      { to: "/agendamentos", icon: Calendar, label: "Painel de Viagens", roles: [ROLES.MANAGER] },
+      { to: "/historico", icon: History, label: "Histórico", roles: [ROLES.USER, ROLES.DRIVER, ROLES.MANAGER] },
     ]
   },
   { to: "/ambulancias", icon: Car, label: "Ambulâncias", roles: [ROLES.DRIVER, ROLES.MANAGER] },
