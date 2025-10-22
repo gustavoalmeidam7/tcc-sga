@@ -16,4 +16,4 @@ def generate_travel() -> dict:
     }
 
 def convert_str_to_iso(dateStr: str) -> str:
-    return datetime.strptime(dateStr, "%Y-%m-%d %H:%M:%S.%f").isoformat()
+    return datetime.strptime(dateStr, "%Y-%m-%d %H:%M:%S").isoformat()
