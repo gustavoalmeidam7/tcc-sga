@@ -15,16 +15,18 @@ import { toast } from "sonner";
 function Viagens() {
   const viagem = useViagem();
   const queryClient = useQueryClient();
-  const { validarAgendamento, getDataMinimaFormatada } = useValidacaoAgendamento();
+  const { validarAgendamento, getDataMinimaFormatada } =
+    useValidacaoAgendamento();
   const [modalOpen, setModalOpen] = useState(false);
   const [dadosViagemConfirmada, setDadosViagemConfirmada] = useState(null);
 
   const createTravelMutation = useMutation({
     mutationFn: createTravel,
     onSuccess: (response) => {
-      queryClient.invalidateQueries({ queryKey: ['travels'] });
-      toast.success('Viagem criada com sucesso!', {
-        description: 'A viagem foi agendada e está disponível na lista de agendamentos.',
+      queryClient.invalidateQueries({ queryKey: ["travels"] });
+      toast.success("Viagem criada com sucesso!", {
+        description:
+          "A viagem foi agendada e está disponível na lista de agendamentos.",
         duration: 5000,
       });
     },
@@ -33,7 +35,7 @@ function Viagens() {
         ? Object.values(error.response.data.Erros).join(", ")
         : error.message || "Erro ao criar viagem";
 
-      toast.error('Erro ao criar viagem', {
+      toast.error("Erro ao criar viagem", {
         description: mensagemErro,
         duration: 6000,
       });
@@ -60,16 +62,29 @@ function Viagens() {
     }
     viagem.setError("");
     viagem.setTelaAtual(2);
-  }, [viagem.coordOrigem, viagem.coordDestino, viagem.setError, viagem.setTelaAtual]);
+  }, [
+    viagem.coordOrigem,
+    viagem.coordDestino,
+    viagem.setError,
+    viagem.setTelaAtual,
+  ]);
 
   const handleVoltarTela = useCallback(() => {
     viagem.setTelaAtual(1);
   }, [viagem.setTelaAtual]);
 
-  const dataMinima = useMemo(() => getDataMinimaFormatada(1), [getDataMinimaFormatada]);
+  const dataMinima = useMemo(
+    () => getDataMinimaFormatada(1),
+    [getDataMinimaFormatada]
+  );
 
   const handleConfirmarViagem = async () => {
-    if (!viagem.nomePaciente || !viagem.cpfPaciente || !viagem.dataAgendamento || !viagem.horaAgendamento) {
+    if (
+      !viagem.nomePaciente ||
+      !viagem.cpfPaciente ||
+      !viagem.dataAgendamento ||
+      !viagem.horaAgendamento
+    ) {
       viagem.setError("Preencha todos os campos obrigatórios");
       return;
     }
@@ -78,7 +93,7 @@ function Viagens() {
       viagem.dataAgendamento,
       viagem.horaAgendamento,
       viagem.duracao,
-      1 
+      1
     );
 
     if (!validacao.valido) {
@@ -94,25 +109,21 @@ function Viagens() {
       const fim = new Date(inicio.getTime() + viagem.duracao * 60000);
 
       const fimAno = fim.getFullYear();
-      const fimMes = String(fim.getMonth() + 1).padStart(2, '0');
-      const fimDia = String(fim.getDate()).padStart(2, '0');
-      const fimHora = String(fim.getHours()).padStart(2, '0');
-      const fimMin = String(fim.getMinutes()).padStart(2, '0');
+      const fimMes = String(fim.getMonth() + 1).padStart(2, "0");
+      const fimDia = String(fim.getDate()).padStart(2, "0");
+      const fimHora = String(fim.getHours()).padStart(2, "0");
+      const fimMin = String(fim.getMinutes()).padStart(2, "0");
       const fimLocal = `${fimAno}-${fimMes}-${fimDia}T${fimHora}:${fimMin}:00`;
 
       const dadosBackend = {
         inicio: inicioLocal,
         fim: fimLocal,
-        local_inicio: viagem.origem,
-        local_fim: viagem.destino,
-        /*  Enviar lat e long ao inves de endereços
         lat_inicio: viagem.coordOrigem[0],
-        long_inicio: viagem.coordOrigem[1],                                                                
-        lat_fim: viagem.coordDestino[0],                                                                
+        long_inicio: viagem.coordOrigem[1],
+        lat_fim: viagem.coordDestino[0],
         long_fim: viagem.coordDestino[1],
-        */
       };
-      
+
       await createTravelMutation.mutateAsync(dadosBackend);
 
       setDadosViagemConfirmada({
@@ -145,7 +156,7 @@ function Viagens() {
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-xl bg-gradient-to-r from-primary/20 via-primary/10 to-transparent p-4 md:p-5 lg:p-3 border border-primary/20"
+        className="relative overflow-hidden rounded-xl bg-linear-to-r from-primary/20 via-primary/10 to-transparent p-4 md:p-5 lg:p-3 border border-primary/20"
       >
         <div className="relative z-10">
           <h1 className="text-2xl md:text-2xl font-bold text-foreground mb-1">
