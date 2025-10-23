@@ -12,7 +12,7 @@ def test_post_travel(client: TestClient):
     travelData["inicio"] = TestTravelHelper.convert_str_to_iso(travelData["inicio"])
     travelData["fim"] = TestTravelHelper.convert_str_to_iso(travelData["fim"])
 
-    requestDictCmp = {k: request.json()[k] for k in travelData.keys()}
+    requestDictCmp = {k: str(request.json()[k]) for k in travelData.keys()}
 
     assert travelData == requestDictCmp
 

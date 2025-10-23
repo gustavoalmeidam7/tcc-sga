@@ -71,7 +71,6 @@ def test_update_user(client: TestClient):
     # TODO: Test update only few fields inted of bulk update
 
     updateData = TestUserHelper.generate_user()
-    updateData["cargo"] = 1
     updateData.pop("cpf")
     updateData.pop("nascimento")
     updateData.pop("senha")

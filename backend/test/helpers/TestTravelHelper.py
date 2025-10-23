@@ -11,8 +11,10 @@ def generate_travel() -> dict:
     return {
         "inicio": str(startTravelDate),
         "fim": str(startTravelDate + timedelta(hours=2)),
-        "local_inicio": faker.local_latlng()[2],
-        "local_fim": faker.local_latlng()[2]
+        "lat_inicio": faker.local_latlng()[0],
+        "long_inicio": faker.local_latlng()[1],
+        "lat_fim": faker.local_latlng()[0],
+        "long_fim": faker.local_latlng()[1]
     }
 
 def convert_str_to_iso(dateStr: str) -> str:
