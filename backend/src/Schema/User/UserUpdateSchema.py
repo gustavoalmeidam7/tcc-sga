@@ -22,8 +22,3 @@ class UserUpdateSchema(BaseModel):
         Field(max_length=12, example="51991234567"),
         phone_number_validator
     ]
-
-    cargo     : Annotated[
-        int,
-        Field(example=UserRole.USER)
-    ]

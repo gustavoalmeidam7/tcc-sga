@@ -4,7 +4,7 @@ from pydantic import Field, BeforeValidator
 from typing import Annotated, Optional
 
 from uuid import UUID, uuid4
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 from src.Validator.GenericValidator import mask_uuid
 
@@ -19,3 +19,5 @@ class DriverResponseSchema(BaseModel):
     cargo         : Annotated[int,            Field(example=UserRole.DRIVER)]
     id_ambulancia : Annotated[Optional[UUID], Field(example=uuid4()), BeforeValidator(mask_uuid)]
     em_viagem     : Annotated[bool,           Field(example=False)]
+    cnh           : Annotated[str,            Field(example="123456789")]
+    vencimento    : Annotated[datetime,       Field(example=datetime.now(timezone.utc) + timedelta(days=365 * 2))]
