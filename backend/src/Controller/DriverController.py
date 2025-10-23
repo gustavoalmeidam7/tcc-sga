@@ -17,16 +17,16 @@ DriverRouter = APIRouter(
 )
 
 @DriverRouter.post("/travel/{travel}")
-def assing_driver_to_travel(driver: GET_AUTENTHICATED_DRIVER, travel: UUID) -> TravelResponseSchema:
+async def assing_driver_to_travel(driver: GET_AUTENTHICATED_DRIVER, travel: UUID) -> TravelResponseSchema:
     """ Assina o motorista e a respectiva ambulância a uma viagem """
     return DriverService.assign_driver_travel(driver, travel)
 
 @DriverRouter.get("/travels/")
-def get_assigned_travels(driver: GET_AUTENTHICATED_DRIVER) -> TravelListResponseSchema:
+async def get_assigned_travels(driver: GET_AUTENTHICATED_DRIVER) -> TravelListResponseSchema:
     """ Encontra todas viagens que um motorista está escrito """
     return DriverService.find_assigned_travels(driver)
 
 @DriverRouter.get("/")
-def get_driver_info(driver: GET_AUTENTHICATED_DRIVER) -> DriverResponseSchema:
+async def get_driver_info(driver: GET_AUTENTHICATED_DRIVER) -> DriverResponseSchema:
     """ Encontra as informações do motorista """
     return DriverService.get_driver_by_user(driver)
