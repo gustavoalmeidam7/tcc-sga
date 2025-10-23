@@ -1,9 +1,20 @@
-import { Navigate, Outlet } from "react-router-dom"
-import { useContext } from "react"
-import { AuthContext } from "@/hooks/useAuth"
+import React from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import LoadingSpinner from '@/components/layout/loading';
 
-export function PrivateRoute() {
-  const { isAuthenticated } = useContext(AuthContext)
+const PrivateRoute = ({ children }) => {
+  const { isAuthenticated, isLoading } = useAuth();
+  const location = useLocation();
+  if (isLoading) {
+    return <LoadingSpinner size="large" text="Carregando..." fullScreen />;
+  }
 
-  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />
-}
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return children;
+};
+
+export default PrivateRoute;

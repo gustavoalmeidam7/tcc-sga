@@ -1,6 +1,3 @@
-'use client'
-
-import { useState } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
@@ -12,40 +9,43 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import img_logo from '@/assets/Logo.webp'
+import { Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Por favor, insira um email válido.' }),
-  password: z.string().min(1, { message: 'A senha é obrigatória.' }),
+  senha: z.string().min(1, { message: 'A senha é obrigatória.' }),
 })
 
 export function LoginForm({ className, ...props }) {
-  const { login } = useAuth()
+  const { login, isLoading: authLoading, error: authError, clearError } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const from = location.state?.from?.pathname || '/'
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
 
   const form = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { email: '', senha: '' },
   })
 
   async function onSubmit(values) {
-    setLoading(true)
-    setError(null)
+    if (authError) clearError();
+
     try {
-      await login(values.email, values.password)
-      navigate(from, { replace: true })
+      await login(values.email, values.senha);
+      toast.success('Login realizado com sucesso!', {
+        description: 'Redirecionando para o sistema...',
+        duration: 3000,
+      });
+      setTimeout(() => navigate(from, { replace: true }), 500);
     } catch (err) {
-      const status = err.response?.status;
-      if (status === 401 || status === 400) {
-        setError('Email ou senha incorretos.');
-      } else {
-        setError('Ocorreu um erro no servidor. Tente novamente mais tarde.');
+      console.error('Erro no login:', err);
+      if (err.message) {
+        toast.error('Erro no login', {
+          description: err.message,
+          duration: 5000,
+        });
       }
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -61,8 +61,6 @@ export function LoginForm({ className, ...props }) {
                   <p className="text-muted-foreground text-balance">Realize login com sua conta SGA</p>
                 </div>
 
-                {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-
                 <FormField
                   control={form.control}
                   name="email"
@@ -70,7 +68,14 @@ export function LoginForm({ className, ...props }) {
                     <FormItem className="grid gap-3">
                       <FormLabel className="text-foreground">Email</FormLabel>
                       <FormControl>
-                        <Input type="email" placeholder="m@example.com" {...field} />
+                        <Input
+                          type="email"
+                          placeholder="m@example.com"
+                          autoComplete="email"
+                          aria-label="Endereço de email"
+                          aria-required="true"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage className="text-destructive-foreground" />
                     </FormItem>
@@ -79,7 +84,7 @@ export function LoginForm({ className, ...props }) {
 
                 <FormField
                   control={form.control}
-                  name="password"
+                  name="senha"
                   render={({ field }) => (
                     <FormItem className="grid gap-3">
                       <div className="flex items-center">
@@ -92,15 +97,32 @@ export function LoginForm({ className, ...props }) {
                         </Link>
                       </div>
                       <FormControl>
-                        <Input type="password" {...field} />
+                        <Input
+                          type="password"
+                          autoComplete="current-password"
+                          aria-label="Senha"
+                          aria-required="true"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage className="text-destructive-foreground" />
                     </FormItem>
                   )}
                 />
-
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? 'Entrando...' : 'Login'}
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={authLoading}
+                  aria-label={authLoading ? "Entrando no sistema" : "Realizar login"}
+                >
+                  {authLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                      Entrando...
+                    </>
+                  ) : (
+                    'Login'
+                  )}
                 </Button>
 
                 <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:flex after:items-center after:border-t after:border-border">
@@ -111,7 +133,7 @@ export function LoginForm({ className, ...props }) {
 
                 <div className="text-center text-sm">
                   Venha fazer parte?{' '}
-                  <Link to="/registro" className="underline underline-offset-4">
+                  <Link to="/registro" className="underline underline-offset-4 hover:text-primary">
                     Cadastre-se
                   </Link>
                 </div>
