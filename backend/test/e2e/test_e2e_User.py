@@ -35,10 +35,41 @@ def test_get_user_authenticated(client: TestClient):
     getUserData = client.get("/user/", headers=userToken)
 
     assert getUserData.status_code == 200
-    assert getUserData.json()["email"]      == userData["email"]
-    assert getUserData.json()["nome"]       == userData["nome"]
-    assert getUserData.json()["nascimento"] == userData["nascimento"]
+    
+    compareData = getUserData.json()
+    compareData.pop("cargo")
+    compareData.pop("id")
+    
+    userData.pop("senha")
+
+    assert compareData == userData
+
     assert "senha" is not getUserData
+
+def test_get_user_by_id(client: TestClient):
+    user1Data = TestUserHelper.generate_user()
+    user2Data = TestUserHelper.generate_user()
+
+    TestUserHelper.register_user(client, user1Data)
+    TestUserHelper.register_user(client, user2Data)
+
+    user1Token = TestUserHelper.autenticate_user(client, user1Data["email"], user1Data["senha"])
+    user2Token = TestUserHelper.autenticate_user(client, user2Data["email"], user2Data["senha"])
+
+    getUser1Id = client.get("/user/", headers=user1Token).json().get("id")
+
+    getUser1ByIdResponse = client.get(f"/user/{getUser1Id}", headers=user2Token)
+
+    assert getUser1ByIdResponse.status_code == 200
+
+    getAllUsers = client.get("/user/getusers", headers=user2Token)
+
+    response_json = getAllUsers.json()
+    assert isinstance(response_json, list)
+    assert len(response_json) > 0
+    
+    ids_in_response = [user["id"] for user in response_json]
+    assert getUser1ByIdResponse not in ids_in_response
 
 def test_delete_user(client: TestClient):
     user1Data = TestUserHelper.generate_user()
