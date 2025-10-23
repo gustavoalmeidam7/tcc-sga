@@ -7,5 +7,7 @@ from datetime import datetime, timezone, timedelta
 class TravelCreateSchema(BaseModel):
     inicio        : Annotated[datetime, Field(example=datetime.now(timezone.utc) + timedelta(days=1))]
     fim           : Annotated[datetime, Field(example=datetime.now(timezone.utc) + timedelta(days=1, hours=3))]
-    local_inicio  : Annotated[str,      Field(example="Rua: José bonifacio N: 230")]
-    local_fim     : Annotated[str,      Field(example="Rua: Herbert Richers N: 369 - Hospital escola")]
+    lat_inicio    : Annotated[float,    Field(example=-22.011433)]
+    long_inicio   : Annotated[float,    Field(example=-47.913322)]
+    lat_fim       : Annotated[float,    Field(example=-22.011002)]
+    long_fim      : Annotated[float,    Field(example=-47.890185)]

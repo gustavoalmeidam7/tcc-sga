@@ -207,3 +207,8 @@ dist-ssr
 
 # Dev database
 database.db
+database.db-journal
+
+# Test database
+database_test.db
+database_test.db-journal

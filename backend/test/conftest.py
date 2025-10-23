@@ -9,24 +9,15 @@ from src.Model import User, Driver, Travel, UserSession, Ambulance, Equipment, M
 
 MODELS = [User.User, Driver.Driver, Travel.Travel, UserSession.Session, Ambulance.Ambulance, Equipment.Equipment, Manager.Manager]
 
-@pytest.fixture(scope='function', autouse=True)
-def test_database():
+def pytest_configure(config):
     """
-    Este fixture configura um banco de dados SQLite em memória para toda a sessão de teste.
-    Ele reinicializa o proxy do banco de dados para apontar para o banco de dados de teste,
-    cria todas as tabelas, cede o controle para a execução do teste e, em seguida, destrói o banco de dados.
+    Configura uma marca personalizada 'pytest' que podemos verificar em outros lugares
+    para saber se estamos rodando em um ambiente de teste
     """
-    test_db = SqliteDatabase(':memory:')
-    
-    db.initialize(test_db)
-    
-    db.connect()
-    db.create_tables(MODELS)
-    
-    yield
-    
-    db.drop_tables(MODELS)
-    db.close()
+    config.addinivalue_line(
+        "markers",
+        "pytest: marca que indica que estamos rodando em ambiente de teste"
+    )
 
 @pytest.fixture(scope="function")
 def client():
@@ -34,4 +25,14 @@ def client():
     Cria um novo TestClient do FastAPI para cada função de teste.
     """
     with TestClient(app) as c:
+        test_db = SqliteDatabase('database_test.db')
+    
+        db.initialize(test_db)
+        
+        db.create_tables(MODELS)
+
         yield c
+
+        db.drop_tables(MODELS)
+
+        db.close()

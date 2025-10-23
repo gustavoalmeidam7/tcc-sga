@@ -5,7 +5,7 @@ def mask_uuid(uuid: str) -> UUID:
     return UUID(str(uuid))
 
 def unmask_uuid(uuid: UUID) -> str:
-    """ Valida se uma string é um UUID válido """
+    """ Desmascara um uuid tranformando em string """
     uuid_str = str(uuid).replace("-", "")
     return uuid_str
 

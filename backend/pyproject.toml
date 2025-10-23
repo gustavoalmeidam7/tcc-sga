@@ -11,7 +11,7 @@ dependencies = [
     "fastapi==0.115.14",
     "passlib==1.7.4",
     "peewee==3.18.1",
-    "psycopg-binary==3.2.9",
+    "psycopg2-binary==2.9.11",
     "pyjwt==2.10.1",
     "python-multipart==0.0.20",
     "slowapi==0.1.9",
