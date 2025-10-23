@@ -13,9 +13,9 @@ def create(userModel: User) -> User:
     return userModel
 
 
-def find_by_id(id: int) -> User:
+def find_by_id(id: str) -> User | None:
     """ Retorna um usuário pelo seu ID """
-    return User.get(User.id == id)
+    return User.select().where(User.id == id).first()
 
 def find_by_email(email: str) -> User | None:
     """ Retorna um usuário pelo seu email """
