@@ -5,8 +5,10 @@ export const createTravel = async (travelData) => {
     const response = await API.post('/travel', {
       inicio: travelData.inicio,
       fim: travelData.fim,
-      local_inicio: travelData.local_inicio,
-      local_fim: travelData.local_fim,
+      lat_inicio: travelData.lat_inicio,
+      long_inicio: travelData.long_inicio,
+      lat_fim: travelData.lat_fim,
+      long_fim: travelData.long_fim,
     });
     return response.data;
   } catch (error) {
@@ -22,6 +24,15 @@ export const getTravels = async (viagensPorPagina = 15, pagina = 0) => {
         pagina,
       },
     });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getTravelById = async (id) => {
+  try {
+    const response = await API.get(`/travel/${id}`);
     return response.data;
   } catch (error) {
     throw error;
