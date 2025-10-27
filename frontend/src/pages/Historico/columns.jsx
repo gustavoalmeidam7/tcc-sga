@@ -1,11 +1,10 @@
-import { ArrowUpDown, Eye } from "lucide-react";
+import { ArrowUpDown, Eye, Calendar } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatarDataHora } from "@/lib/date-utils";
 import { getTravelStatusLabel, getTravelStatusColors } from "@/lib/travel-status";
-import { useNavigate } from "react-router-dom";
 
-export const createColumnsHistorico = () => [
+export const createColumnsHistorico = (navigate) => [
   {
     accessorKey: "inicio",
     header: ({ column }) => {
@@ -20,25 +19,41 @@ export const createColumnsHistorico = () => [
         </Button>
       );
     },
-    cell: ({ row }) => formatarDataHora(row.original.inicio),
+    cell: ({ row }) => (
+      <div className="flex items-center gap-2">
+        <Calendar className="h-4 w-4 text-primary" />
+        <span>{formatarDataHora(row.original.inicio)}</span>
+      </div>
+    ),
+    enableColumnFilter: true,
   },
   {
-    accessorKey: "local_inicio",
+    accessorKey: "_solicitante",
+    header: "Solicitante",
+    cell: ({ row }) => (
+      <div className="max-w-[150px] truncate">{row.original._solicitante || "N/A"}</div>
+    ),
+    enableColumnFilter: false,
+  },
+  {
+    accessorKey: "_endereco_origem",
     header: "Origem",
     cell: ({ row }) => (
-      <div className="max-w-[200px] truncate" title={row.original.local_inicio}>
-        {row.original.local_inicio}
+      <div className="max-w-[200px] truncate text-xs">
+        {row.original._endereco_origem || "N/A"}
       </div>
     ),
+    enableColumnFilter: false,
   },
   {
-    accessorKey: "local_fim",
+    accessorKey: "_endereco_destino",
     header: "Destino",
     cell: ({ row }) => (
-      <div className="max-w-[200px] truncate" title={row.original.local_fim}>
-        {row.original.local_fim}
+      <div className="max-w-[200px] truncate text-xs">
+        {row.original._endereco_destino || "N/A"}
       </div>
     ),
+    enableColumnFilter: false,
   },
   {
     accessorKey: "fim",
@@ -65,18 +80,19 @@ export const createColumnsHistorico = () => [
     header: "Ações",
     cell: ({ row }) => {
       const viagem = row.original;
-      const navigate = useNavigate();
-
       return (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate(`/viagens/detalhes/${viagem.id}`)}
-        >
-          <Eye className="h-4 w-4 mr-2" />
-          Ver Detalhes
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate && navigate(`/viagens/detalhes/${viagem.id}`)}
+          >
+            <Eye className="h-4 w-4 mr-1" />
+            Ver detalhes
+          </Button>
+        </div>
       );
     },
+    enableColumnFilter: false,
   },
 ];

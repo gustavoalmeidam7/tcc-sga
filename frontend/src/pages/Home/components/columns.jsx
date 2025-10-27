@@ -10,7 +10,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { formatarDataHora } from "@/lib/date-utils";
-import { getTravelStatusLabel, getTravelStatusColors } from "@/lib/travel-status";
+import {
+  getTravelStatusLabel,
+  getTravelStatusColors,
+} from "@/lib/travel-status";
 
 export const createColumnsViagens = (navigate) => [
   {
@@ -28,22 +31,34 @@ export const createColumnsViagens = (navigate) => [
       );
     },
     cell: ({ row }) => formatarDataHora(row.original.inicio),
+    meta: {
+      headerText: "Data/Hora",
+    },
   },
   {
-    accessorKey: "local_inicio",
-    header: "Origem",
+    accessorKey: "_solicitante",
+    header: "Solicitante",
     cell: ({ row }) => (
-      <div className="max-w-[150px] truncate" title={row.original.local_inicio}>
-        {row.original.local_inicio}
+      <div className="max-w-[150px] truncate">
+        {row.original._solicitante || "N/A"}
       </div>
     ),
   },
   {
-    accessorKey: "local_fim",
+    accessorKey: "_endereco_origem",
+    header: "Origem",
+    cell: ({ row }) => (
+      <div className="max-w-[120px] truncate text-xs">
+        {row.original._endereco_origem || "N/A"}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "_endereco_destino",
     header: "Destino",
     cell: ({ row }) => (
-      <div className="max-w-[150px] truncate" title={row.original.local_fim}>
-        {row.original.local_fim}
+      <div className="max-w-[120px] truncate text-xs">
+        {row.original._endereco_destino || "N/A"}
       </div>
     ),
   },
@@ -54,7 +69,6 @@ export const createColumnsViagens = (navigate) => [
       const status = row.original.realizado;
       const label = getTravelStatusLabel(status);
       const colors = getTravelStatusColors(status);
-
       return <Badge className={colors.className}>{label}</Badge>;
     },
   },
@@ -79,7 +93,11 @@ export const createColumnsViagens = (navigate) => [
               Copiar ID da Viagem
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate && navigate(`/viagens/detalhes/${viagem.id}`)}>
+            <DropdownMenuItem
+              onClick={() =>
+                navigate && navigate(`/viagens/detalhes/${viagem.id}`)
+              }
+            >
               Ver detalhes
             </DropdownMenuItem>
             <DropdownMenuItem>Finalizar viagem</DropdownMenuItem>
@@ -107,19 +125,29 @@ export const columns_motoristas = [
         </Button>
       );
     },
+    meta: {
+      headerText: "Nome",
+    },
   },
   {
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-        const status = row.getValue("status");
-        const variant = {
+      const status = row.getValue("status");
+      const variant =
+        {
           Ativo: "bg-primary/20 text-primary font-semibold",
           Inativo: "bg-destructive/20 text-destructive font-semibold",
         }[status] ?? "bg-muted/20 text-muted-foreground";
 
-        return <div className={`px-2 py-1 rounded-full text-xs text-center w-20 ${variant}`}>{status}</div>;
-      },
+      return (
+        <div
+          className={`px-2 py-1 rounded-full text-xs text-center w-20 ${variant}`}
+        >
+          {status}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "ambulancia",
