@@ -2,14 +2,15 @@
 @import "tw-animate-css";
 
 @layer base {
-  @media (max-width: 1440px) and (min-width: 1200px) {
+  @media (max-width: 1980px) and (min-width: 1200px) {
     html {
-      font-size: 85%;
+      font-size: 90%;
     }
   }
 }
 
-:root, .dark {
+:root,
+.dark {
   --background: hsl(215 28% 17%);
   --foreground: hsl(210 17% 97%);
   --card: hsl(215 28% 22%);
@@ -79,7 +80,7 @@
   --accent: hsla(218, 29%, 15%, 0.555);
   --accent-foreground: hsl(0, 0%, 0%);
   --destructive: hsl(0 65% 50%);
-  --destructive-foreground: hsl(0 0% 100%);
+  --destructive-foreground: hsl(0, 100%, 50%);
   --border: hsl(220 10% 65%);
   --input: hsl(220 10% 75%);
   --ring: hsl(220 70% 50%);

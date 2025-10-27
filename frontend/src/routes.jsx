@@ -11,7 +11,7 @@ const Registro = lazy(() => import("./pages/Register"));
 const Ambulancias = lazy(() => import("./pages/Gerenciar_ambulancias"));
 const Usuarios = lazy(() => import("./pages/Gerenciar_usuario"));
 const Viagens = lazy(() => import("./pages/Viagens"));
-const DetalhesViagem = lazy(() => import("./pages/Viagens/DetalhesViagem"));
+const DetalhesViagem = lazy(() => import("./pages/Detalhes/viagem/DetalhesViagem"));
 const Agendamentos = lazy(() => import("./pages/Agendamentos"));
 const Historico = lazy(() => import("./pages/Historico"));
 const Perfil = lazy(() => import("./pages/Perfil"));

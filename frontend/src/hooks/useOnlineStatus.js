@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 export function useOnlineStatus() {
   const [isOnline, setIsOnline] = useState(
-    typeof navigator !== 'undefined' ? navigator.onLine : true
+    typeof navigator !== "undefined" ? navigator.onLine : true
   );
   const [wasOffline, setWasOffline] = useState(false);
 
@@ -10,7 +10,6 @@ export function useOnlineStatus() {
     function handleOnline() {
       setIsOnline(true);
       setWasOffline(true);
-      // Limpa o status após 3 segundos
       setTimeout(() => setWasOffline(false), 3000);
     }
 
@@ -19,12 +18,12 @@ export function useOnlineStatus() {
       setWasOffline(false);
     }
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, []);
 
