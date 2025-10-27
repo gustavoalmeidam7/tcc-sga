@@ -9,13 +9,13 @@ from src.Utils.env import get_env_var
 
 from src.Controller import AuthController, DriverController, TravelController, UserController
 
-from src.Error.ErrorClass import ErrorClass
-
 from src.Model import User, Driver, Travel, UserSession, Ambulance, Equipment, Manager
+
+from src.Error.ErrorClass import ErrorClass
 
 from src.Utils.env import get_env_var
 
-from src.DB import db
+from src.DB import db, is_pytest
 
 routers = [AuthController.AUTH_ROUTER, DriverController.DriverRouter, TravelController.TravelRouter, UserController.USER_ROUTER]
 
@@ -26,7 +26,9 @@ isDebug = (env == "DEV")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     db.connect()
-    db.create_tables([User.User, Driver.Driver, Travel.Travel, UserSession.Session, Ambulance.Ambulance, Equipment.Equipment, Manager.Manager])
+
+    if not is_pytest:
+        db.create_tables([User.User, Driver.Driver, Travel.Travel, UserSession.Session, Ambulance.Ambulance, Equipment.Equipment, Manager.Manager])
     yield
     db.close()
 
@@ -34,7 +36,6 @@ app = FastAPI(debug=isDebug, title="Gerenciamento de ambulância API", descripti
 
 for route in routers:
   app.include_router(route)
-# map(lambda r: app.include_router(r), routers)
 
 app.add_middleware(
     CORSMiddleware,

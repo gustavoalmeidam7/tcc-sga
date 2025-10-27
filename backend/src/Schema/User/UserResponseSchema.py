@@ -3,13 +3,16 @@ from pydantic import BaseModel, ConfigDict, Field, AfterValidator, EmailStr
 
 from datetime import date
 
-from src.Validator.UserValidator import validate_birthday
+from src.Schema.User.UserRoleEnum import UserRole
+
+from src.Validator import UserValidator
 from uuid import UUID
 
 class UserResponseSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     
-    id: UUID = UUID("3fa85f64-5717-4562-b3fc-2c963f66afa6")
-    nome: Annotated[str, Field(max_length=35)] = "Ronaldo de Assis Moreira"
-    nascimento: Annotated[date, Field(), AfterValidator(validate_birthday)] = date(1980, 3, 21)
-    email:    Annotated[EmailStr, Field(max_length=45)] = "ronaldo@mail.com"
+    id:         Annotated[UUID,     Field(example=UserValidator.generate_uuid())]
+    nome:       Annotated[str,      Field(example="Ronaldo de Assis Moreira", max_length=35)]
+    nascimento: Annotated[date,     Field(example=date(1980, 3, 21)), AfterValidator(UserValidator.validate_birthday)]
+    email:      Annotated[EmailStr, Field(example="ronaldo@mail.com", max_length=45)]
+    cargo:      Annotated[int,      Field(example=UserRole.USER)]
