@@ -9,6 +9,32 @@ def test_post_travel(client: TestClient):
     
     assert request.status_code == 200
 
-    requestDictCmp = list(filter(lambda k: request.json().key == k, travelData.keys))
+    travelData["inicio"] = TestTravelHelper.convert_str_to_iso(travelData["inicio"])
+    travelData["fim"] = TestTravelHelper.convert_str_to_iso(travelData["fim"])
+
+    requestDictCmp = {k: str(request.json()[k]) for k in travelData.keys()}
 
     assert travelData == requestDictCmp
+
+def test_get_travels(client: TestClient):
+    userToken = UserUtils.get_user(client)
+    travelData = TestTravelHelper.generate_travel()
+    postRequest = client.post("/travel/", headers=userToken, json=travelData)
+    assert postRequest.status_code == 200
+
+    getRequest = client.get("/travel/", headers=userToken)
+    assert getRequest.status_code == 200
+    assert len(getRequest.json()) > 0
+
+def test_delete_travel_by_id(client: TestClient):
+    userToken = UserUtils.get_user(client)
+    travelData = TestTravelHelper.generate_travel()
+    postRequest = client.post("/travel/", headers=userToken, json=travelData)
+    assert postRequest.status_code == 200
+
+    travelId = postRequest.json()["id"]
+
+    deleteRequest = client.delete(f"/travel/{travelId}", headers=userToken)
+    assert deleteRequest.status_code == 200
+    assert deleteRequest.json()["id"] == travelId
+    assert deleteRequest.json()["deletado"] is True

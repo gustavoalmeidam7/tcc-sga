@@ -1,4 +1,5 @@
 from peewee import Proxy
+import sys
 from src.DB import postgres, sqlite
 from src.Utils.env import get_env_var
 from src.Utils.singleton import singleton
@@ -15,14 +16,22 @@ class connection(metaclass=singleton):
         self.port =        get_env_var("Database_Port")
         self.user =        get_env_var("Database_User")
 
-databases = {
-    "PROD": postgres.Database(connection()),
-    "DEV" : sqlite.Database(connection())
-}
+is_pytest = any(arg.startswith('pytest') for arg in sys.argv)
 
-selected_db = databases[connection().environment].db
+selected_db = None
 
-if selected_db is None:
-    raise RuntimeError("Erro a o selecionar banco de dados!")
+if not is_pytest:
+    databases = {
+        "PROD": postgres.Database(connection()),
+        "DEV" : sqlite.Database(connection())
+    }
+    env = get_env_var("environment", "DEV")
+    if env in databases:
+        selected_db = databases[env].db
 
-db.initialize(selected_db)
+    if selected_db is None:
+        raise RuntimeError("Erro a o selecionar banco de dados!")
+
+    db.initialize(selected_db)
+else:
+    print("***Running in test mode***")

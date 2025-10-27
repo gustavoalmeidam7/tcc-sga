@@ -174,7 +174,7 @@ function Viagens() {
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-xl bg-gradient-to-r from-primary/20 via-primary/10 to-transparent p-4 md:p-5 lg:p-3 border border-primary/20"
+        className="relative overflow-hidden rounded-xl bg-linear-to-r from-primary/20 via-primary/10 to-transparent p-4 md:p-5 lg:p-3 border border-primary/20"
       >
         <div className="relative z-10">
           <h1 className="text-2xl md:text-2xl font-bold text-foreground mb-1">
