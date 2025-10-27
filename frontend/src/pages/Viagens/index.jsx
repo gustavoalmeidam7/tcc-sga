@@ -8,6 +8,7 @@ import { MapaRota } from "./components/MapaRota";
 import { DadosPaciente } from "./components/DadosPaciente";
 import { ModalConfirmacao } from "./components/ModalConfirmacao";
 import { createTravel } from "@/services/travelService";
+import { formatarDateTimeParaBackend } from "@/lib/date-utils";
 import { useState, useCallback, useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -29,11 +30,30 @@ function Viagens() {
       });
     },
     onError: (error) => {
-      const mensagemErro = error.response?.data?.Erros
-        ? Object.values(error.response.data.Erros).join(", ")
-        : error.message || "Erro ao criar viagem";
+      let mensagemErro = "Erro ao criar viagem";
 
-      toast.error('Erro ao criar viagem', {
+      if (error.response?.data?.detail) {
+        if (Array.isArray(error.response.data.detail)) {
+          mensagemErro = error.response.data.detail
+            .map((err) => `${err.loc.join(".")}: ${err.msg}`)
+            .join("; ");
+        } else if (typeof error.response.data.detail === "string") {
+          mensagemErro = error.response.data.detail;
+        }
+      } else if (error.response?.data?.Erros) {
+        const erros = error.response.data.Erros;
+        if (typeof erros === "object") {
+          mensagemErro = Object.entries(erros)
+            .map(([campo, msg]) => `${campo}: ${msg}`)
+            .join("; ");
+        } else if (typeof erros === "string") {
+          mensagemErro = erros;
+        }
+      } else if (error.message) {
+        mensagemErro = error.message;
+      }
+
+      toast.error("Erro ao criar viagem", {
         description: mensagemErro,
         duration: 6000,
       });
@@ -88,24 +108,27 @@ function Viagens() {
 
     viagem.setError("");
 
-    try {
-      const inicioLocal = `${viagem.dataAgendamento}T${viagem.horaAgendamento}:00`;
-      const inicio = new Date(inicioLocal);
-      const fim = new Date(inicio.getTime() + viagem.duracao * 60000);
+    if (!viagem.coordOrigem || !viagem.coordDestino) {
+      viagem.setError(
+        "Erro: Coordenadas não encontradas. Selecione novamente origem e destino."
+      );
+      return;
+    }
 
-      const fimAno = fim.getFullYear();
-      const fimMes = String(fim.getMonth() + 1).padStart(2, '0');
-      const fimDia = String(fim.getDate()).padStart(2, '0');
-      const fimHora = String(fim.getHours()).padStart(2, '0');
-      const fimMin = String(fim.getMinutes()).padStart(2, '0');
-      const fimLocal = `${fimAno}-${fimMes}-${fimDia}T${fimHora}:${fimMin}:00`;
+    try {
+      const inicioFormatado = formatarDateTimeParaBackend(
+        viagem.dataAgendamento,
+        viagem.horaAgendamento
+      );
+      const fimFormatado = formatarDateTimeParaBackend(
+        viagem.dataAgendamento,
+        viagem.horaAgendamento,
+        viagem.duracao
+      );
 
       const dadosBackend = {
-        inicio: inicioLocal,
-        fim: fimLocal,
-        local_inicio: viagem.origem,
-        local_fim: viagem.destino,
-        /*  Enviar lat e long ao inves de endereços
+        inicio: inicioFormatado,
+        fim: fimFormatado,
         lat_inicio: viagem.coordOrigem[0],
         long_inicio: viagem.coordOrigem[1],                                                                
         lat_fim: viagem.coordDestino[0],                                                                
@@ -129,15 +152,7 @@ function Viagens() {
       setModalOpen(true);
 
       viagem.resetarFormulario();
-    } catch (error) {
-      console.error("Erro ao criar viagem:", error);
-
-      const mensagemErro = error.response?.data?.Erros
-        ? Object.values(error.response.data.Erros).join(", ")
-        : error.message || "Erro ao criar viagem. Tente novamente.";
-
-      viagem.setError(mensagemErro);
-    }
+    } catch (error) {}
   };
 
   return (
