@@ -4,20 +4,11 @@ import { CheckCircle, Clock, TrendingUp, Calendar, AlertCircle } from "lucide-re
 
 export function ResumoModal({ viagens = [], motoristas = [] }) {
   const estatisticasDia = useMemo(() => {
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
+    const emAndamento = viagens.filter(v => v.realizado === 1).length;
+    const concluidas = viagens.filter(v => v.realizado === 2).length;
+    const pendentes = viagens.filter(v => v.realizado === 0).length;
 
-    const viagensHoje = viagens.filter(v => {
-      const dataViagem = new Date(v.inicio);
-      dataViagem.setHours(0, 0, 0, 0);
-      return dataViagem.getTime() === hoje.getTime();
-    });
-
-    const emAndamento = viagensHoje.filter(v => v.realizado === 1).length;
-    const concluidas = viagensHoje.filter(v => v.realizado === 2).length;
-    const pendentes = viagensHoje.filter(v => v.realizado === 0).length;
-
-    return { total: viagensHoje.length, emAndamento, concluidas, pendentes };
+    return { total: viagens.length, emAndamento, concluidas, pendentes };
   }, [viagens]);
 
   const estatisticasGerais = useMemo(() => {
@@ -44,9 +35,9 @@ export function ResumoModal({ viagens = [], motoristas = [] }) {
   return (
     <div className="space-y-3 sm:space-y-6">
       <div>
-        <h3 className="text-base sm:text-lg font-semibold mb-2.5 sm:mb-4 flex items-center gap-2">
+        <h3 className="text-base sm:text-lg font-semibold mb-2.5 sm:mb-4 flex items-center gap-2 text-foreground">
           <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-          Resumo de Hoje
+          Resumo Geral
         </h3>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
           <Card>
@@ -57,7 +48,7 @@ export function ResumoModal({ viagens = [], motoristas = [] }) {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xl sm:text-2xl font-bold text-primary leading-tight">{estatisticasDia.total}</p>
-                  <p className="text-[11px] sm:text-xs text-muted-foreground">Total Hoje</p>
+                  <p className="text-[11px] sm:text-xs text-muted-foreground">Total</p>
                 </div>
               </div>
             </CardContent>
@@ -108,7 +99,7 @@ export function ResumoModal({ viagens = [], motoristas = [] }) {
       </div>
 
       <div>
-        <h3 className="text-base sm:text-lg font-semibold mb-2.5 sm:mb-4 flex items-center gap-2">
+        <h3 className="text-base sm:text-lg font-semibold mb-2.5 sm:mb-4 flex items-center gap-2 text-foreground">
           <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
           Estatísticas Gerais
         </h3>
@@ -170,7 +161,7 @@ export function ResumoModal({ viagens = [], motoristas = [] }) {
       </div>
 
       <div>
-        <h3 className="text-base sm:text-lg font-semibold mb-2.5 sm:mb-4">Distribuição por Status</h3>
+        <h3 className="text-base sm:text-lg font-semibold mb-2.5 sm:mb-4 text-foreground">Distribuição por Status</h3>
         <Card>
           <CardContent className="p-3 sm:p-6">
             <div className="space-y-3 sm:space-y-4">

@@ -1,12 +1,12 @@
-import axios from 'axios';
-import { getAuthToken, clearAuthToken } from './tokenStore';
+import axios from "axios";
+import { getAuthToken, clearAuthToken } from "./tokenStore";
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 const API = axios.create({
   baseURL: API_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -29,18 +29,22 @@ API.interceptors.response.use(
     if (!error.response) {
       return Promise.reject({
         ...error,
-        message: 'Erro de conexão. Verifique sua internet.',
-        isNetworkError: true
+        message: "Erro de conexão. Verifique sua internet.",
+        isNetworkError: true,
       });
     }
 
     const { status, data } = error.response;
 
     const backendErrors = data?.Erros;
-    let errorMessage = 'Erro desconhecido';
+    let errorMessage = "Erro desconhecido";
 
-    if (backendErrors && Array.isArray(backendErrors) && backendErrors.length > 0) {
-      errorMessage = backendErrors.join(', ');
+    if (
+      backendErrors &&
+      Array.isArray(backendErrors) &&
+      backendErrors.length > 0
+    ) {
+      errorMessage = backendErrors.join(", ");
     } else if (data?.detail) {
       errorMessage = data.detail;
     }
@@ -48,47 +52,48 @@ API.interceptors.response.use(
     if (status === 401) {
       clearAuthToken();
 
-      if (!window.location.pathname.includes('/login')) {
-        window.location.href = '/login';
+      if (!window.location.pathname.includes("/login")) {
+        window.dispatchEvent(new CustomEvent("auth:unauthorized"));
       }
 
       return Promise.reject({
         ...error,
-        message: 'Sua sessão expirou. Faça login novamente.'
+        message: "Sua sessão expirou. Faça login novamente.",
       });
     }
 
     if (status === 403) {
       return Promise.reject({
         ...error,
-        message: errorMessage || 'Você não tem permissão para realizar esta ação'
+        message:
+          errorMessage || "Você não tem permissão para realizar esta ação",
       });
     }
 
     if (status === 404) {
       return Promise.reject({
         ...error,
-        message: errorMessage || 'Recurso não encontrado.'
+        message: errorMessage || "Recurso não encontrado.",
       });
     }
 
     if (status === 409) {
       return Promise.reject({
         ...error,
-        message: errorMessage
+        message: errorMessage,
       });
     }
 
     if (status >= 500) {
       return Promise.reject({
         ...error,
-        message: 'Erro no servidor. Tente novamente mais tarde.'
+        message: "Erro no servidor. Tente novamente mais tarde.",
       });
     }
 
     return Promise.reject({
       ...error,
-      message: errorMessage
+      message: errorMessage,
     });
   }
 );

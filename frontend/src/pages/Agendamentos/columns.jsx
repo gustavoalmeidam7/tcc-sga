@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Trash2, Eye } from "lucide-react";
+import { Calendar, Eye } from "lucide-react";
 import { formatarDataHora } from "@/lib/date-utils";
-import { getStatusViagem, getStatusBadge, calcularDuracao } from "./utils";
+import { calcularDuracao } from "./utils";
+import { getTravelStatusLabel, getTravelStatusColors } from "@/lib/travel-status";
 
 export const createColumns = (onDelete, navigate) => [
   {
@@ -17,24 +18,28 @@ export const createColumns = (onDelete, navigate) => [
     enableColumnFilter: true,
   },
   {
-    accessorKey: "local_inicio",
-    header: "Origem",
+    accessorKey: "_solicitante",
+    header: "Solicitante",
     cell: ({ row }) => (
-      <div className="max-w-[200px] truncate" title={row.original.local_inicio}>
-        {row.original.local_inicio}
-      </div>
+      <div className="max-w-[150px] truncate">{row.original._solicitante || "N/A"}</div>
     ),
-    enableColumnFilter: true,
+    enableColumnFilter: false,
   },
   {
-    accessorKey: "local_fim",
+    accessorKey: "_endereco_origem",
+    header: "Origem",
+    cell: ({ row }) => (
+      <div className="max-w-[200px] truncate">{row.original._endereco_origem || "N/A"}</div>
+    ),
+    enableColumnFilter: false,
+  },
+  {
+    accessorKey: "_endereco_destino",
     header: "Destino",
     cell: ({ row }) => (
-      <div className="max-w-[200px] truncate" title={row.original.local_fim}>
-        {row.original.local_fim}
-      </div>
+      <div className="max-w-[200px] truncate">{row.original._endereco_destino || "N/A"}</div>
     ),
-    enableColumnFilter: true,
+    enableColumnFilter: false,
   },
   {
     accessorKey: "duracao",
@@ -46,24 +51,24 @@ export const createColumns = (onDelete, navigate) => [
     enableColumnFilter: false,
   },
   {
-    accessorKey: "status",
+    accessorKey: "realizado",
     header: "Status",
     cell: ({ row }) => {
-      const status = getStatusViagem(row.original);
-      const badgeInfo = getStatusBadge(status);
-      return <Badge className={badgeInfo.className}>{badgeInfo.label}</Badge>;
+      const status = row.original.realizado;
+      const label = getTravelStatusLabel(status);
+      const colors = getTravelStatusColors(status);
+      return <Badge className={colors.className}>{label}</Badge>;
     },
     enableColumnFilter: true,
     filterFn: (row, id, value) => {
-      const status = getStatusViagem(row.original);
-      return status.toLowerCase().includes(value.toLowerCase());
+      const label = getTravelStatusLabel(row.original.realizado);
+      return label.toLowerCase().includes(value.toLowerCase());
     },
   },
   {
     id: "actions",
     header: "Ações",
     cell: ({ row }) => {
-      const status = getStatusViagem(row.original);
       const viagem = row.original;
       return (
         <div className="flex items-center gap-2">

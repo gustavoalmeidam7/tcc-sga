@@ -1,7 +1,6 @@
 ﻿import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { z } from 'zod'
 import { useAuth } from '@/hooks/useAuth'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -11,11 +10,7 @@ import { Input } from '@/components/ui/input'
 import img_logo from '@/assets/Logo.webp'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-
-const formSchema = z.object({
-  email: z.string().email({ message: 'Por favor, insira um email válido.' }),
-  senha: z.string().min(1, { message: 'A senha é obrigatória.' }),
-})
+import { loginSchema } from '@/lib/validations/validations'
 
 export default function Login({ className, ...props }) {
   const { login, isLoading: authLoading, error: authError, clearError } = useAuth()
@@ -24,7 +19,7 @@ export default function Login({ className, ...props }) {
   const from = location.state?.from?.pathname || '/'
 
   const form = useForm({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(loginSchema),
     defaultValues: { email: '', senha: '' },
   })
 

@@ -1,4 +1,4 @@
-"use client";;
+"use client";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "motion/react";
 import { memo } from "react";
@@ -290,27 +290,27 @@ const TextAnimateBase = ({
         item: variants,
       }
     : animation
-      ? {
-          container: {
-            ...defaultItemAnimationVariants[animation].container,
-            show: {
-              ...defaultItemAnimationVariants[animation].container.show,
-              transition: {
-                delayChildren: delay,
-                staggerChildren: duration / segments.length,
-              },
-            },
-            exit: {
-              ...defaultItemAnimationVariants[animation].container.exit,
-              transition: {
-                staggerChildren: duration / segments.length,
-                staggerDirection: -1,
-              },
+    ? {
+        container: {
+          ...defaultItemAnimationVariants[animation].container,
+          show: {
+            ...defaultItemAnimationVariants[animation].container.show,
+            transition: {
+              delayChildren: delay,
+              staggerChildren: duration / segments.length,
             },
           },
-          item: defaultItemAnimationVariants[animation].item,
-        }
-      : { container: defaultContainerVariants, item: defaultItemVariants };
+          exit: {
+            ...defaultItemAnimationVariants[animation].container.exit,
+            transition: {
+              staggerChildren: duration / segments.length,
+              staggerDirection: -1,
+            },
+          },
+        },
+        item: defaultItemAnimationVariants[animation].item,
+      }
+    : { container: defaultContainerVariants, item: defaultItemVariants };
 
   return (
     <AnimatePresence mode="popLayout">
@@ -323,7 +323,8 @@ const TextAnimateBase = ({
         className={cn("whitespace-pre-wrap", className)}
         viewport={{ once }}
         aria-label={accessible ? children : undefined}
-        {...props}>
+        {...props}
+      >
         {accessible && <span className="sr-only">{children}</span>}
         {segments.map((segment, i) => (
           <motion.span
@@ -335,7 +336,8 @@ const TextAnimateBase = ({
               by === "character" && "",
               segmentClassName
             )}
-            aria-hidden={accessible ? true : undefined}>
+            aria-hidden={accessible ? true : undefined}
+          >
             {segment}
           </motion.span>
         ))}
@@ -344,5 +346,4 @@ const TextAnimateBase = ({
   );
 };
 
-// Export the memoized version
 export const TextAnimate = memo(TextAnimateBase);

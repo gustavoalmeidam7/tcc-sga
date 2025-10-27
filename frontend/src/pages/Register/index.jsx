@@ -1,7 +1,6 @@
 import { useNavigate, Link } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import {
@@ -24,52 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import img_logo from "@/assets/Logo_Maior.webp";
-
-const formSchema = z
-  .object({
-    nome: z
-      .string()
-      .min(2, { message: "O nome deve ter pelo menos 2 caracteres." })
-      .max(100, { message: "O nome não pode ter mais de 100 caracteres." }),
-
-    email: z.string().email({ message: "Por favor, insira um email válido." }),
-
-    cpf: z.string().refine((cpf) => {
-      if (typeof cpf !== "string") return false;
-      cpf = cpf.replace(/[^\d]+/g, "");
-      if (cpf.length !== 11 || !!cpf.match(/(\d)\1{10}/)) return false;
-      const cpfDigits = cpf.split("").map((el) => +el);
-      const rest = (count) => {
-        return (
-          ((cpfDigits
-            .slice(0, count - 12)
-            .reduce((soma, el, index) => soma + el * (count - index), 0) *
-            10) %
-            11) %
-          10
-        );
-      };
-      return rest(10) === cpfDigits[9] && rest(11) === cpfDigits[10];
-    }, "CPF inválido"),
-
-    telefone: z
-      .string()
-      .min(10, { message: "Insira um número de telefone válido." }),
-
-    nascimento: z.string().refine((val) => !isNaN(Date.parse(val)), {
-      message: "Insira uma data de nascimento válida.",
-    }),
-
-    senha: z
-      .string()
-      .min(8, { message: "A senha deve ter no mínimo 8 caracteres." }),
-
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.senha === data.confirmPassword, {
-    message: "As senhas não coincidem.",
-    path: ["confirmPassword"],
-  });
+import { registroSchema } from "@/lib/validations/validations";
 
 export default function Registro({ className, ...props }) {
   const {
@@ -81,7 +35,7 @@ export default function Registro({ className, ...props }) {
   const navigate = useNavigate();
 
   const form = useForm({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(registroSchema),
     defaultValues: {
       nome: "",
       email: "",
