@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,7 +25,7 @@ import {
   Clock,
   MapPin,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -28,7 +34,7 @@ export default function Suporte() {
     nome: "",
     email: "",
     assunto: "",
-    mensagem: ""
+    mensagem: "",
   });
   const [enviando, setEnviando] = useState(false);
 
@@ -37,8 +43,8 @@ export default function Suporte() {
     setEnviando(true);
 
     setTimeout(() => {
-      toast.success('Mensagem enviada com sucesso!', {
-        description: 'Entraremos em contato em breve.',
+      toast.success("Mensagem enviada com sucesso!", {
+        description: "Entraremos em contato em breve.",
         duration: 5000,
       });
       setFormData({ nome: "", email: "", assunto: "", mensagem: "" });
@@ -49,28 +55,34 @@ export default function Suporte() {
   const faqs = [
     {
       pergunta: "Como solicitar uma viagem de ambulância?",
-      resposta: "Acesse a página 'Viagens', preencha os dados de origem, destino e informações do paciente. O sistema calculará automaticamente a rota e você poderá confirmar o agendamento."
+      resposta:
+        "Acesse a página 'Viagens', preencha os dados de origem, destino e informações do paciente. O sistema calculará automaticamente a rota e você poderá confirmar o agendamento.",
     },
     {
       pergunta: "Qual o prazo para agendar uma viagem?",
-      resposta: "Recomendamos agendar suas viagens com pelo menos 1 dia útil de antecedência. Este sistema é voltado para agendamentos programados de transporte de pacientes."
+      resposta:
+        "Recomendamos agendar suas viagens com pelo menos 3 dias útil de antecedência. Este sistema é voltado para agendamentos programados de transporte de pacientes.",
     },
     {
       pergunta: "Como posso cancelar uma viagem agendada?",
-      resposta: "Acesse 'Meus Agendamentos', localize a viagem que deseja cancelar e clique no botão de exclusão. Lembre-se de fazer isso com antecedência para não prejudicar o planejamento."
+      resposta:
+        "Acesse 'Meus Agendamentos', localize a viagem que deseja cancelar entre nos detalhes dela e clique no botão de exclusão. Lembre-se de fazer isso com antecedência para não prejudicar o planejamento.",
     },
     {
       pergunta: "Posso editar informações do meu perfil?",
-      resposta: "Sim! Acesse 'Meu Perfil' e clique no botão 'Editar'. Você pode alterar seu nome, email e telefone. A data de nascimento não pode ser alterada."
+      resposta:
+        "Sim! Acesse 'Meu Perfil' e clique no botão 'Editar'. Você pode alterar seu nome, email e telefone. A data de nascimento não pode ser alterada.",
     },
     {
       pergunta: "Como acompanhar o status da minha viagem?",
-      resposta: "Na página 'Meus Agendamentos' você pode ver o status de todas as suas viagens: Pendente, Confirmada ou Finalizada."
+      resposta:
+        "Na página 'Meus Agendamentos' você pode ver o status de todas as suas viagens: Pendente, Confirmada ou Finalizada.",
     },
     {
       pergunta: "Este sistema atende emergências?",
-      resposta: "Não. Este sistema é exclusivo para agendamento de transporte programado de pacientes. Em casos de emergência médica, ligue 192 (SAMU)."
-    }
+      resposta:
+        "Não. Este sistema é exclusivo para agendamento de transporte programado de pacientes. Em casos de emergência médica, ligue 192 (SAMU).",
+    },
   ];
 
   return (
@@ -131,7 +143,9 @@ export default function Suporte() {
                 <Phone className="h-5 w-5 text-primary mt-0.5" />
                 <div>
                   <p className="font-medium">Telefone</p>
-                  <p className="text-sm text-muted-foreground">(16) 3333-4444</p>
+                  <p className="text-sm text-muted-foreground">
+                    (16) 3333-4444
+                  </p>
                   <p className="text-xs text-muted-foreground mt-1">
                     Seg a Sex: 8h às 18h
                   </p>
@@ -142,7 +156,9 @@ export default function Suporte() {
                 <Mail className="h-5 w-5 text-primary mt-0.5" />
                 <div>
                   <p className="font-medium">E-mail</p>
-                  <p className="text-sm text-muted-foreground">suporte@sga.com.br</p>
+                  <p className="text-sm text-muted-foreground">
+                    suporte@sga.com.br
+                  </p>
                   <p className="text-xs text-muted-foreground mt-1">
                     Resposta em até 24h úteis
                   </p>
@@ -154,7 +170,8 @@ export default function Suporte() {
                 <div>
                   <p className="font-medium">Endereço</p>
                   <p className="text-sm text-muted-foreground">
-                    Rua São Carlos, 123<br />
+                    Rua São Carlos, 123
+                    <br />
                     Centro - São Carlos/SP
                   </p>
                 </div>
@@ -163,7 +180,9 @@ export default function Suporte() {
               <div className="flex items-start gap-3 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
                 <Clock className="h-5 w-5 text-blue-500 mt-0.5" />
                 <div>
-                  <p className="font-medium text-blue-500">Horário de Atendimento</p>
+                  <p className="font-medium text-blue-500">
+                    Horário de Atendimento
+                  </p>
                   <p className="text-sm text-muted-foreground">
                     Segunda a Sexta: 8h às 18h
                   </p>
@@ -176,7 +195,9 @@ export default function Suporte() {
               <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
                 <AlertCircle className="h-5 w-5 text-amber-500 mt-0.5" />
                 <div>
-                  <p className="font-medium text-amber-600 dark:text-amber-400">Importante</p>
+                  <p className="font-medium text-amber-600 dark:text-amber-400">
+                    Importante
+                  </p>
                   <p className="text-sm text-muted-foreground">
                     Para emergências médicas, ligue <strong>192 (SAMU)</strong>
                   </p>
@@ -209,7 +230,9 @@ export default function Suporte() {
                   <Input
                     placeholder="Digite seu nome"
                     value={formData.nome}
-                    onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, nome: e.target.value })
+                    }
                     required
                   />
                 </div>
@@ -222,7 +245,9 @@ export default function Suporte() {
                     type="email"
                     placeholder="seu@email.com"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
                     required
                   />
                 </div>
@@ -234,7 +259,9 @@ export default function Suporte() {
                   <Input
                     placeholder="Sobre o que você precisa de ajuda?"
                     value={formData.assunto}
-                    onChange={(e) => setFormData({ ...formData, assunto: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, assunto: e.target.value })
+                    }
                     required
                   />
                 </div>
@@ -247,16 +274,14 @@ export default function Suporte() {
                     placeholder="Descreva sua dúvida ou problema..."
                     rows={6}
                     value={formData.mensagem}
-                    onChange={(e) => setFormData({ ...formData, mensagem: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, mensagem: e.target.value })
+                    }
                     required
                   />
                 </div>
 
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={enviando}
-                >
+                <Button type="submit" className="w-full" disabled={enviando}>
                   {enviando ? (
                     <>Enviando...</>
                   ) : (
@@ -276,7 +301,8 @@ export default function Suporte() {
                       Compromisso com você
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Respondemos todas as mensagens em até 24 horas úteis. Sua satisfação é nossa prioridade!
+                      Respondemos todas as mensagens em até 24 horas úteis. Sua
+                      satisfação é nossa prioridade!
                     </p>
                   </div>
                 </div>
