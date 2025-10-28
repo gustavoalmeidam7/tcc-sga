@@ -129,7 +129,7 @@ export default function UserDetalhesView() {
           <ArrowLeft className="h-5 w-5 text-foreground" />
         </Button>
         <div className="flex-1">
-          <h1 className="text-3xl font-bold text-foreground">
+          <h1 className="text-xl md:text-2xl font-bold text-foreground">
             Detalhes da Viagem
           </h1>
           <div className="flex items-center gap-2 mt-1">
@@ -311,8 +311,8 @@ export default function UserDetalhesView() {
                   <AlertDialogDescription asChild>
                     <div className="space-y-3 pt-2">
                       <p>
-                        Tem certeza que deseja cancelar esta viagem? Esta ação não
-                        pode ser desfeita.
+                        Tem certeza que deseja cancelar esta viagem? Esta ação
+                        não pode ser desfeita.
                       </p>
                       {viagem.id_motorista && (
                         <div className="rounded-lg bg-destructive/20 border border-destructive/30 p-3">
@@ -331,7 +331,7 @@ export default function UserDetalhesView() {
                     onClick={handleCancelarViagem}
                     disabled={deleteMutation.isPending}
                     className="bg-destructive hover:bg-destructive/90"
-                    style={{ color: theme === 'dark' ? 'white' : 'black' }}
+                    style={{ color: theme === "dark" ? "white" : "black" }}
                   >
                     {deleteMutation.isPending
                       ? "Cancelando..."
