@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { FileText, Hash, MapPin } from "lucide-react";
 
 const hasPacienteData = (viagem) => {
@@ -9,7 +10,7 @@ const hasPacienteData = (viagem) => {
   );
 };
 
-export const PatientCard = ({ viagem, loading }) => {
+const PatientCardComponent = ({ viagem, loading }) => {
   if (loading) {
     return (
       <div className="rounded-lg border border-border bg-muted/30 p-6 animate-pulse">
@@ -102,3 +103,5 @@ export const PatientCard = ({ viagem, loading }) => {
     </div>
   );
 };
+
+export const PatientCard = memo(PatientCardComponent);

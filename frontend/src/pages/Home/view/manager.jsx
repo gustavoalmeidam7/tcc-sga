@@ -47,13 +47,15 @@ function ManagerView() {
         queryKey: ["geocode", t.lat_inicio, t.long_inicio],
         queryFn: () => reverseGeocode(t.lat_inicio, t.long_inicio),
         enabled: !!(t.lat_inicio && t.long_inicio),
-        staleTime: 1000 * 60 * 30,
+        staleTime: 1000 * 60 * 60 * 24,
+        cacheTime: 1000 * 60 * 60 * 24 * 7,
       },
       {
         queryKey: ["geocode", t.lat_fim, t.long_fim],
         queryFn: () => reverseGeocode(t.lat_fim, t.long_fim),
         enabled: !!(t.lat_fim && t.long_fim),
-        staleTime: 1000 * 60 * 30,
+        staleTime: 1000 * 60 * 60 * 24,
+        cacheTime: 1000 * 60 * 60 * 24 * 7,
       },
     ]),
   });

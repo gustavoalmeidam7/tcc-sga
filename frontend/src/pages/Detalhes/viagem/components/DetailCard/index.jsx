@@ -1,4 +1,6 @@
-export const DetailCard = ({
+import { memo } from "react";
+
+const DetailCardComponent = ({
   icon: Icon,
   label,
   value,
@@ -30,3 +32,5 @@ export const DetailCard = ({
     </div>
   </div>
 );
+
+export const DetailCard = memo(DetailCardComponent);

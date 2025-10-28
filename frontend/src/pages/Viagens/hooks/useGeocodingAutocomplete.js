@@ -1,7 +1,39 @@
 import { useState, useRef, useEffect } from "react";
+import { toast } from "sonner";
 
 const geocodingCache = new Map();
-const CACHE_EXPIRY_MS = 1000 * 60 * 10;
+const CACHE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000;
+const STORAGE_KEY = "autocomplete_cache";
+const MAX_CACHE_SIZE = 500;
+const GEOAPIFY_API_KEY = import.meta.env.VITE_GEOAPIFY_API_KEY;
+
+let autocompleteFallbackToastShown = false;
+
+try {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored) {
+    const parsed = JSON.parse(stored);
+    Object.entries(parsed).forEach(([key, val]) => {
+      if (Date.now() - val.timestamp < CACHE_EXPIRY_MS) {
+        geocodingCache.set(key, val);
+      }
+    });
+  }
+} catch (e) {
+  console.error("Erro ao carregar cache de autocomplete:", e);
+}
+
+setInterval(() => {
+  try {
+    const cacheObj = {};
+    geocodingCache.forEach((val, key) => {
+      if (Date.now() - val.timestamp < CACHE_EXPIRY_MS) {
+        cacheObj[key] = val;
+      }
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cacheObj));
+  } catch (e) {}
+}, 120 * 1000);
 
 export function useGeocodingAutocomplete() {
   const [sugestoes, setSugestoes] = useState([]);
@@ -11,18 +43,69 @@ export function useGeocodingAutocomplete() {
   const inputRef = useRef(null);
   const abortControllerRef = useRef(null);
 
-  const formatarEndereco = (displayName) => {
-    const partes = displayName.split(", ");
-
-    const relevantes = partes.filter(
-      (parte) =>
-        !parte.includes("Região") &&
-        !parte.includes("Brasil") &&
-        !parte.includes("Brazil") &&
-        !/^\d{5}-\d{3}$/.test(parte)
+  const buscarNominatim = async (texto, signal) => {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+        texto
+      )},Brazil&format=json&addressdetails=1&limit=15&accept-language=pt-BR`,
+      {
+        signal,
+        headers: {
+          "User-Agent": "TCC-SGA-Frontend/1.0",
+        },
+      }
     );
 
-    return relevantes.slice(0, 4).join(", ");
+    if (!response.ok) throw new Error("Nominatim falhou");
+
+    const data = await response.json();
+
+    return data.map((result) => {
+      const addr = result.address || {};
+      const partes = [];
+
+      if (addr.amenity) partes.push(addr.amenity);
+      if (addr.road) partes.push(addr.road);
+      if (addr.suburb || addr.neighbourhood)
+        partes.push(addr.suburb || addr.neighbourhood);
+      if (addr.city || addr.town) partes.push(addr.city || addr.town);
+      if (addr.state) partes.push(addr.state);
+
+      return {
+        nome: partes.slice(0, 3).join(", ") || result.display_name,
+        nomeCompleto: partes.join(", ") || result.display_name,
+        lat: parseFloat(result.lat),
+        lon: parseFloat(result.lon),
+      };
+    });
+  };
+
+  const formatarEndereco = (props) => {
+    const partes = [];
+    if (props.name && props.name !== props.street) partes.push(props.name);
+    if (props.street) partes.push(props.street);
+    if (props.suburb || props.district)
+      partes.push(props.suburb || props.district);
+    if (props.city) partes.push(props.city);
+
+    const estado = props.state_code || props.state;
+    const valoresRegionais = [
+      "Southeast",
+      "South",
+      "Northeast",
+      "North",
+      "Central-West",
+      "Sudeste",
+      "Sul",
+      "Nordeste",
+      "Norte",
+      "Centro-Oeste",
+    ];
+    if (estado && !valoresRegionais.includes(estado)) {
+      partes.push(estado);
+    }
+
+    return partes.slice(0, 5).join(", ");
   };
 
   const buscarSugestoes = async (texto) => {
@@ -51,7 +134,6 @@ export function useGeocodingAutocomplete() {
     const signal = abortControllerRef.current.signal;
 
     try {
-      const saoCarlosBbox = "-47.9530,-22.0470,-47.8298,-21.9706";
       const timeout = 8000;
 
       const fetchWithTimeout = async (url) => {
@@ -62,6 +144,19 @@ export function useGeocodingAutocomplete() {
         try {
           const response = await fetch(url, { signal });
           clearTimeout(timeoutId);
+
+          if (response.status === 429) {
+            if (!autocompleteFallbackToastShown) {
+              toast.info("Limite de requisições atingido", {
+                description:
+                  "Usando servidor alternativo para buscar endereços.",
+                duration: 5000,
+              });
+              autocompleteFallbackToastShown = true;
+            }
+            return null;
+          }
+
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
           return response.json();
         } catch (error) {
@@ -70,32 +165,35 @@ export function useGeocodingAutocomplete() {
         }
       };
 
-      const [dataSaoCarlos, dataBrasil] = await Promise.all([
-        fetchWithTimeout(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-            texto + ", São Carlos, SP"
-          )}&limit=5&countrycodes=br&viewbox=${saoCarlosBbox}&bounded=1&addressdetails=1`
-        ),
-        fetchWithTimeout(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-            texto
-          )}&limit=5&countrycodes=br&addressdetails=1`
-        ),
-      ]);
-
-      const todosDados = [...dataSaoCarlos, ...dataBrasil];
-
-      const dadosUnicos = todosDados.filter(
-        (item, index, self) =>
-          index ===
-          self.findIndex((t) => t.lat === item.lat && t.lon === item.lon)
+      const data = await fetchWithTimeout(
+        `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(
+          texto
+        )}&filter=countrycode:br&bias=proximity:-47.890,-21.988&limit=15&apiKey=${GEOAPIFY_API_KEY}`
       );
 
-      const sugestoesBrasil = dadosUnicos.slice(0, 10).map((item) => ({
-        nome: formatarEndereco(item.display_name),
-        nomeCompleto: item.display_name,
-        lat: parseFloat(item.lat),
-        lon: parseFloat(item.lon),
+      if (data === null) {
+        const sugestoesNominatim = await buscarNominatim(texto, signal);
+        geocodingCache.set(cacheKey, {
+          data: sugestoesNominatim,
+          timestamp: Date.now(),
+        });
+        setSugestoes(sugestoesNominatim);
+        setIsLoading(false);
+        return;
+      }
+
+      if (!data.features || data.features.length === 0) {
+        setSugestoes([]);
+        setIsLoading(false);
+        return;
+      }
+
+      const sugestoesBrasil = data.features.map((feature) => ({
+        nome: formatarEndereco(feature.properties),
+        nomeCompleto:
+          feature.properties.formatted || formatarEndereco(feature.properties),
+        lat: feature.geometry.coordinates[1],
+        lon: feature.geometry.coordinates[0],
       }));
 
       geocodingCache.set(cacheKey, {
@@ -103,7 +201,7 @@ export function useGeocodingAutocomplete() {
         timestamp: Date.now(),
       });
 
-      if (geocodingCache.size > 100) {
+      if (geocodingCache.size > MAX_CACHE_SIZE) {
         const firstKey = geocodingCache.keys().next().value;
         geocodingCache.delete(firstKey);
       }
@@ -113,8 +211,28 @@ export function useGeocodingAutocomplete() {
       if (err.name === "AbortError") {
         return;
       }
-      console.error("Erro ao buscar sugestões:", err);
-      setSugestoes([]);
+
+      if (!autocompleteFallbackToastShown) {
+        toast.info("Servidor alternativo em uso", {
+          description: "Buscando endereços normalmente.",
+          duration: 4000,
+        });
+        autocompleteFallbackToastShown = true;
+      }
+      try {
+        const sugestoesNominatim = await buscarNominatim(texto, signal);
+        geocodingCache.set(cacheKey, {
+          data: sugestoesNominatim,
+          timestamp: Date.now(),
+        });
+        setSugestoes(sugestoesNominatim);
+      } catch (nominatimErr) {
+        toast.error("Erro ao buscar endereços", {
+          description: "Tente novamente em alguns instantes.",
+          duration: 4000,
+        });
+        setSugestoes([]);
+      }
     } finally {
       setIsLoading(false);
     }

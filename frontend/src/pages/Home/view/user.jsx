@@ -85,7 +85,7 @@ export default function UserView() {
                         </p>
                       </div>
                       <div className="hidden sm:block p-2 bg-blue-500/10 rounded-full">
-                        <Clock className="h-5 w-5 text-blue-500" />
+                        <Clock className="h-5 w-5 text-blue-500" aria-hidden="true" />
                       </div>
                     </div>
                   </CardContent>
@@ -105,7 +105,7 @@ export default function UserView() {
                         </p>
                       </div>
                       <div className="hidden sm:block p-2 bg-green-500/10 rounded-full">
-                        <CheckCircle2 className="h-5 w-5 text-green-500" />
+                        <CheckCircle2 className="h-5 w-5 text-green-500" aria-hidden="true" />
                       </div>
                     </div>
                   </CardContent>
@@ -125,7 +125,7 @@ export default function UserView() {
                         </p>
                       </div>
                       <div className="hidden sm:block p-2 bg-purple-500/10 rounded-full">
-                        <TrendingUp className="h-5 w-5 text-purple-500" />
+                        <TrendingUp className="h-5 w-5 text-purple-500" aria-hidden="true" />
                       </div>
                     </div>
                   </CardContent>

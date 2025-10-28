@@ -5,11 +5,17 @@ export default function Header() {
   return (
     <>
       <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b px-4 sm:hidden bg-sidebar">
-        <SidebarTrigger className="bg-gray-200 hover:bg-gray-300 border border-border" />
+        <SidebarTrigger
+          className="bg-gray-200 hover:bg-gray-300 border border-border"
+          aria-label="Abrir menu de navegação"
+        />
         <h1 className="font-semibold text-lg m-0 text-foreground">SGA</h1>
       </header>
       <header className="hidden sm:flex sticky top-0 z-30 h-14 items-center gap-4 px-4">
-        <SidebarTrigger className="border bg-gray-200 hover:bg-gray-400" />
+        <SidebarTrigger
+          className="border bg-gray-200 hover:bg-gray-400"
+          aria-label="Abrir menu de navegação"
+        />
       </header>
     </>
   );

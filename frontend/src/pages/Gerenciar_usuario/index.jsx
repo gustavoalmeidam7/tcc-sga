@@ -1,35 +1,20 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Pencil } from "lucide-react";
-import { ROLE_LABELS, ROLES } from "@/lib/roles";
+import { Loader2, Eye } from "lucide-react";
+import { ROLE_LABELS } from "@/lib/roles";
 import authService from "@/services/authService";
 import { toast } from "sonner";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { formatarData } from "@/lib/date-utils";
 
 function Usuarios() {
+  const navigate = useNavigate();
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [usuarioEdit, setUsuarioEdit] = useState(null);
-  const [novoCargo, setNovoCargo] = useState("");
 
   useEffect(() => {
     carregarUsuarios();
@@ -39,12 +24,13 @@ function Usuarios() {
     setLoading(true);
     try {
       const response = await authService.getAllUsers();
-      const dados = Array.isArray(response) ? response : (response.data || []);
+      const dados = Array.isArray(response) ? response : response.data || [];
       setUsuarios(dados);
     } catch (err) {
       console.error("Erro ao carregar usuários:", err);
-      toast.error('Erro ao carregar usuários', {
-        description: 'Não foi possível carregar a lista de usuários. Tente novamente.',
+      toast.error("Erro ao carregar usuários", {
+        description:
+          "Não foi possível carregar a lista de usuários. Tente novamente.",
         duration: 5000,
       });
     } finally {
@@ -52,35 +38,24 @@ function Usuarios() {
     }
   };
 
-
   const getRoleBadgeColor = (cargo) => {
     const colors = {
       0: "bg-blue-500 hover:bg-blue-600",
-      1: "bg-orange-500 hover:bg-orange-600",
+      1: "bg-green-500 hover:bg-green-600",
       2: "bg-purple-500 hover:bg-purple-600",
     };
     return colors[cargo] || "bg-gray-500";
   };
 
-  const handleEditarCargo = (usuario) => {
-    setUsuarioEdit(usuario);
-    setNovoCargo(usuario.cargo.toString());
-  };
-
-  const handleSalvarCargo = async () => {
-    if (!usuarioEdit) return;
-
-    setUsuarioEdit(null);
-    setNovoCargo("");
+  const handleVerDetalhes = (usuario) => {
+    navigate(`/usuarios/detalhes/${usuario.id}`);
   };
 
   const columns = [
     {
       accessorKey: "nome",
       header: "Nome",
-      cell: ({ row }) => (
-        <div className="font-medium">{row.original.nome}</div>
-      ),
+      cell: ({ row }) => <div className="font-medium">{row.original.nome}</div>,
       enableColumnFilter: true,
     },
     {
@@ -94,9 +69,7 @@ function Usuarios() {
     {
       accessorKey: "nascimento",
       header: "Data de Nascimento",
-      cell: ({ row }) => (
-        <div>{formatarData(row.original.nascimento)}</div>
-      ),
+      cell: ({ row }) => <div>{formatarData(row.original.nascimento)}</div>,
       enableColumnFilter: false,
     },
     {
@@ -123,10 +96,10 @@ function Usuarios() {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => handleEditarCargo(row.original)}
+          onClick={() => handleVerDetalhes(row.original)}
         >
-          <Pencil className="h-4 w-4 mr-1" />
-          Editar Cargo
+          <Eye className="h-4 w-4 mr-1" aria-hidden="true" />
+          Ver Detalhes
         </Button>
       ),
       enableColumnFilter: false,
@@ -167,60 +140,6 @@ function Usuarios() {
           )}
         </CardContent>
       </Card>
-
-      <Dialog open={!!usuarioEdit} onOpenChange={() => setUsuarioEdit(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Editar Cargo do Usuário</DialogTitle>
-            <DialogDescription>
-              Altere o cargo de {usuarioEdit?.nome}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Cargo Atual</label>
-              <div className="flex items-center gap-2">
-                <Badge className={getRoleBadgeColor(usuarioEdit?.cargo)}>
-                  {ROLE_LABELS[usuarioEdit?.cargo]}
-                </Badge>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Novo Cargo</label>
-              <Select value={novoCargo} onValueChange={setNovoCargo}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o cargo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={ROLES.USER.toString()}>
-                    {ROLE_LABELS[ROLES.USER]}
-                  </SelectItem>
-                  <SelectItem value={ROLES.DRIVER.toString()}>
-                    {ROLE_LABELS[ROLES.DRIVER]}
-                  </SelectItem>
-                  <SelectItem value={ROLES.MANAGER.toString()}>
-                    {ROLE_LABELS[ROLES.MANAGER]}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setUsuarioEdit(null)}
-            >
-              Cancelar
-            </Button>
-            <Button onClick={handleSalvarCargo}>
-              Salvar Alterações
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </main>
   );
 }

@@ -33,13 +33,15 @@ export function useUserDashboard() {
         queryKey: ["geocode", v.lat_inicio, v.long_inicio],
         queryFn: () => reverseGeocode(v.lat_inicio, v.long_inicio),
         enabled: !!(v.lat_inicio && v.long_inicio),
-        staleTime: 1000 * 60 * 30,
+        staleTime: 1000 * 60 * 60 * 24,
+        cacheTime: 1000 * 60 * 60 * 24 * 7,
       },
       {
         queryKey: ["geocode", v.lat_fim, v.long_fim],
         queryFn: () => reverseGeocode(v.lat_fim, v.long_fim),
         enabled: !!(v.lat_fim && v.long_fim),
-        staleTime: 1000 * 60 * 30,
+        staleTime: 1000 * 60 * 60 * 24,
+        cacheTime: 1000 * 60 * 60 * 24 * 7,
       },
     ]),
   });
