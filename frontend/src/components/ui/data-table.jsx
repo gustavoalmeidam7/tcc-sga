@@ -1,4 +1,4 @@
-import { useState, Fragment } from "react";
+import { useState, Fragment, memo } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -22,6 +22,126 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import LoadingSpinner from "@/components/layout/loading";
+
+const MemoizedDesktopRow = memo(({ row, renderExpandedRow, columns, index }) => (
+  <Fragment>
+    <TableRow
+      data-state={row.getIsSelected() && "selected"}
+      className={`
+        transition-all duration-200 ease-in-out
+        hover:bg-accent/80 hover:shadow-md hover:-translate-y-0.5
+        ${index % 2 === 0 ? 'bg-background' : 'bg-muted/30'}
+      `}
+    >
+      {renderExpandedRow && (
+        <TableCell className="w-12 py-4 px-4 text-sm rounded-l-md">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => row.toggleExpanded()}
+            className="h-8 w-8 p-0"
+            aria-label={row.getIsExpanded() ? "Ocultar detalhes" : "Ver detalhes"}
+          >
+            {row.getIsExpanded() ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+          </Button>
+        </TableCell>
+      )}
+      {row.getVisibleCells().map((cell, cellIndex) => {
+        const isFirst = cellIndex === 0 && !renderExpandedRow;
+        const isLast = cellIndex === row.getVisibleCells().length - 1;
+        return (
+          <TableCell
+            key={cell.id}
+            className={`py-4 px-4 text-sm ${isFirst ? 'rounded-l-md' : ''} ${isLast ? 'rounded-r-md' : ''}`}
+          >
+            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          </TableCell>
+        );
+      })}
+    </TableRow>
+    {row.getIsExpanded() && renderExpandedRow && (
+      <TableRow>
+        <TableCell colSpan={columns.length + (renderExpandedRow ? 1 : 0)} className="p-0 rounded-md overflow-hidden">
+          <div className="px-6 py-4 bg-muted/50 border-t border-b">
+            {renderExpandedRow(row.original)}
+          </div>
+        </TableCell>
+      </TableRow>
+    )}
+  </Fragment>
+));
+
+const MemoizedMobileCard = memo(({ row, renderExpandedRow, index }) => (
+  <Card
+    className={`
+      transition-all duration-200 ease-in-out
+      hover:shadow-md hover:-translate-y-0.5
+      overflow-hidden
+      ${index % 2 === 0 ? 'bg-background' : 'bg-muted/30'}
+    `}
+  >
+    <CardContent className="p-4 sm:p-4 space-y-3 sm:space-y-3">
+      {renderExpandedRow && (
+        <div className="flex justify-end pb-3 border-b">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => row.toggleExpanded()}
+            className="h-8 text-xs px-3"
+            aria-expanded={row.getIsExpanded()}
+          >
+            {row.getIsExpanded() ? (
+              <>
+                <ChevronDown className="h-4 w-4 mr-1.5" aria-hidden="true" />
+                Ocultar detalhes
+              </>
+            ) : (
+              <>
+                <ChevronRight className="h-4 w-4 mr-1.5" aria-hidden="true" />
+                Ver detalhes
+              </>
+            )}
+          </Button>
+        </div>
+      )}
+      <div className="space-y-2.5">
+        {row.getVisibleCells().map((cell) => {
+          const header = cell.column.columnDef.header;
+          const metaHeaderText = cell.column.columnDef.meta?.headerText;
+          const headerText = metaHeaderText || (typeof header === 'string' ? header : cell.column.id);
+
+          if (cell.column.id === 'actions') {
+            return (
+              <div key={cell.id} className="pt-2 border-t flex justify-end">
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </div>
+            );
+          }
+
+          return (
+            <div key={cell.id} className="grid grid-cols-[minmax(65px,auto)_1fr] gap-6 sm:gap-8 items-start min-w-0">
+              <span className="text-xs font-semibold text-foreground whitespace-nowrap">
+                {headerText}
+              </span>
+              <span className="text-sm text-foreground font-medium break-words overflow-hidden">
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      {row.getIsExpanded() && renderExpandedRow && (
+        <div className="pt-3 mt-3 border-t">
+          {renderExpandedRow(row.original)}
+        </div>
+      )}
+    </CardContent>
+  </Card>
+));
 
 export function DataTable({ columns, data, filterColumn, filterPlaceholder, renderExpandedRow, isLoading = false }) {
   const [sorting, setSorting] = useState([]);
@@ -101,54 +221,13 @@ export function DataTable({ columns, data, filterColumn, filterPlaceholder, rend
               {table.getRowModel().rows?.length ? (
                 <>
                   {table.getRowModel().rows.map((row, index) => (
-                    <Fragment key={row.id}>
-                      <TableRow
-                        data-state={row.getIsSelected() && "selected"}
-                        className={`
-                          transition-all duration-200 ease-in-out
-                          hover:bg-accent/80 hover:shadow-md hover:-translate-y-0.5
-                          ${index % 2 === 0 ? 'bg-background' : 'bg-muted/30'}
-                        `}
-                      >
-                        {renderExpandedRow && (
-                          <TableCell className="w-12 py-4 px-4 text-sm rounded-l-md">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => row.toggleExpanded()}
-                              className="h-8 w-8 p-0"
-                            >
-                              {row.getIsExpanded() ? (
-                                <ChevronDown className="h-4 w-4" />
-                              ) : (
-                                <ChevronRight className="h-4 w-4" />
-                              )}
-                            </Button>
-                          </TableCell>
-                        )}
-                        {row.getVisibleCells().map((cell, cellIndex) => {
-                          const isFirst = cellIndex === 0 && !renderExpandedRow;
-                          const isLast = cellIndex === row.getVisibleCells().length - 1;
-                          return (
-                            <TableCell
-                              key={cell.id}
-                              className={`py-4 px-4 text-sm ${isFirst ? 'rounded-l-md' : ''} ${isLast ? 'rounded-r-md' : ''}`}
-                            >
-                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                            </TableCell>
-                          );
-                        })}
-                      </TableRow>
-                      {row.getIsExpanded() && renderExpandedRow && (
-                        <TableRow key={`${row.id}-expanded`}>
-                          <TableCell colSpan={columns.length + (renderExpandedRow ? 1 : 0)} className="p-0 rounded-md overflow-hidden">
-                            <div className="px-6 py-4 bg-muted/50 border-t border-b">
-                              {renderExpandedRow(row.original)}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </Fragment>
+                    <MemoizedDesktopRow
+                      key={row.id}
+                      row={row}
+                      renderExpandedRow={renderExpandedRow}
+                      columns={columns}
+                      index={index}
+                    />
                   ))}
                   {Array.from({
                     length: Math.max(0, table.getState().pagination.pageSize - table.getRowModel().rows.length)
@@ -180,72 +259,13 @@ export function DataTable({ columns, data, filterColumn, filterPlaceholder, rend
         <div className="md:hidden flex-1 space-y-2 sm:space-y-3">
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row, index) => (
-            <Card
-              key={row.id}
-              className={`
-                transition-all duration-200 ease-in-out
-                hover:shadow-md hover:-translate-y-0.5
-                overflow-hidden
-                ${index % 2 === 0 ? 'bg-background' : 'bg-muted/30'}
-              `}
-            >
-              <CardContent className="p-4 sm:p-4 space-y-3 sm:space-y-3">
-                {renderExpandedRow && (
-                  <div className="flex justify-end pb-3 border-b">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => row.toggleExpanded()}
-                      className="h-8 text-xs px-3"
-                    >
-                      {row.getIsExpanded() ? (
-                        <>
-                          <ChevronDown className="h-4 w-4 mr-1.5" />
-                          Ocultar detalhes
-                        </>
-                      ) : (
-                        <>
-                          <ChevronRight className="h-4 w-4 mr-1.5" />
-                          Ver detalhes
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                )}
-                <div className="space-y-2.5">
-                  {row.getVisibleCells().map((cell) => {
-                    const header = cell.column.columnDef.header;
-                    const metaHeaderText = cell.column.columnDef.meta?.headerText;
-                    const headerText = metaHeaderText || (typeof header === 'string' ? header : cell.column.id);
-
-                    if (cell.column.id === 'actions') {
-                      return (
-                        <div key={cell.id} className="pt-2 border-t flex justify-end">
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </div>
-                      );
-                    }
-
-                    return (
-                      <div key={cell.id} className="grid grid-cols-[minmax(65px,auto)_1fr] gap-6 sm:gap-8 items-start min-w-0">
-                        <span className="text-xs font-semibold text-foreground whitespace-nowrap">
-                          {headerText}
-                        </span>
-                        <span className="text-sm text-foreground font-medium break-words overflow-hidden">
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-                {row.getIsExpanded() && renderExpandedRow && (
-                  <div className="pt-3 mt-3 border-t">
-                    {renderExpandedRow(row.original)}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))
+              <MemoizedMobileCard
+                key={row.id}
+                row={row}
+                renderExpandedRow={renderExpandedRow}
+                index={index}
+              />
+            ))
         ) : (
           <Card>
             <CardContent className="p-4 sm:p-6 text-center">

@@ -35,7 +35,11 @@ const publicNavItems = [
 
 const Logo = () => (
   <SidebarHeader className="p-4">
-      <Link to="/home" className="flex items-center gap-3" title="SGA - Início">
+      <Link
+        to="/home"
+        className="flex items-center gap-3"
+        aria-label="SGA - Sistema de Gestão de Ambulâncias - Ir para página inicial"
+      >
       <h1>Logo</h1>
       </Link>
   </SidebarHeader>
@@ -53,10 +57,10 @@ const NavMenuItem = ({ item, pathname, ItemView }) => {
       <Collapsible open={isOpen} onOpenChange={setIsOpen} className="group/collapsible">
         <SidebarMenuItem>
           <CollapsibleTrigger asChild>
-            <SidebarMenuButton tooltip={item.label} className="h-9">
-              <item.icon className="h-5 w-5" />
+            <SidebarMenuButton tooltip={item.label} className="h-9" aria-expanded={isOpen}>
+              <item.icon className="h-5 w-5" aria-hidden="true" />
               <span className="font-medium text-base">{item.label}</span>
-              <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
+              <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" aria-hidden="true" />
             </SidebarMenuButton>
           </CollapsibleTrigger>
           <CollapsibleContent>
@@ -65,7 +69,7 @@ const NavMenuItem = ({ item, pathname, ItemView }) => {
                 <SidebarMenuSubItem key={subItem.to}>
                   <SidebarMenuSubButton asChild isActive={pathname === subItem.to}>
                     <Link to={subItem.to}>
-                      <subItem.icon className="h-4 w-4" />
+                      <subItem.icon className="h-4 w-4" aria-hidden="true" />
                       <span>{subItem.label}</span>
                     </Link>
                   </SidebarMenuSubButton>
@@ -86,7 +90,7 @@ const NavMenuItem = ({ item, pathname, ItemView }) => {
           tooltip={item.label}
           className="h-9"
         >
-          <item.icon className="h-5 w-5" />
+          <item.icon className="h-5 w-5" aria-hidden="true" />
           <span className="font-medium text-base">{item.label}</span>
         </SidebarMenuButton>
       </Link>
@@ -101,12 +105,15 @@ const UserProfile = ({ user, onLogout }) => {
     <SidebarFooter className="p-2 border-t">
       <DropdownMenu >
         <DropdownMenuTrigger asChild>
-          <SidebarMenuButton className="group/user-profile flex w-full items-center gap-3 rounded-md p-2 text-left hover:bg-accent">
-            <User className="text-background-foreground" />
+          <SidebarMenuButton
+            className="group/user-profile flex w-full items-center gap-3 rounded-md p-2 text-left hover:bg-accent"
+            aria-label={`Menu de ${user?.nome || "usuário"}`}
+          >
+            <User className="text-background-foreground" aria-hidden="true" />
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate text-base font-medium">{user?.nome}</span>
             </div>
-            <ChevronsUpDown className="ml-auto size-4" />
+            <ChevronsUpDown className="ml-auto size-4" aria-hidden="true" />
           </SidebarMenuButton>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-45" align="end" forceMount>

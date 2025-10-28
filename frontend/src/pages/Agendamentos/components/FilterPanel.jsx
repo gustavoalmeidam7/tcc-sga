@@ -42,13 +42,14 @@ function FilterPanel({
           variant="outline"
           onClick={onToggleFiltrosAvancados}
           className="w-full sm:w-auto"
+          aria-expanded={filtrosAvancadosAbertos}
         >
-          <Filter className="h-4 w-4 mr-2" />
+          <Filter className="h-4 w-4 mr-2" aria-hidden="true" />
           Filtros Avançados
           {filtrosAvancadosAbertos ? (
-            <ChevronUp className="h-4 w-4 ml-2" />
+            <ChevronUp className="h-4 w-4 ml-2" aria-hidden="true" />
           ) : (
-            <ChevronDown className="h-4 w-4 ml-2" />
+            <ChevronDown className="h-4 w-4 ml-2" aria-hidden="true" />
           )}
         </Button>
       </div>
