@@ -1,12 +1,14 @@
 from dotenv import load_dotenv
 import os
 
+from src.Logging import Logging, Level
+
 if not load_dotenv("./.env"):
-    print("Erro ao carregar o arquivo \".env\". Verifique se ele existe e está no diretório correto ou se contem alguma chave.")
+    Logging.log("Erro ao carregar o arquivo \".env\". Verifique se ele existe e está no diretório correto ou se contem alguma chave.", Level.WARN)
 
 def get_env_var(key: str | None = None, default: str | None = None) -> str | None:
     value = os.environ.get(key, default)
     if value == default:
-        print(f"Chave {key} não encontrada no .env file")
+        Logging.log(f"Chave {key} não encontrada no .env file", Level.WARN)
     
     return value
