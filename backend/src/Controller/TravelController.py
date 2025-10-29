@@ -10,23 +10,23 @@ from src.Decorators.UserDecorators import GET_AUTENTHICATED_USER
 
 from src.Service import TravelService
 
-TravelRouter = APIRouter(
+TRAVEL_ROUTER = APIRouter(
     prefix="/travel",
     tags=["travel"]
 )
 
-@TravelRouter.get("/")
+@TRAVEL_ROUTER.get("/")
 async def get_travels(user: GET_AUTENTHICATED_USER, viagensPorPagina: int = 15, pagina: int = 0) -> list[TravelResponseSchema]:
     return TravelService.find_all_travels(viagensPorPagina, pagina)
 
-@TravelRouter.get("/{id}")
+@TRAVEL_ROUTER.get("/{id}")
 async def get_travel_by_id(user: GET_AUTENTHICATED_USER, id: UUID) -> TravelResponseSchema:
     return TravelService.find_travel_by_id(id)
 
-@TravelRouter.post("/")
+@TRAVEL_ROUTER.post("/")
 async def post_travel(user: GET_AUTENTHICATED_USER, travel: TravelCreateSchema) -> TravelResponseSchema:
     return TravelService.create_travel(travel, user)
 
-@TravelRouter.delete("/{id}")
+@TRAVEL_ROUTER.delete("/{id}")
 async def delete_travel(id: str) -> TravelDeleteResponseSchema:
     return TravelService.remove_travel(id)
