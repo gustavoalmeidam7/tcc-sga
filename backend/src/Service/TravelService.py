@@ -23,6 +23,12 @@ def find_all_travels(itemsPerPage: int = 15, page: int = 0) -> list[TravelRespon
 
     return list(map(TravelResponseSchema.model_validate, travels))
 
+def find_assigned_travels(user: User, page: int, pageSize: int) -> list[TravelResponseSchema]:
+    """ Encontra as viagens assinadas para usuário user """
+
+    travels = TravelRepository.find_assigned_travels(user, page, pageSize)
+    return list(map(lambda t: TravelResponseSchema.model_validate(t), travels))
+
 def create_travel(travel: TravelCreateSchema, user: User) -> TravelResponseSchema:
     """ Cria uma nova viagem """
 

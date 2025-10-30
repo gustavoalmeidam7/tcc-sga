@@ -30,9 +30,6 @@ def assign_driver_travel(driver: User, travelId: UUID) -> TravelResponseSchema:
     
     return TravelResponseSchema.model_validate(assingedTravel)
 
-def find_assigned_travels(driver: User) -> None:
-    pass
-
 def is_user_driver(user: User) -> bool:
     return user.cargo > 0
 

@@ -9,9 +9,13 @@ def insert_travel(travel: Travel) -> Travel:
     return travel
 
 
-def find_assigned_travels(user: User) -> list[Travel]:
+def find_assigned_travels(user: User, page: int, pageSize: int) -> list[Travel]:
     """ Encontra todas viagens atribuidas a o usuário user """
-    return Travel.select().where(Travel.id_motorista == user | Travel.id_paciente == user)
+    travels = (Travel.select()
+                      .where(Travel.id_paciente == user.id or Travel.id_motorista == user.id)
+                      .paginate(page, pageSize))
+    
+    return list(travels)
 
 def find_all_travels(itemsPerPage: int = 15, page: int = 0) -> list[Travel]:
     """ Encontra todas viagens e ordena de mais recente para mais antiga """
