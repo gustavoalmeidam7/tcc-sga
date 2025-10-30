@@ -10,7 +10,7 @@ export async function getUpgradeTokenInfo(token) {
   return response.data;
 }
 
-export async function upgradeAccount(token) {
-  const response = await api.post(`/upgradetoken/${token}`);
+export async function upgradeAccount(token, driverFields = null) {
+  const response = await api.post(`/upgradetoken/${token}`, driverFields);
   return response.data;
 }

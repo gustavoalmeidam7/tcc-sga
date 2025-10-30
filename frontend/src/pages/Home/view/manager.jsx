@@ -23,6 +23,7 @@ import QuickActions from "../components/manager/QuickActions";
 import RecentActivity from "../components/manager/RecentActivity";
 import { useGeocodeQueries } from "@/hooks/useGeocodeQueries";
 import { useEnrichedTravels } from "@/hooks/useEnrichedTravels";
+import { useDriversInfo } from "@/hooks/useDriversInfo";
 import { showErrorToast } from "@/lib/error-utils";
 
 function ManagerView() {
@@ -75,6 +76,8 @@ function ManagerView() {
   );
 
   const motoristas = useMemo(() => users.filter((u) => u.cargo === 1), [users]);
+
+  const { enrichedDrivers } = useDriversInfo(motoristas);
 
   const columns_viagens_with_nav = useMemo(
     () => createColumnsViagens(navigate),
@@ -133,7 +136,7 @@ function ManagerView() {
         <DataTablesTabs
           viagensPendentesPreview={viagensPendentesPreview}
           viagensPendentesTotal={viagensPendentes.length}
-          motoristas={motoristas}
+          motoristas={enrichedDrivers}
           columnsViagens={columns_viagens_with_nav}
           columnsMotoristas={columns_motoristas}
           onVerTodasClick={() => navigate("/agendamentos")}

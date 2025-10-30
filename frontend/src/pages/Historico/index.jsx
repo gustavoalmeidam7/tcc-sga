@@ -2,7 +2,7 @@ import { useMemo, useEffect, memo } from "react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { getTravels } from "@/services/travelService";
+import { getTravels, getAssignedTravels } from "@/services/travelService";
 import { DataTable } from "@/components/ui/data-table";
 import { Card, CardContent } from "@/components/ui/card";
 import { History } from "lucide-react";
@@ -12,17 +12,21 @@ import { useGeocodeQueries } from "@/hooks/useGeocodeQueries";
 import { useEnrichedTravels } from "@/hooks/useEnrichedTravels";
 import { showErrorToast } from "@/lib/error-utils";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
+import { useRole } from "@/hooks/use-role";
+import { ROLES } from "@/lib/roles";
 
 function Historico() {
   const navigate = useNavigate();
+  const { userRole } = useRole();
+  const isManager = userRole === ROLES.MANAGER;
 
   const {
     data: viagens = [],
     isLoading: loading,
     error: queryError,
   } = useQuery({
-    queryKey: ["travels", "historico"],
-    queryFn: () => getTravels(50, 0),
+    queryKey: ["travels", isManager ? "historico-all" : "historico-assigned"],
+    queryFn: () => isManager ? getTravels(50, 0) : getAssignedTravels(50, 0),
     staleTime: 1000 * 60 * 5,
   });
 

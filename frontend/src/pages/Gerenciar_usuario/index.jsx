@@ -131,7 +131,7 @@ function Usuarios() {
             size="sm"
           >
             <Sparkles className="h-4 w-4 mr-2" />
-            Gerar Token de Gerente
+            Gerar Token de Motorista
           </Button>
         </div>
         <div className="absolute top-0 right-0 w-32 h-32 md:w-48 md:h-48 bg-primary/5 rounded-full blur-3xl" />
