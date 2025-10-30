@@ -1,5 +1,5 @@
-import { useState, useMemo, memo } from "react";
-import { useQuery, useQueries } from "@tanstack/react-query";
+import { useState, useMemo, memo, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -21,7 +21,9 @@ import StatCards from "../components/manager/StatCards";
 import DataTablesTabs from "../components/manager/DataTablesTabs";
 import QuickActions from "../components/manager/QuickActions";
 import RecentActivity from "../components/manager/RecentActivity";
-import { reverseGeocode } from "@/hooks/useReverseGeocode";
+import { useGeocodeQueries } from "@/hooks/useGeocodeQueries";
+import { useEnrichedTravels } from "@/hooks/useEnrichedTravels";
+import { showErrorToast } from "@/lib/error-utils";
 
 function ManagerView() {
   const { user } = useAuth();
@@ -29,84 +31,38 @@ function ManagerView() {
   const [isAmbulanciasModalOpen, setIsAmbulanciasModalOpen] = useState(false);
   const [isResumoModalOpen, setIsResumoModalOpen] = useState(false);
 
-  const { data: travels = [], isLoading: isLoadingTravels } = useQuery({
+  const { data: travels = [], isLoading: isLoadingTravels, error: travelsError } = useQuery({
     queryKey: ["travels"],
     queryFn: () => getTravels(15, 0),
     staleTime: 1000 * 60 * 2,
   });
 
-  const { data: users = [] } = useQuery({
+  const { data: users = [], error: usersError } = useQuery({
     queryKey: ["users"],
     queryFn: () => authService.getAllUsers(),
     staleTime: 1000 * 60 * 5,
   });
 
-  const geocodeQueries = useQueries({
-    queries: travels.flatMap((t) => [
-      {
-        queryKey: ["geocode", t.lat_inicio, t.long_inicio],
-        queryFn: () => reverseGeocode(t.lat_inicio, t.long_inicio),
-        enabled: !!(t.lat_inicio && t.long_inicio),
-        staleTime: 1000 * 60 * 60 * 24,
-        cacheTime: 1000 * 60 * 60 * 24 * 7,
-      },
-      {
-        queryKey: ["geocode", t.lat_fim, t.long_fim],
-        queryFn: () => reverseGeocode(t.lat_fim, t.long_fim),
-        enabled: !!(t.lat_fim && t.long_fim),
-        staleTime: 1000 * 60 * 60 * 24,
-        cacheTime: 1000 * 60 * 60 * 24 * 7,
-      },
-    ]),
-  });
+  const { geocodeMap } = useGeocodeQueries(travels);
+  const { enrichedTravels, hasIncompleteData } = useEnrichedTravels(travels, geocodeMap);
 
-  const userIds = useMemo(() => {
-    const ids = new Set();
-    travels.forEach((t) => t.id_paciente && ids.add(t.id_paciente));
-    return Array.from(ids);
-  }, [travels]);
+  const isLoadingData = isLoadingTravels || hasIncompleteData;
 
-  const userQueries = useQueries({
-    queries: userIds.map((userId) => ({
-      queryKey: ["user", userId],
-      queryFn: () => authService.getUserById(userId),
-      staleTime: 1000 * 60 * 5,
-    })),
-  });
+  useEffect(() => {
+    if (travelsError) {
+      showErrorToast(travelsError, "Erro ao carregar viagens", {
+        defaultMessage: "Não foi possível carregar as viagens.",
+      });
+    }
+  }, [travelsError]);
 
-  const enrichedTravels = useMemo(() => {
-    const userMap = new Map();
-    userIds.forEach((id, index) => {
-      if (userQueries[index]?.data) {
-        userMap.set(id, userQueries[index].data);
-      }
-    });
-
-    return travels.map((viagem, index) => {
-      const origemIndex = index * 2;
-      const destinoIndex = index * 2 + 1;
-
-      return {
-        ...viagem,
-        _endereco_origem: geocodeQueries[origemIndex]?.data || null,
-        _endereco_destino: geocodeQueries[destinoIndex]?.data || null,
-        _solicitante: userMap.get(viagem.id_paciente)?.nome || null,
-      };
-    });
-  }, [travels, geocodeQueries, userQueries, userIds]);
-
-  const isLoadingData = useMemo(() => {
-    if (isLoadingTravels) return true;
-
-    const hasIncompleteData = enrichedTravels.some(
-      (t) =>
-        t._endereco_origem === null ||
-        t._endereco_destino === null ||
-        t._solicitante === null
-    );
-
-    return hasIncompleteData;
-  }, [isLoadingTravels, enrichedTravels]);
+  useEffect(() => {
+    if (usersError) {
+      showErrorToast(usersError, "Erro ao carregar usuários", {
+        defaultMessage: "Não foi possível carregar a lista de motoristas.",
+      });
+    }
+  }, [usersError]);
 
   const viagensPendentes = useMemo(
     () => enrichedTravels.filter((t) => t.realizado === 0),

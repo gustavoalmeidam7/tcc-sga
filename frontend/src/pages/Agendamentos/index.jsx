@@ -1,15 +1,9 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, memo } from "react";
 import { motion } from "framer-motion";
-import {
-  useQuery,
-  useQueries,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getTravels, deleteTravel } from "@/services/travelService";
 import { DataTable } from "@/components/ui/data-table";
 import { Card, CardContent } from "@/components/ui/card";
-import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { createColumns } from "./columns";
 import { useRole } from "@/hooks/use-role";
@@ -18,7 +12,8 @@ import { TravelStatus, TRAVEL_STATUS_LABELS } from "@/lib/travel-status";
 import FilterPanel from "./components/FilterPanel";
 import DeleteTravelDialog from "./components/DeleteTravelDialog";
 import { useGeocodeQueries } from "@/hooks/useGeocodeQueries";
-import authService from "@/services/authService";
+import { useEnrichedTravels } from "@/hooks/useEnrichedTravels";
+import { showErrorToast, showSuccessToast } from "@/lib/error-utils";
 
 function Agendamentos() {
   const queryClient = useQueryClient();
@@ -53,72 +48,39 @@ function Agendamentos() {
   );
 
   const { geocodeMap } = useGeocodeQueries(viagensAtivas);
+  const { enrichedTravels: enrichedViagens, hasIncompleteData } = useEnrichedTravels(
+    viagensAtivas,
+    geocodeMap
+  );
 
-  const userIds = useMemo(() => {
-    const ids = new Set();
-    viagensAtivas.forEach((t) => t.id_paciente && ids.add(t.id_paciente));
-    return Array.from(ids);
-  }, [viagensAtivas]);
-
-  const userQueries = useQueries({
-    queries: userIds.length > 0
-      ? userIds.map((userId) => ({
-          queryKey: ["user", userId],
-          queryFn: () => authService.getUserById(userId),
-          staleTime: 1000 * 60 * 5,
-        }))
-      : [],
-  });
-
-  const enrichedViagens = useMemo(() => {
-    const userMap = new Map();
-    userIds.forEach((id, index) => {
-      if (userQueries[index]?.data) {
-        userMap.set(id, userQueries[index].data);
-      }
-    });
-
-    return viagensAtivas.map((viagem) => {
-      return {
-        ...viagem,
-        _endereco_origem: geocodeMap.get(`${viagem.lat_inicio},${viagem.long_inicio}`) || null,
-        _endereco_destino: geocodeMap.get(`${viagem.lat_fim},${viagem.long_fim}`) || null,
-        _solicitante: userMap.get(viagem.id_paciente)?.nome || null,
-      };
-    });
-  }, [viagensAtivas, geocodeMap, userQueries, userIds]);
-
-  const isLoadingData = useMemo(() => {
-    if (loading) return true;
-
-    const hasIncompleteData = enrichedViagens.some(
-      (t) =>
-        t._endereco_origem === null ||
-        t._endereco_destino === null ||
-        t._solicitante === null
-    );
-
-    return hasIncompleteData;
-  }, [loading, enrichedViagens]);
+  const isLoadingData = loading || hasIncompleteData;
 
   const deleteMutation = useMutation({
     mutationFn: deleteTravel,
-    onSuccess: () => {
+    onSuccess: (_, deletedTravelId) => {
+      // Remove a query individual da viagem deletada do cache
+      queryClient.removeQueries({ queryKey: ["travel", deletedTravelId] });
+
+      // Atualiza o cache das listas de viagens removendo a viagem deletada
+      queryClient.setQueriesData({ queryKey: ["travels"] }, (oldData) => {
+        if (!oldData) return oldData;
+        if (Array.isArray(oldData)) {
+          return oldData.filter((v) => v.id !== deletedTravelId);
+        }
+        return oldData;
+      });
+
+      // Invalida outras queries relacionadas para garantir consistência
       queryClient.invalidateQueries({ queryKey: ["travels"] });
+
       setViagemExcluir(null);
-      toast.error("Viagem excluída com sucesso!", {
+      showSuccessToast("Viagem excluída!", {
         description: "O agendamento foi removido da lista.",
-        duration: 4000,
       });
     },
     onError: (error) => {
-      const mensagemErro = error.response?.data?.Erros
-        ? Object.values(error.response.data.Erros).join(", ")
-        : error.message || "Erro ao excluir viagem";
-
-      toast.error("Erro ao excluir viagem", {
-        description: mensagemErro,
-        duration: 5000,
+      showErrorToast(error, "Erro ao excluir viagem", {
+        defaultMessage: "Não foi possível excluir a viagem. Tente novamente.",
       });
     },
   });
@@ -130,10 +92,8 @@ function Agendamentos() {
 
   useEffect(() => {
     if (queryError) {
-      toast.error("Erro ao carregar viagens", {
-        description:
-          queryError.message || "Não foi possível carregar seus agendamentos.",
-        duration: 5000,
+      showErrorToast(queryError, "Erro ao carregar viagens", {
+        defaultMessage: "Não foi possível carregar seus agendamentos.",
       });
     }
   }, [queryError]);
@@ -253,4 +213,4 @@ function Agendamentos() {
   );
 }
 
-export default Agendamentos;
+export default memo(Agendamentos);
