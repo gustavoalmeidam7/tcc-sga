@@ -17,7 +17,7 @@ import { ROLES } from "@/lib/roles";
 import { TravelStatus, TRAVEL_STATUS_LABELS } from "@/lib/travel-status";
 import FilterPanel from "./components/FilterPanel";
 import DeleteTravelDialog from "./components/DeleteTravelDialog";
-import { reverseGeocode } from "@/hooks/useReverseGeocode";
+import { useGeocodeQueries } from "@/hooks/useGeocodeQueries";
 import authService from "@/services/authService";
 
 function Agendamentos() {
@@ -52,24 +52,7 @@ function Agendamentos() {
     [viagens]
   );
 
-  const geocodeQueries = useQueries({
-    queries: viagensAtivas.flatMap((t) => [
-      {
-        queryKey: ["geocode", t.lat_inicio, t.long_inicio],
-        queryFn: () => reverseGeocode(t.lat_inicio, t.long_inicio),
-        enabled: !!(t.lat_inicio && t.long_inicio),
-        staleTime: 1000 * 60 * 60 * 24,
-        cacheTime: 1000 * 60 * 60 * 24 * 7,
-      },
-      {
-        queryKey: ["geocode", t.lat_fim, t.long_fim],
-        queryFn: () => reverseGeocode(t.lat_fim, t.long_fim),
-        enabled: !!(t.lat_fim && t.long_fim),
-        staleTime: 1000 * 60 * 60 * 24,
-        cacheTime: 1000 * 60 * 60 * 24 * 7,
-      },
-    ]),
-  });
+  const { geocodeMap } = useGeocodeQueries(viagensAtivas);
 
   const userIds = useMemo(() => {
     const ids = new Set();
@@ -78,11 +61,13 @@ function Agendamentos() {
   }, [viagensAtivas]);
 
   const userQueries = useQueries({
-    queries: userIds.map((userId) => ({
-      queryKey: ["user", userId],
-      queryFn: () => authService.getUserById(userId),
-      staleTime: 1000 * 60 * 5,
-    })),
+    queries: userIds.length > 0
+      ? userIds.map((userId) => ({
+          queryKey: ["user", userId],
+          queryFn: () => authService.getUserById(userId),
+          staleTime: 1000 * 60 * 5,
+        }))
+      : [],
   });
 
   const enrichedViagens = useMemo(() => {
@@ -93,18 +78,15 @@ function Agendamentos() {
       }
     });
 
-    return viagensAtivas.map((viagem, index) => {
-      const origemIndex = index * 2;
-      const destinoIndex = index * 2 + 1;
-
+    return viagensAtivas.map((viagem) => {
       return {
         ...viagem,
-        _endereco_origem: geocodeQueries[origemIndex]?.data || null,
-        _endereco_destino: geocodeQueries[destinoIndex]?.data || null,
+        _endereco_origem: geocodeMap.get(`${viagem.lat_inicio},${viagem.long_inicio}`) || null,
+        _endereco_destino: geocodeMap.get(`${viagem.lat_fim},${viagem.long_fim}`) || null,
         _solicitante: userMap.get(viagem.id_paciente)?.nome || null,
       };
     });
-  }, [viagensAtivas, geocodeQueries, userQueries, userIds]);
+  }, [viagensAtivas, geocodeMap, userQueries, userIds]);
 
   const isLoadingData = useMemo(() => {
     if (loading) return true;
