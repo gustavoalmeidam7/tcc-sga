@@ -27,24 +27,44 @@ export function useUserDashboard() {
       .slice(0, 3);
   }, [viagensAtivas]);
 
+  const uniqueCoordinates = useMemo(() => {
+    if (proximasViagensList.length === 0) return [];
+
+    const coordsMap = new Map();
+    proximasViagensList.forEach((v) => {
+      if (v.lat_inicio && v.long_inicio) {
+        const key = `${v.lat_inicio},${v.long_inicio}`;
+        if (!coordsMap.has(key)) {
+          coordsMap.set(key, { lat: v.lat_inicio, long: v.long_inicio });
+        }
+      }
+      if (v.lat_fim && v.long_fim) {
+        const key = `${v.lat_fim},${v.long_fim}`;
+        if (!coordsMap.has(key)) {
+          coordsMap.set(key, { lat: v.lat_fim, long: v.long_fim });
+        }
+      }
+    });
+    return Array.from(coordsMap.values());
+  }, [proximasViagensList]);
+
   const geocodeQueries = useQueries({
-    queries: proximasViagensList.flatMap((v) => [
-      {
-        queryKey: ["geocode", v.lat_inicio, v.long_inicio],
-        queryFn: () => reverseGeocode(v.lat_inicio, v.long_inicio),
-        enabled: !!(v.lat_inicio && v.long_inicio),
-        staleTime: 1000 * 60 * 60 * 24,
-        cacheTime: 1000 * 60 * 60 * 24 * 7,
-      },
-      {
-        queryKey: ["geocode", v.lat_fim, v.long_fim],
-        queryFn: () => reverseGeocode(v.lat_fim, v.long_fim),
-        enabled: !!(v.lat_fim && v.long_fim),
-        staleTime: 1000 * 60 * 60 * 24,
-        cacheTime: 1000 * 60 * 60 * 24 * 7,
-      },
-    ]),
+    queries: uniqueCoordinates.map((coord) => ({
+      queryKey: ["geocode", coord.lat, coord.long],
+      queryFn: () => reverseGeocode(coord.lat, coord.long),
+      staleTime: 1000 * 60 * 60 * 24,
+      cacheTime: 1000 * 60 * 60 * 24 * 7,
+    })),
   });
+
+  const geocodeMap = useMemo(() => {
+    const map = new Map();
+    uniqueCoordinates.forEach((coord, index) => {
+      const key = `${coord.lat},${coord.long}`;
+      map.set(key, geocodeQueries[index]?.data);
+    });
+    return map;
+  }, [uniqueCoordinates, geocodeQueries]);
 
   const dashboardData = useMemo(() => {
     const stats = {
@@ -56,16 +76,13 @@ export function useUserDashboard() {
       total: viagens.length,
     };
 
-    const proximasViagens = proximasViagensList.map((v, index) => {
-      const origemIndex = index * 2;
-      const destinoIndex = index * 2 + 1;
-
+    const proximasViagens = proximasViagensList.map((v) => {
       return {
         id: v.id,
         dataHoraCompleta: formatarDataHora(v.inicio),
         dataISO: v.inicio,
-        origem: geocodeQueries[origemIndex]?.data || "Carregando...",
-        destino: geocodeQueries[destinoIndex]?.data || "Carregando...",
+        origem: geocodeMap.get(`${v.lat_inicio},${v.long_inicio}`) || "Carregando...",
+        destino: geocodeMap.get(`${v.lat_fim},${v.long_fim}`) || "Carregando...",
         status:
           v.realizado === TravelStatus.NAO_REALIZADO
             ? "pendente"
@@ -77,7 +94,7 @@ export function useUserDashboard() {
     });
 
     return { stats, proximasViagens };
-  }, [viagens, proximasViagensList, geocodeQueries]);
+  }, [viagens, proximasViagensList, geocodeMap]);
 
   return {
     dashboardData,

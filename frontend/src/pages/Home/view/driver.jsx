@@ -23,60 +23,89 @@ import {
 } from "@/lib/travel-status";
 import { useNavigate } from "react-router-dom";
 import { reverseGeocode } from "@/hooks/useReverseGeocode";
+import { StatsCardSkeleton } from "@/components/ui/stats-skeleton";
 
 function DriverView() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // TEMPORARIAMENTE DESABILITADO: Backend tem bug com motoristas sem ambulância
-  // const { data: driverInfo } = useQuery({
-  //   queryKey: ["driver", "info", user?.id],
-  //   queryFn: getDriverInfo,
-  //   enabled: false,
-  //   staleTime: 1000 * 60 * 5,
-  // });
+  /*  TEMPORARIAMENTE DESABILITADO: Backend tem bug com motoristas sem ambulância
+   const { data: driverInfo } = useQuery({
+    queryKey: ["driver", "info", user?.id],
+    queryFn: getDriverInfo,
+    enabled: false,
+    staleTime: 1000 * 60 * 5,
+  });
 
-  // const { data: travelsResponse } = useQuery({
-  //   queryKey: ["driver", "travels", user?.id],
-  //   queryFn: getDriverTravels,
-  //   enabled: false,
-  //   staleTime: 1000 * 60 * 2,
-  // });
+  const { data: travelsResponse } = useQuery({
+    queryKey: ["driver", "travels", user?.id],
+    queryFn: getDriverTravels,
+    enabled: false,
+    staleTime: 1000 * 60 * 2,
+  });  
+  */
 
   const driverInfo = null;
   const travelsResponse = { viagens: [] };
+  const isLoadingDriver = false;
+  const isLoadingTravels = false;
 
   const travels = useMemo(
     () => travelsResponse?.viagens || [],
     [travelsResponse]
   );
 
+  const uniqueCoordinates = useMemo(() => {
+    if (travels.length === 0) return [];
+
+    const coordsMap = new Map();
+    travels.forEach((v) => {
+      if (v.lat_inicio && v.long_inicio) {
+        const key = `${v.lat_inicio},${v.long_inicio}`;
+        if (!coordsMap.has(key)) {
+          coordsMap.set(key, { lat: v.lat_inicio, long: v.long_inicio });
+        }
+      }
+      if (v.lat_fim && v.long_fim) {
+        const key = `${v.lat_fim},${v.long_fim}`;
+        if (!coordsMap.has(key)) {
+          coordsMap.set(key, { lat: v.lat_fim, long: v.long_fim });
+        }
+      }
+    });
+    return Array.from(coordsMap.values());
+  }, [travels]);
+
   const geocodeQueries = useQueries({
-    queries: travels.flatMap((v) => [
-      {
-        queryKey: ["geocode", v.lat_inicio, v.long_inicio],
-        queryFn: () => reverseGeocode(v.lat_inicio, v.long_inicio),
-        enabled: !!(v.lat_inicio && v.long_inicio),
-        staleTime: 1000 * 60 * 60 * 24,
-      },
-      {
-        queryKey: ["geocode", v.lat_fim, v.long_fim],
-        queryFn: () => reverseGeocode(v.lat_fim, v.long_fim),
-        enabled: !!(v.lat_fim && v.long_fim),
-        staleTime: 1000 * 60 * 60 * 24,
-      },
-    ]),
+    queries: uniqueCoordinates.map((coord) => ({
+      queryKey: ["geocode", coord.lat, coord.long],
+      queryFn: () => reverseGeocode(coord.lat, coord.long),
+      staleTime: 1000 * 60 * 60 * 24,
+    })),
   });
+
+  const geocodeMap = useMemo(() => {
+    const map = new Map();
+    uniqueCoordinates.forEach((coord, index) => {
+      const key = `${coord.lat},${coord.long}`;
+      map.set(key, geocodeQueries[index]?.data);
+    });
+    return map;
+  }, [uniqueCoordinates, geocodeQueries]);
 
   const viagensEnriquecidas = useMemo(() => {
     if (!travels.length) return [];
 
-    return travels.map((viagem, index) => ({
+    return travels.map((viagem) => ({
       ...viagem,
-      local_inicio: geocodeQueries[index * 2]?.data || "Carregando...",
-      local_fim: geocodeQueries[index * 2 + 1]?.data || "Carregando...",
+      local_inicio:
+        geocodeMap.get(`${viagem.lat_inicio},${viagem.long_inicio}`) ||
+        "Carregando...",
+      local_fim:
+        geocodeMap.get(`${viagem.lat_fim},${viagem.long_fim}`) ||
+        "Carregando...",
     }));
-  }, [travels, geocodeQueries]);
+  }, [travels, geocodeMap]);
 
   const viagensAtribuidas = useMemo(
     () =>
@@ -132,268 +161,285 @@ function DriverView() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <div className="grid grid-cols-2 gap-3 md:gap-4">
-            <Card className="hover:shadow-lg transition-all">
-              <CardContent className="p-4 md:p-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <p className="text-xs md:text-sm font-medium text-muted-foreground">
-                      Atribuídas
-                    </p>
-                    <p className="text-2xl md:text-3xl font-bold text-primary">
-                      {viagensAtribuidas.length}
-                    </p>
+          {isLoadingTravels ? (
+            <div className="grid grid-cols-2 gap-3 md:gap-4">
+              <StatsCardSkeleton />
+              <StatsCardSkeleton />
+              <StatsCardSkeleton />
+              <StatsCardSkeleton />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3 md:gap-4">
+              <Card className="hover:shadow-lg transition-all">
+                <CardContent className="p-4 md:p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-2">
+                      <p className="text-xs md:text-sm font-medium text-muted-foreground">
+                        Atribuídas
+                      </p>
+                      <p className="text-2xl md:text-3xl font-bold text-primary">
+                        {viagensAtribuidas.length}
+                      </p>
+                    </div>
+                    <div className="p-3 md:p-4 bg-primary/10 rounded-xl">
+                      <Truck
+                        className="h-6 w-6 md:h-8 md:w-8 text-primary"
+                        aria-hidden="true"
+                      />
+                    </div>
                   </div>
-                  <div className="p-3 md:p-4 bg-primary/10 rounded-xl">
-                    <Truck
-                      className="h-6 w-6 md:h-8 md:w-8 text-primary"
-                      aria-hidden="true"
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            <Card className="hover:shadow-lg transition-all">
-              <CardContent className="p-4 md:p-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <p className="text-xs md:text-sm font-medium text-muted-foreground">
-                      Concluídas
-                    </p>
-                    <p className="text-2xl md:text-3xl font-bold text-green-600">
-                      {viagensConcluidasHoje.length}
-                    </p>
+              <Card className="hover:shadow-lg transition-all">
+                <CardContent className="p-4 md:p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-2">
+                      <p className="text-xs md:text-sm font-medium text-muted-foreground">
+                        Concluídas
+                      </p>
+                      <p className="text-2xl md:text-3xl font-bold text-green-600">
+                        {viagensConcluidasHoje.length}
+                      </p>
+                    </div>
+                    <div className="p-3 md:p-4 bg-green-500/10 rounded-xl">
+                      <CheckCircle
+                        className="h-6 w-6 md:h-8 md:w-8 text-green-600"
+                        aria-hidden="true"
+                      />
+                    </div>
                   </div>
-                  <div className="p-3 md:p-4 bg-green-500/10 rounded-xl">
-                    <CheckCircle
-                      className="h-6 w-6 md:h-8 md:w-8 text-green-600"
-                      aria-hidden="true"
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            <Card className="hover:shadow-lg transition-all">
-              <CardContent className="p-4 md:p-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <p className="text-xs md:text-sm font-medium text-muted-foreground">
-                      Hoje
-                    </p>
-                    <p className="text-2xl md:text-3xl font-bold text-orange-600">
-                      {viagensHoje.length}
-                    </p>
+              <Card className="hover:shadow-lg transition-all">
+                <CardContent className="p-4 md:p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-2">
+                      <p className="text-xs md:text-sm font-medium text-muted-foreground">
+                        Hoje
+                      </p>
+                      <p className="text-2xl md:text-3xl font-bold text-orange-600">
+                        {viagensHoje.length}
+                      </p>
+                    </div>
+                    <div className="p-3 md:p-4 bg-orange-500/10 rounded-xl">
+                      <Clock
+                        className="h-6 w-6 md:h-8 md:w-8 text-orange-600"
+                        aria-hidden="true"
+                      />
+                    </div>
                   </div>
-                  <div className="p-3 md:p-4 bg-orange-500/10 rounded-xl">
-                    <Clock
-                      className="h-6 w-6 md:h-8 md:w-8 text-orange-600"
-                      aria-hidden="true"
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            <Card className="hover:shadow-lg transition-all">
-              <CardContent className="p-4 md:p-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <p className="text-xs md:text-sm font-medium text-muted-foreground">
-                      Ativa
-                    </p>
-                    <p className="text-2xl md:text-3xl font-bold text-blue-600">
-                      {viagemEmAndamento ? "1" : "0"}
-                    </p>
+              <Card className="hover:shadow-lg transition-all">
+                <CardContent className="p-4 md:p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-2">
+                      <p className="text-xs md:text-sm font-medium text-muted-foreground">
+                        Ativa
+                      </p>
+                      <p className="text-2xl md:text-3xl font-bold text-blue-600">
+                        {viagemEmAndamento ? "1" : "0"}
+                      </p>
+                    </div>
+                    <div className="p-3 md:p-4 bg-blue-500/10 rounded-xl">
+                      <Navigation
+                        className="h-6 w-6 md:h-8 md:w-8 text-blue-600"
+                        aria-hidden="true"
+                      />
+                    </div>
                   </div>
-                  <div className="p-3 md:p-4 bg-blue-500/10 rounded-xl">
-                    <Navigation
-                      className="h-6 w-6 md:h-8 md:w-8 text-blue-600"
-                      aria-hidden="true"
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {viagemEmAndamento && (
-            <Card className="border-blue-500/50 bg-blue-50/50 dark:bg-blue-950/20">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between gap-2">
-                  <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-                    <Navigation className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
-                    <span className="hidden sm:inline">
-                      Viagem em Andamento
-                    </span>
-                    <span className="sm:hidden">Em Andamento</span>
-                  </CardTitle>
-                  <Badge className="bg-blue-600 hover:bg-blue-700 text-xs">
-                    Ativa
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="space-y-2">
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-0.5 flex items-center gap-1">
-                      <MapPin className="h-3 w-3" />
-                      Origem
-                    </p>
-                    <p className="text-sm font-medium line-clamp-1">
-                      {viagemEmAndamento.local_inicio}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-0.5 flex items-center gap-1">
-                      <MapPin className="h-3 w-3" />
-                      Destino
-                    </p>
-                    <p className="text-sm font-medium line-clamp-1">
-                      {viagemEmAndamento.local_fim}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <Button
-                    onClick={() =>
-                      navigate(`/viagens/detalhes/${viagemEmAndamento.id}`)
-                    }
-                    variant="outline"
-                    size="sm"
-                    className="md:flex-1 !bg-gray-100 hover:!bg-gray-200 !text-black"
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    Ver detalhes
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="md:flex-1 bg-green-600 hover:bg-green-700 w-full sm:w-auto"
-                  >
-                    <CheckCheck className="h-4 w-4 mr-2" />
-                    Finalizar
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           )}
 
-          {viagensHoje.length > 0 && (
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-                  <Calendar className="h-4 w-4 md:h-5 md:w-5" />
-                  <span className="hidden sm:inline">
-                    Viagens Agendadas para Hoje
-                  </span>
-                  <span className="sm:hidden">Viagens Hoje</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {viagensHoje.map((viagem) => {
-                    const statusColors = getTravelStatusColors(
-                      viagem.realizado
-                    );
-                    const statusLabel = getTravelStatusLabel(viagem.realizado);
-
-                    return (
-                      <Card
-                        key={viagem.id}
-                        className="hover:shadow-md transition-shadow"
+          {isLoadingTravels
+            ? null
+            : viagemEmAndamento && (
+                <Card className="border-blue-500/50 bg-blue-50/50 dark:bg-blue-950/20">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                        <Navigation className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
+                        <span className="hidden sm:inline">
+                          Viagem em Andamento
+                        </span>
+                        <span className="sm:hidden">Em Andamento</span>
+                      </CardTitle>
+                      <Badge className="bg-blue-600 hover:bg-blue-700 text-xs">
+                        Ativa
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="space-y-2">
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-0.5 flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          Origem
+                        </p>
+                        <p className="text-sm font-medium line-clamp-1">
+                          {viagemEmAndamento.local_inicio}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-0.5 flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          Destino
+                        </p>
+                        <p className="text-sm font-medium line-clamp-1">
+                          {viagemEmAndamento.local_fim}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <Button
+                        onClick={() =>
+                          navigate(`/viagens/detalhes/${viagemEmAndamento.id}`)
+                        }
+                        variant="outline"
+                        size="sm"
+                        className="md:flex-1 !bg-gray-100 hover:!bg-gray-200 !text-black"
                       >
-                        <CardContent className="p-4">
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between gap-2">
-                              <Badge
-                                className={`${statusColors.className} text-xs`}
-                              >
-                                {statusLabel}
-                              </Badge>
-                              <span className="text-sm font-semibold">
-                                {formatarHora(viagem.inicio)}
-                              </span>
-                            </div>
+                        <Eye className="h-4 w-4 mr-2" />
+                        Ver detalhes
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="md:flex-1 bg-green-600 hover:bg-green-700 w-full sm:w-auto"
+                      >
+                        <CheckCheck className="h-4 w-4 mr-2" />
+                        Finalizar
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
-                            <div className="space-y-2">
-                              <div>
-                                <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
-                                  <MapPin className="h-3 w-3" />
-                                  Origem
-                                </p>
-                                <p className="text-sm font-medium line-clamp-2">
-                                  {viagem.local_inicio}
-                                </p>
+          {isLoadingTravels
+            ? null
+            : viagensHoje.length > 0 && (
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                      <Calendar className="h-4 w-4 md:h-5 md:w-5" />
+                      <span className="hidden sm:inline">
+                        Viagens Agendadas para Hoje
+                      </span>
+                      <span className="sm:hidden">Viagens Hoje</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {viagensHoje.map((viagem) => {
+                        const statusColors = getTravelStatusColors(
+                          viagem.realizado
+                        );
+                        const statusLabel = getTravelStatusLabel(
+                          viagem.realizado
+                        );
+
+                        return (
+                          <Card
+                            key={viagem.id}
+                            className="hover:shadow-md transition-shadow"
+                          >
+                            <CardContent className="p-4">
+                              <div className="space-y-3">
+                                <div className="flex items-center justify-between gap-2">
+                                  <Badge
+                                    className={`${statusColors.className} text-xs`}
+                                  >
+                                    {statusLabel}
+                                  </Badge>
+                                  <span className="text-sm font-semibold">
+                                    {formatarHora(viagem.inicio)}
+                                  </span>
+                                </div>
+
+                                <div className="space-y-2">
+                                  <div>
+                                    <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                                      <MapPin className="h-3 w-3" />
+                                      Origem
+                                    </p>
+                                    <p className="text-sm font-medium line-clamp-2">
+                                      {viagem.local_inicio}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                                      <MapPin className="h-3 w-3" />
+                                      Destino
+                                    </p>
+                                    <p className="text-sm font-medium line-clamp-2">
+                                      {viagem.local_fim}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <Button
+                                  onClick={() =>
+                                    navigate(`/viagens/detalhes/${viagem.id}`)
+                                  }
+                                  variant="outline"
+                                  size="sm"
+                                  className="w-full sm:w-auto"
+                                >
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  Ver detalhes
+                                </Button>
                               </div>
-                              <div>
-                                <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
-                                  <MapPin className="h-3 w-3" />
-                                  Destino
-                                </p>
-                                <p className="text-sm font-medium line-clamp-2">
-                                  {viagem.local_fim}
-                                </p>
-                              </div>
-                            </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
 
-                            <Button
-                              onClick={() =>
-                                navigate(`/viagens/detalhes/${viagem.id}`)
-                              }
-                              variant="outline"
-                              size="sm"
-                              className="w-full sm:w-auto"
-                            >
-                              <Eye className="h-4 w-4 mr-2" />
-                              Ver detalhes
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
+                    {viagensAtribuidas.length > viagensHoje.length && (
+                      <div className="mt-3 pt-3 border-t text-center">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => navigate("/agendamentos")}
+                          className="w-full sm:w-auto"
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          Ver todas ({viagensAtribuidas.length})
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
 
-                {viagensAtribuidas.length > viagensHoje.length && (
-                  <div className="mt-3 pt-3 border-t text-center">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => navigate("/agendamentos")}
-                      className="w-full sm:w-auto"
-                    >
-                      <Eye className="h-4 w-4 mr-2" />
-                      Ver todas ({viagensAtribuidas.length})
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {viagensAtribuidas.length === 0 && (
-            <Card>
-              <CardContent className="p-8 md:p-12 text-center">
-                <div className="flex flex-col items-center gap-3 md:gap-4">
-                  <div className="p-3 md:p-4 bg-muted rounded-full">
-                    <Truck
-                      className="h-8 w-8 md:h-12 md:w-12 text-muted-foreground"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <div>
-                    <h3 className="text-base md:text-lg font-semibold mb-1">
-                      Nenhuma viagem atribuída
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Aguarde o gerente atribuir viagens para você.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          {isLoadingTravels
+            ? null
+            : viagensAtribuidas.length === 0 && (
+                <Card>
+                  <CardContent className="p-8 md:p-12 text-center">
+                    <div className="flex flex-col items-center gap-3 md:gap-4">
+                      <div className="p-3 md:p-4 bg-muted rounded-full">
+                        <Truck
+                          className="h-8 w-8 md:h-12 md:w-12 text-muted-foreground"
+                          aria-hidden="true"
+                        />
+                      </div>
+                      <div>
+                        <h3 className="text-base md:text-lg font-semibold mb-1">
+                          Nenhuma viagem atribuída
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Aguarde o gerente atribuir viagens para você.
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
         </div>
 
         <div className="hidden lg:block space-y-6">

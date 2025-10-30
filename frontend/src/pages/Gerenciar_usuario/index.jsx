@@ -5,11 +5,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Eye } from "lucide-react";
+import { Eye } from "lucide-react";
 import { ROLE_LABELS } from "@/lib/roles";
 import authService from "@/services/authService";
 import { toast } from "sonner";
 import { formatarData } from "@/lib/date-utils";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 
 function Usuarios() {
   const navigate = useNavigate();
@@ -124,22 +125,20 @@ function Usuarios() {
         <div className="absolute top-0 right-0 w-32 h-32 md:w-48 md:h-48 bg-primary/5 rounded-full blur-3xl" />
       </motion.header>
 
-      <Card>
-        <CardContent className="p-6">
-          {loading ? (
-            <div className="flex justify-center items-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          ) : (
+      {loading ? (
+        <TableSkeleton rows={8} columns={5} />
+      ) : (
+        <Card>
+          <CardContent className="p-6">
             <DataTable
               columns={columns}
               data={usuarios}
               filterColumn="nome"
               filterPlaceholder="Buscar por nome..."
             />
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </main>
   );
 }

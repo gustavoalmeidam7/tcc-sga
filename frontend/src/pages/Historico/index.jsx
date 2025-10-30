@@ -5,13 +5,14 @@ import { useNavigate } from "react-router-dom";
 import { getTravels } from "@/services/travelService";
 import { DataTable } from "@/components/ui/data-table";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, History } from "lucide-react";
+import { History } from "lucide-react";
 import { toast } from "sonner";
 import { useEffect } from "react";
 import { TravelStatus } from "@/lib/travel-status";
 import { createColumnsHistorico } from "./columns";
-import { reverseGeocode } from "@/hooks/useReverseGeocode";
+import { useGeocodeQueries } from "@/hooks/useGeocodeQueries";
 import authService from "@/services/authService";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 
 function Historico() {
   const navigate = useNavigate();
@@ -31,24 +32,7 @@ function Historico() {
     [viagens]
   );
 
-  const geocodeQueries = useQueries({
-    queries: viagensConcluidas.flatMap((t) => [
-      {
-        queryKey: ["geocode", t.lat_inicio, t.long_inicio],
-        queryFn: () => reverseGeocode(t.lat_inicio, t.long_inicio),
-        enabled: !!(t.lat_inicio && t.long_inicio),
-        staleTime: 1000 * 60 * 60 * 24,
-        cacheTime: 1000 * 60 * 60 * 24 * 7,
-      },
-      {
-        queryKey: ["geocode", t.lat_fim, t.long_fim],
-        queryFn: () => reverseGeocode(t.lat_fim, t.long_fim),
-        enabled: !!(t.lat_fim && t.long_fim),
-        staleTime: 1000 * 60 * 60 * 24,
-        cacheTime: 1000 * 60 * 60 * 24 * 7,
-      },
-    ]),
-  });
+  const { geocodeMap } = useGeocodeQueries(viagensConcluidas);
 
   const userIds = useMemo(() => {
     const ids = new Set();
@@ -57,11 +41,13 @@ function Historico() {
   }, [viagensConcluidas]);
 
   const userQueries = useQueries({
-    queries: userIds.map((userId) => ({
-      queryKey: ["user", userId],
-      queryFn: () => authService.getUserById(userId),
-      staleTime: 1000 * 60 * 5,
-    })),
+    queries: userIds.length > 0
+      ? userIds.map((userId) => ({
+          queryKey: ["user", userId],
+          queryFn: () => authService.getUserById(userId),
+          staleTime: 1000 * 60 * 5,
+        }))
+      : [],
   });
 
   const enrichedViagens = useMemo(() => {
@@ -72,18 +58,15 @@ function Historico() {
       }
     });
 
-    return viagensConcluidas.map((viagem, index) => {
-      const origemIndex = index * 2;
-      const destinoIndex = index * 2 + 1;
-
+    return viagensConcluidas.map((viagem) => {
       return {
         ...viagem,
-        _endereco_origem: geocodeQueries[origemIndex]?.data || null,
-        _endereco_destino: geocodeQueries[destinoIndex]?.data || null,
+        _endereco_origem: geocodeMap.get(`${viagem.lat_inicio},${viagem.long_inicio}`) || null,
+        _endereco_destino: geocodeMap.get(`${viagem.lat_fim},${viagem.long_fim}`) || null,
         _solicitante: userMap.get(viagem.id_paciente)?.nome || null,
       };
     });
-  }, [viagensConcluidas, geocodeQueries, userQueries, userIds]);
+  }, [viagensConcluidas, geocodeMap, userQueries, userIds]);
 
   const isLoadingData = useMemo(() => {
     if (loading) return true;
@@ -132,13 +115,12 @@ function Historico() {
         <div className="absolute top-0 right-0 w-32 h-32 md:w-48 md:h-48 bg-primary/5 rounded-full blur-3xl" />
       </motion.header>
 
-      <Card>
-        <CardContent className="p-6">
-          {loading ? (
-            <div className="flex justify-center items-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          ) : enrichedViagens.length === 0 ? (
+      {loading ? (
+        <TableSkeleton rows={8} columns={6} />
+      ) : (
+        <Card>
+          <CardContent className="p-6">
+            {enrichedViagens.length === 0 ? (
             <div className="text-center py-12">
               <History className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">
@@ -166,9 +148,10 @@ function Historico() {
                 isLoading={isLoadingData}
               />
             </div>
-          )}
-        </CardContent>
-      </Card>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </main>
   );
 }
