@@ -1,7 +1,11 @@
 import { useState, useMemo, useEffect, memo } from "react";
 import { motion } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getTravels, deleteTravel } from "@/services/travelService";
+import {
+  getTravels,
+  getAssignedTravels,
+  deleteTravel,
+} from "@/services/travelService";
 import { DataTable } from "@/components/ui/data-table";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
@@ -32,8 +36,9 @@ function Agendamentos() {
     isLoading: loading,
     error: queryError,
   } = useQuery({
-    queryKey: ["travels", "user"],
-    queryFn: () => getTravels(100, 0),
+    queryKey: ["travels", isManager ? "all" : "assigned"],
+    queryFn: () =>
+      isManager ? getTravels(100, 0) : getAssignedTravels(100, 0),
     staleTime: 1000 * 60 * 2,
   });
 
@@ -48,20 +53,16 @@ function Agendamentos() {
   );
 
   const { geocodeMap } = useGeocodeQueries(viagensAtivas);
-  const { enrichedTravels: enrichedViagens, hasIncompleteData } = useEnrichedTravels(
-    viagensAtivas,
-    geocodeMap
-  );
+  const { enrichedTravels: enrichedViagens, hasIncompleteData } =
+    useEnrichedTravels(viagensAtivas, geocodeMap);
 
   const isLoadingData = loading || hasIncompleteData;
 
   const deleteMutation = useMutation({
     mutationFn: deleteTravel,
     onSuccess: (_, deletedTravelId) => {
-      // Remove a query individual da viagem deletada do cache
       queryClient.removeQueries({ queryKey: ["travel", deletedTravelId] });
 
-      // Atualiza o cache das listas de viagens removendo a viagem deletada
       queryClient.setQueriesData({ queryKey: ["travels"] }, (oldData) => {
         if (!oldData) return oldData;
         if (Array.isArray(oldData)) {
@@ -70,7 +71,6 @@ function Agendamentos() {
         return oldData;
       });
 
-      // Invalida outras queries relacionadas para garantir consistência
       queryClient.invalidateQueries({ queryKey: ["travels"] });
 
       setViagemExcluir(null);

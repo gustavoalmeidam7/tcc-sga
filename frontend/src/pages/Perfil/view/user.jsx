@@ -285,27 +285,27 @@ export default function UserProfileView() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="border-2 border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent shadow-lg hover:shadow-xl transition-all overflow-hidden group max-h-[140px]">
+          <Card className="border-2 border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent shadow-lg hover:shadow-xl transition-all overflow-hidden group max-h-[140px]">
             <CardContent className="p-4 h-full flex items-center">
               <div className="flex items-center gap-3 w-full">
-                <div className="p-2 bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg shadow-lg group-hover:scale-110 transition-transform flex-shrink-0">
+                <div className="p-2 bg-gradient-to-br from-primary to-primary/80 rounded-lg shadow-lg group-hover:scale-110 transition-transform flex-shrink-0">
                   <Crown className="h-5 w-5 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-bold text-sm mb-1 flex items-center gap-2">
-                    Tornar-se Gerente
-                    <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
+                    Fazer Upgrade de Conta
+                    <Star className="h-3.5 w-3.5 text-primary fill-primary" />
                   </h3>
                   <p className="text-xs text-muted-foreground mb-2.5">
-                    Desbloqueie recursos avançados e funcionalidades exclusivas.
+                    Use um token para se tornar motorista ou gerente do sistema.
                   </p>
                   <Button
                     size="sm"
                     variant="outline"
-                    className="border-amber-500/50 hover:bg-amber-500/10 hover:border-amber-500 transition-all"
+                    className="border-primary/50 hover:bg-primary/10 hover:border-primary transition-all"
                     onClick={() => setIsUpgradeModalOpen(true)}
                   >
-                    Saiba Mais
+                    Usar Token
                   </Button>
                 </div>
               </div>

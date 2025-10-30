@@ -66,10 +66,10 @@ export function GenerateTokenModal({ open, onOpenChange }) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
             <Sparkles className="h-5 w-5 text-primary" />
-            Gerar Token de Gerente
+            Gerar Token de Motorista
           </DialogTitle>
           <DialogDescription>
-            Crie um token de upgrade para transformar um usuário em gerente do
+            Crie um token de upgrade para transformar um usuário em motorista do
             sistema.
           </DialogDescription>
         </DialogHeader>
@@ -124,7 +124,7 @@ export function GenerateTokenModal({ open, onOpenChange }) {
               </div>
               <p className="text-xs text-muted-foreground">
                 ⚠️ Compartilhe este token apenas com o usuário que você deseja
-                promover a gerente. O token pode ser usado uma única vez.
+                promover a motorista. O token pode ser usado uma única vez.
               </p>
             </div>
           )}

@@ -20,8 +20,22 @@ export const getTravels = async (viagensPorPagina = 15, pagina = 0) => {
   try {
     const response = await API.get('/travel', {
       params: {
-        viagensPorPagina,
-        pagina,
+        pageSize: viagensPorPagina,
+        page: pagina,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getAssignedTravels = async (viagensPorPagina = 15, pagina = 0) => {
+  try {
+    const response = await API.get('/travel/assigned', {
+      params: {
+        pageSize: viagensPorPagina,
+        page: pagina,
       },
     });
     return response.data;

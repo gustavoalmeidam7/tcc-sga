@@ -1,6 +1,6 @@
 import { useQuery, useQueries } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { getTravels } from "@/services/travelService";
+import { getAssignedTravels } from "@/services/travelService";
 import { formatarDataHora } from "@/lib/date-utils";
 import { TravelStatus } from "@/lib/travel-status";
 import { reverseGeocode } from "@/hooks/useReverseGeocode";
@@ -11,8 +11,8 @@ export function useUserDashboard() {
     isLoading: loading,
     error,
   } = useQuery({
-    queryKey: ["travels", "user"],
-    queryFn: () => getTravels(100, 0),
+    queryKey: ["travels", "assigned"],
+    queryFn: () => getAssignedTravels(100, 0),
     staleTime: 1000 * 60 * 2,
   });
 
