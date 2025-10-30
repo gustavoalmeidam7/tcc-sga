@@ -1,17 +1,16 @@
-import { useMemo } from "react";
+import { useMemo, useEffect, memo } from "react";
 import { motion } from "framer-motion";
-import { useQuery, useQueries } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { getTravels } from "@/services/travelService";
 import { DataTable } from "@/components/ui/data-table";
 import { Card, CardContent } from "@/components/ui/card";
 import { History } from "lucide-react";
-import { toast } from "sonner";
-import { useEffect } from "react";
 import { TravelStatus } from "@/lib/travel-status";
 import { createColumnsHistorico } from "./columns";
 import { useGeocodeQueries } from "@/hooks/useGeocodeQueries";
-import authService from "@/services/authService";
+import { useEnrichedTravels } from "@/hooks/useEnrichedTravels";
+import { showErrorToast } from "@/lib/error-utils";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 
 function Historico() {
@@ -33,61 +32,17 @@ function Historico() {
   );
 
   const { geocodeMap } = useGeocodeQueries(viagensConcluidas);
+  const { enrichedTravels: enrichedViagens, hasIncompleteData } = useEnrichedTravels(
+    viagensConcluidas,
+    geocodeMap
+  );
 
-  const userIds = useMemo(() => {
-    const ids = new Set();
-    viagensConcluidas.forEach((t) => t.id_paciente && ids.add(t.id_paciente));
-    return Array.from(ids);
-  }, [viagensConcluidas]);
-
-  const userQueries = useQueries({
-    queries: userIds.length > 0
-      ? userIds.map((userId) => ({
-          queryKey: ["user", userId],
-          queryFn: () => authService.getUserById(userId),
-          staleTime: 1000 * 60 * 5,
-        }))
-      : [],
-  });
-
-  const enrichedViagens = useMemo(() => {
-    const userMap = new Map();
-    userIds.forEach((id, index) => {
-      if (userQueries[index]?.data) {
-        userMap.set(id, userQueries[index].data);
-      }
-    });
-
-    return viagensConcluidas.map((viagem) => {
-      return {
-        ...viagem,
-        _endereco_origem: geocodeMap.get(`${viagem.lat_inicio},${viagem.long_inicio}`) || null,
-        _endereco_destino: geocodeMap.get(`${viagem.lat_fim},${viagem.long_fim}`) || null,
-        _solicitante: userMap.get(viagem.id_paciente)?.nome || null,
-      };
-    });
-  }, [viagensConcluidas, geocodeMap, userQueries, userIds]);
-
-  const isLoadingData = useMemo(() => {
-    if (loading) return true;
-
-    const hasIncompleteData = enrichedViagens.some(
-      (t) =>
-        t._endereco_origem === null ||
-        t._endereco_destino === null ||
-        t._solicitante === null
-    );
-
-    return hasIncompleteData;
-  }, [loading, enrichedViagens]);
+  const isLoadingData = loading || hasIncompleteData;
 
   useEffect(() => {
     if (queryError) {
-      toast.error("Erro ao carregar histórico", {
-        description:
-          queryError.message ||
-          "Não foi possível carregar o histórico de viagens.",
-        duration: 5000,
+      showErrorToast(queryError, "Erro ao carregar histórico", {
+        defaultMessage: "Não foi possível carregar o histórico de viagens.",
       });
     }
   }, [queryError]);
@@ -156,4 +111,4 @@ function Historico() {
   );
 }
 
-export default Historico;
+export default memo(Historico);
