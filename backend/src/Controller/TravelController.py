@@ -32,5 +32,5 @@ async def post_travel(user: UserDecorators.GET_AUTENTHICATED_USER, travel: Trave
     return TravelService.create_travel(travel, user)
 
 @TRAVEL_ROUTER.delete("/{id}")
-async def delete_travel(id: str) -> TravelDeleteResponseSchema:
+async def delete_travel(user: UserDecorators.GET_AUTENTHICATED_USER, id: str) -> TravelDeleteResponseSchema:
     return TravelService.remove_travel(id)

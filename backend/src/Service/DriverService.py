@@ -1,9 +1,12 @@
 from src.Model.Driver import Driver
-from src.Repository import DriverRepository, TravelRepository
+from src.Repository import DriverRepository, TravelRepository, UserRepository
 
 from src.Schema.Travel.TravelResponseSchema import TravelResponseSchema
 
 from src.Schema.Driver.DriverResponseSchema import DriverResponseSchema
+from src.Schema.Driver.DriverResponseFullSchema import DriverResponseFullSchema
+from src.Schema.Driver.DriverCreateSchema import DriverCreateSchema
+from src.Schema.Driver.DriverUpdateFieldsSchema import DriverUpdateFieldsSchema
 
 from src.Validator.GenericValidator import unmask_uuid
 
@@ -30,15 +33,24 @@ def assign_driver_travel(driver: User, travelId: UUID) -> TravelResponseSchema:
     
     return TravelResponseSchema.model_validate(assingedTravel)
 
-def is_user_driver(user: User) -> bool:
-    return user.cargo > 0
+def is_user_driver(userId: UUID) -> bool:
+    return UserRepository.find_by_id(unmask_uuid(userId)).cargo == 1
 
-def get_driver_by_user(user: User) -> DriverResponseSchema | None:
+def is_user_driver_or_higer(userId: UUID) -> bool:
+    return UserRepository.find_by_id(unmask_uuid(userId)).cargo >= 1
+
+def get_driver_by_user(user: User) -> DriverResponseSchema:
     driver = DriverRepository.find_driver_by_id(user.id)
-    if driver is None:
-        return None
 
     driverDict = model_to_dict(driver)
     driverDict.update(model_to_dict(driver.id))
     
     return DriverResponseSchema.model_validate(driverDict)
+
+def update_driver(user: User, driverFields: DriverUpdateFieldsSchema) -> DriverResponseFullSchema:
+    """ Atualiza os campos especificos do motorista """
+    driverFields = {k: v for k, v in driverFields.model_dump().items() if v is not None}
+
+    driver = DriverRepository.update_driver_by_id(user.id, **driverFields)
+
+    return DriverResponseFullSchema.model_validate(driver)

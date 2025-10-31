@@ -1,5 +1,7 @@
 from src.Repository import TravelRepository
 
+from fastapi import HTTPException, status
+
 from src.Model.Travel import Travel
 from src.Model.User import User 
 
@@ -56,13 +58,13 @@ def remove_travel(id: UUID | str) -> TravelDeleteResponseSchema:
 
     return travelDeleteResponse
 
-def find_travel_by_id(travelId: UUID | str) -> TravelResponseSchema | None:
+def find_travel_by_id(travelId: UUID | str) -> TravelResponseSchema:
     """ Encontra uma travel pelo seu ID """
 
     travelId = unmask_uuid(travelId)
     travel = TravelRepository.find_travel_by_id(travelId)
 
     if travel is None:
-        return None
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Viagem não encontrada")
     
     return TravelResponseSchema.model_validate(travel)

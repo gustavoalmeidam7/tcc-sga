@@ -7,6 +7,8 @@ from uuid import UUID
 from src.Decorators.DriverDecorator import GET_AUTENTHICATED_DRIVER
 
 from src.Schema.Driver.DriverResponseSchema import DriverResponseSchema
+from src.Schema.Driver.DriverResponseFullSchema import DriverResponseFullSchema
+from src.Schema.Driver.DriverUpdateFieldsSchema import DriverUpdateFieldsSchema
 
 from src.Schema.Travel.TravelResponseSchema import TravelResponseSchema
 from src.Schema.Travel.TravelListResponseSchema import TravelListResponseSchema
@@ -21,10 +23,10 @@ async def assing_driver_to_travel(driver: GET_AUTENTHICATED_DRIVER, travel: UUID
     """ Assina o motorista e a respectiva ambulância a uma viagem """
     return DriverService.assign_driver_travel(driver, travel)
 
-@DRIVER_ROUTER.get("/travels/")
-async def get_assigned_travels(driver: GET_AUTENTHICATED_DRIVER) -> TravelListResponseSchema:
-    """ Encontra todas viagens que um motorista está escrito """
-    return DriverService.find_assigned_travels(driver)
+@DRIVER_ROUTER.patch("/update/")
+async def update_driver(user: GET_AUTENTHICATED_DRIVER, driverFields: DriverUpdateFieldsSchema) -> DriverResponseFullSchema:
+    """ Atualiza as informações especificas de um motorista """
+    return DriverService.update_driver(user, driverFields)
 
 @DRIVER_ROUTER.get("/")
 async def get_driver_info(driver: GET_AUTENTHICATED_DRIVER) -> DriverResponseSchema:
