@@ -297,7 +297,8 @@ export default function UserProfileView() {
                     <Star className="h-3.5 w-3.5 text-primary fill-primary" />
                   </h3>
                   <p className="text-xs text-muted-foreground mb-2.5">
-                    Use um token para se tornar motorista ou gerente do sistema.
+                    Use uma chave de acesso para se tornar motorista ou gerente
+                    do sistema.
                   </p>
                   <Button
                     size="sm"
@@ -305,7 +306,7 @@ export default function UserProfileView() {
                     className="border-primary/50 hover:bg-primary/10 hover:border-primary transition-all"
                     onClick={() => setIsUpgradeModalOpen(true)}
                   >
-                    Usar Token
+                    Usar chave de acesso
                   </Button>
                 </div>
               </div>

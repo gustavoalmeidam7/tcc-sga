@@ -27,15 +27,17 @@ export function useEnrichedTravels(travels, geocodeMap, options = {}) {
         : [],
   });
 
+  const queriesData = userQueries.map(q => q.data);
+
   const userMap = useMemo(() => {
     const map = new Map();
     userIds.forEach((id, index) => {
-      if (userQueries[index]?.data) {
-        map.set(id, userQueries[index].data);
+      if (queriesData[index]) {
+        map.set(id, queriesData[index]);
       }
     });
     return map;
-  }, [userIds, userQueries]);
+  }, [userIds, JSON.stringify(queriesData)]);
 
   const enrichedTravels = useMemo(() => {
     if (!travels || travels.length === 0) return [];
@@ -47,9 +49,9 @@ export function useEnrichedTravels(travels, geocodeMap, options = {}) {
       return {
         ...viagem,
         _endereco_origem:
-          geocodeMap.get(`${viagem.lat_inicio},${viagem.long_inicio}`) || null,
+          geocodeMap.get(`${viagem.lat_inicio.toFixed(5)},${viagem.long_inicio.toFixed(5)}`) || null,
         _endereco_destino:
-          geocodeMap.get(`${viagem.lat_fim},${viagem.long_fim}`) || null,
+          geocodeMap.get(`${viagem.lat_fim.toFixed(5)},${viagem.long_fim.toFixed(5)}`) || null,
         _solicitante: user?.nome || null,
         _solicitante_completo: user || null,
       };
