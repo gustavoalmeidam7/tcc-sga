@@ -35,25 +35,17 @@ function FormularioRotaComponent({
   const origemAutocomplete = useGeocodingAutocomplete();
   const destinoAutocomplete = useGeocodingAutocomplete();
 
-  const handleOrigemChange = useCallback((e) => {
-    setOrigem(e.target.value);
-    origemAutocomplete.handleInputChange(e.target.value);
-  }, [setOrigem, origemAutocomplete.handleInputChange]);
-
-  const handleDestinoChange = useCallback((e) => {
-    setDestino(e.target.value);
-    destinoAutocomplete.handleInputChange(e.target.value);
-  }, [setDestino, destinoAutocomplete.handleInputChange]);
-
   const selecionarOrigem = useCallback((sugestao) => {
+    origemAutocomplete.setInputValue(sugestao.nome);
     setOrigem(sugestao.nome);
     setCoordOrigem([sugestao.lat, sugestao.lon]);
-  }, [setOrigem, setCoordOrigem]);
+  }, [setOrigem, setCoordOrigem, origemAutocomplete.setInputValue]);
 
   const selecionarDestino = useCallback((sugestao) => {
+    destinoAutocomplete.setInputValue(sugestao.nome);
     setDestino(sugestao.nome);
     setCoordDestino([sugestao.lat, sugestao.lon]);
-  }, [setDestino, setCoordDestino]);
+  }, [setDestino, setCoordDestino, destinoAutocomplete.setInputValue]);
 
   return (
     <div className="xl:col-span-1 space-y-4">
@@ -72,18 +64,14 @@ function FormularioRotaComponent({
             icon={MapPin}
             iconColor="text-green-500"
             placeholder="Ex: São Carlos, SP, Brasil"
-            value={origem}
-            onChange={handleOrigemChange}
-            onKeyDown={(e) =>
-              origemAutocomplete.handleKeyDown(e, selecionarOrigem)
-            }
-            onFocus={() => origemAutocomplete.setShowSugestoes(true)}
-            sugestoes={origemAutocomplete.sugestoes}
-            showSugestoes={origemAutocomplete.showSugestoes}
-            onSugestaoClick={(sug) =>
-              origemAutocomplete.handleSugestaoClick(sug, selecionarOrigem)
-            }
-            inputRef={origemAutocomplete.inputRef}
+            value={origemAutocomplete.inputValue}
+            onChange={origemAutocomplete.handleInputChange}
+            onKeyDown={(e) => origemAutocomplete.handleKeyDown(e, selecionarOrigem)}
+            onFocus={() => origemAutocomplete.setShowSuggestions(true)}
+            sugestoes={origemAutocomplete.suggestions}
+            showSugestoes={origemAutocomplete.showSuggestions}
+            onSugestaoClick={(sug) => origemAutocomplete.handleSuggestionClick(sug, selecionarOrigem)}
+            inputRef={origemAutocomplete.containerRef} // Mudou de inputRef para containerRef
             borderColor="focus:border-green-500"
           />
 
@@ -93,18 +81,14 @@ function FormularioRotaComponent({
             icon={Navigation}
             iconColor="text-red-500"
             placeholder="Ex: Araraquara, SP, Brasil"
-            value={destino}
-            onChange={handleDestinoChange}
-            onKeyDown={(e) =>
-              destinoAutocomplete.handleKeyDown(e, selecionarDestino)
-            }
-            onFocus={() => destinoAutocomplete.setShowSugestoes(true)}
-            sugestoes={destinoAutocomplete.sugestoes}
-            showSugestoes={destinoAutocomplete.showSugestoes}
-            onSugestaoClick={(sug) =>
-              destinoAutocomplete.handleSugestaoClick(sug, selecionarDestino)
-            }
-            inputRef={destinoAutocomplete.inputRef}
+            value={destinoAutocomplete.inputValue}
+            onChange={destinoAutocomplete.handleInputChange}
+            onKeyDown={(e) => destinoAutocomplete.handleKeyDown(e, selecionarDestino)}
+            onFocus={() => destinoAutocomplete.setShowSuggestions(true)}
+            sugestoes={destinoAutocomplete.suggestions}
+            showSugestoes={destinoAutocomplete.showSuggestions}
+            onSugestaoClick={(sug) => destinoAutocomplete.handleSuggestionClick(sug, selecionarDestino)}
+            inputRef={destinoAutocomplete.containerRef} // Mudou de inputRef para containerRef
             borderColor="focus:border-red-500"
           />
         </CardContent>

@@ -68,15 +68,17 @@ export function UpgradeAccountModal({ open, onOpenChange }) {
       setTokenInfo(data);
     },
     onError: (error) => {
-      showErrorToast(error, "Token inválido", {
-        defaultMessage: "Não foi possível validar o token. Verifique e tente novamente.",
+      showErrorToast(error, "Chave inválido", {
+        defaultMessage:
+          "Não foi possível validar a chave. Verifique e tente novamente.",
       });
       setTokenInfo(null);
     },
   });
 
   const upgradeMutation = useMutation({
-    mutationFn: ({ token, driverFields }) => upgradeAccount(token, driverFields),
+    mutationFn: ({ token, driverFields }) =>
+      upgradeAccount(token, driverFields),
     onSuccess: async () => {
       const roleLabel = isDriverToken ? "motorista" : "gerente";
       showSuccessToast("Conta atualizada!", {
@@ -93,7 +95,7 @@ export function UpgradeAccountModal({ open, onOpenChange }) {
     onError: (error) => {
       showErrorToast(error, "Erro ao fazer upgrade", {
         defaultMessage:
-          "Token inválido ou já utilizado. Verifique e tente novamente.",
+          "chave inválida ou já utilizada. Verifique e tente novamente.",
       });
     },
   });
@@ -109,8 +111,8 @@ export function UpgradeAccountModal({ open, onOpenChange }) {
     setFieldErrors({});
 
     if (!token.trim()) {
-      showErrorToast({ message: "Token vazio" }, "Token obrigatório", {
-        defaultMessage: "Por favor, insira um token de upgrade.",
+      showErrorToast({ message: "chave vazio" }, "chave obrigatório", {
+        defaultMessage: "Por favor, insira um chave de acesso.",
       });
       return;
     }
@@ -129,7 +131,8 @@ export function UpgradeAccountModal({ open, onOpenChange }) {
           { message: "Validação falhou" },
           "Preencha todos os campos corretamente",
           {
-            defaultMessage: "Verifique os campos obrigatórios e tente novamente.",
+            defaultMessage:
+              "Verifique os campos obrigatórios e tente novamente.",
           }
         );
         return;
@@ -152,13 +155,21 @@ export function UpgradeAccountModal({ open, onOpenChange }) {
     }
   };
 
-  const titleIcon = isDriverToken ? <Truck className="h-5 w-5 text-green-500" /> : <Crown className="h-5 w-5 text-yellow-500" />;
-  const titleText = isDriverToken ? "Tornar-se Motorista" : isManagerToken ? "Tornar-se Gerente" : "Fazer Upgrade";
-  const description = isDriverToken
-    ? "Insira o token e preencha os dados necessários para se tornar motorista."
+  const titleIcon = isDriverToken ? (
+    <Truck className="h-5 w-5 text-green-500" />
+  ) : (
+    <Crown className="h-5 w-5 text-yellow-500" />
+  );
+  const titleText = isDriverToken
+    ? "Tornar-se Motorista"
     : isManagerToken
-    ? "Insira o token para se tornar gerente do sistema."
-    : "Insira o token de upgrade fornecido.";
+    ? "Tornar-se Gerente"
+    : "Fazer Upgrade";
+  const description = isDriverToken
+    ? "Insira a chave de acesso e preencha os dados necessários para se tornar motorista."
+    : isManagerToken
+    ? "Insira o a chave de acesso para se tornar gerente do sistema."
+    : "Insira a chave de acesso fornecido.";
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -174,27 +185,29 @@ export function UpgradeAccountModal({ open, onOpenChange }) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="upgrade-token" className="text-foreground">
-              Token de Upgrade
+              Chave de Acesso
             </Label>
             <Input
               id="upgrade-token"
               value={token}
               onChange={(e) => setToken(e.target.value)}
               onBlur={handleTokenBlur}
-              placeholder="Cole o token aqui"
+              placeholder="Coloque a chave de acesso aqui"
               className="font-mono"
-              disabled={upgradeMutation.isPending || checkTokenMutation.isPending}
+              disabled={
+                upgradeMutation.isPending || checkTokenMutation.isPending
+              }
               autoFocus
             />
             {checkTokenMutation.isPending && (
               <p className="text-xs text-muted-foreground flex items-center gap-2">
                 <Loader2 className="h-3 w-3 animate-spin" />
-                Validando token...
+                Validando Chave...
               </p>
             )}
             {!checkTokenMutation.isPending && !tokenInfo && token && (
               <p className="text-xs text-muted-foreground">
-                Cole o token e clique fora do campo para validá-lo.
+                Cole a chave de acesso e clique fora do campo para validá-lo.
               </p>
             )}
           </div>
@@ -234,7 +247,9 @@ export function UpgradeAccountModal({ open, onOpenChange }) {
                   min={new Date().toISOString().split("T")[0]}
                 />
                 {fieldErrors.vencimento && (
-                  <p className="text-xs text-destructive">{fieldErrors.vencimento}</p>
+                  <p className="text-xs text-destructive">
+                    {fieldErrors.vencimento}
+                  </p>
                 )}
                 <p className="text-xs text-muted-foreground">
                   A CNH não pode estar vencida
@@ -250,7 +265,9 @@ export function UpgradeAccountModal({ open, onOpenChange }) {
                     onChange={handleAmbulanciaChange}
                     placeholder="ID da ambulância"
                     disabled={upgradeMutation.isPending}
-                    className={fieldErrors.id_ambulancia ? "border-destructive" : ""}
+                    className={
+                      fieldErrors.id_ambulancia ? "border-destructive" : ""
+                    }
                   />
                   <Button
                     type="button"
@@ -264,7 +281,9 @@ export function UpgradeAccountModal({ open, onOpenChange }) {
                   </Button>
                 </div>
                 {fieldErrors.id_ambulancia && (
-                  <p className="text-xs text-destructive">{fieldErrors.id_ambulancia}</p>
+                  <p className="text-xs text-destructive">
+                    {fieldErrors.id_ambulancia}
+                  </p>
                 )}
                 <p className="text-xs text-muted-foreground">
                   Clique no botão para gerar um UUID automaticamente
@@ -278,14 +297,21 @@ export function UpgradeAccountModal({ open, onOpenChange }) {
               type="button"
               variant="outline"
               onClick={handleClose}
-              disabled={upgradeMutation.isPending || checkTokenMutation.isPending}
+              disabled={
+                upgradeMutation.isPending || checkTokenMutation.isPending
+              }
               className="m-1"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
-              disabled={upgradeMutation.isPending || checkTokenMutation.isPending || !token.trim() || !tokenInfo}
+              disabled={
+                upgradeMutation.isPending ||
+                checkTokenMutation.isPending ||
+                !token.trim() ||
+                !tokenInfo
+              }
               className="m-1"
             >
               {upgradeMutation.isPending ? (
@@ -295,7 +321,11 @@ export function UpgradeAccountModal({ open, onOpenChange }) {
                 </>
               ) : (
                 <>
-                  {isDriverToken ? <Truck className="h-4 w-4 mr-2" /> : <Crown className="h-4 w-4 mr-2" />}
+                  {isDriverToken ? (
+                    <Truck className="h-4 w-4 mr-2" />
+                  ) : (
+                    <Crown className="h-4 w-4 mr-2" />
+                  )}
                   Fazer Upgrade
                 </>
               )}

@@ -24,13 +24,14 @@ export function GenerateTokenModal({ open, onOpenChange }) {
     onSuccess: (data) => {
       const token = data?.id;
       setGeneratedToken(token);
-      showSuccessToast("Token gerado!", {
-        description: "Token de upgrade criado com sucesso.",
+      showSuccessToast("Chave gerada!", {
+        description: "Chave de acesso criada com sucesso.",
       });
     },
     onError: (error) => {
-      showErrorToast(error, "Erro ao gerar token", {
-        defaultMessage: "Não foi possível gerar o token. Tente novamente.",
+      showErrorToast(error, "Erro ao gerar chave", {
+        defaultMessage:
+          "Não foi possível gerar a chave de acesso. Tente novamente.",
       });
     },
   });
@@ -42,14 +43,14 @@ export function GenerateTokenModal({ open, onOpenChange }) {
       await navigator.clipboard.writeText(generatedToken);
       setCopied(true);
       showSuccessToast("Copiado!", {
-        description: "Token copiado para a área de transferência.",
+        description: "Chave copiado para a área de transferência.",
         duration: 2000,
       });
 
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       showErrorToast(error, "Erro ao copiar", {
-        defaultMessage: "Não foi possível copiar o token.",
+        defaultMessage: "Não foi possível copiar a chave.",
       });
     }
   };
@@ -66,10 +67,10 @@ export function GenerateTokenModal({ open, onOpenChange }) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
             <Sparkles className="h-5 w-5 text-primary" />
-            Gerar Token de Motorista
+            Gerar Chave de acesso para Motorista
           </DialogTitle>
           <DialogDescription>
-            Crie um token de upgrade para transformar um usuário em motorista do
+            Crie uma chave de acesso para transformar um usuário em motorista do
             sistema.
           </DialogDescription>
         </DialogHeader>
@@ -78,7 +79,7 @@ export function GenerateTokenModal({ open, onOpenChange }) {
           {!generatedToken ? (
             <div className="text-center py-6">
               <p className="text-sm text-muted-foreground mb-4">
-                Clique no botão abaixo para gerar um novo token de upgrade.
+                Clique no botão abaixo para gerar uma nova chave de acesso.
               </p>
               <Button
                 onClick={() => generateMutation.mutate()}
@@ -94,14 +95,14 @@ export function GenerateTokenModal({ open, onOpenChange }) {
                 ) : (
                   <>
                     <Sparkles className="h-4 w-4 mr-2" />
-                    Gerar Token
+                    Gerar Chave
                   </>
                 )}
               </Button>
             </div>
           ) : (
             <div className="space-y-3">
-              <Label htmlFor="token">Token Gerado</Label>
+              <Label htmlFor="token">Chave Gerada</Label>
               <div className="flex gap-2">
                 <Input
                   id="token"
@@ -123,8 +124,8 @@ export function GenerateTokenModal({ open, onOpenChange }) {
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                ⚠️ Compartilhe este token apenas com o usuário que você deseja
-                promover a motorista. O token pode ser usado uma única vez.
+                ⚠️ Compartilhe esta chave apenas com o usuário que você deseja
+                promover a motorista. A chave pode ser usada uma única vez.
               </p>
             </div>
           )}

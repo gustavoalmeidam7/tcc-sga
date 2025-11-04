@@ -22,7 +22,7 @@ import {
   getTravelStatusColors,
 } from "@/lib/travel-status";
 import { useNavigate } from "react-router-dom";
-import { reverseGeocode } from "@/hooks/useReverseGeocode";
+import { fetchReverseGeocode } from "@/hooks/useReverseGeocode"; // Importação corrigida
 import { StatsCardSkeleton } from "@/components/ui/stats-skeleton";
 
 function DriverView() {
@@ -61,13 +61,13 @@ function DriverView() {
     const coordsMap = new Map();
     travels.forEach((v) => {
       if (v.lat_inicio && v.long_inicio) {
-        const key = `${v.lat_inicio},${v.long_inicio}`;
+        const key = `${v.lat_inicio.toFixed(5)},${v.long_inicio.toFixed(5)}`;
         if (!coordsMap.has(key)) {
           coordsMap.set(key, { lat: v.lat_inicio, long: v.long_inicio });
         }
       }
       if (v.lat_fim && v.long_fim) {
-        const key = `${v.lat_fim},${v.long_fim}`;
+        const key = `${v.lat_fim.toFixed(5)},${v.long_fim.toFixed(5)}`;
         if (!coordsMap.has(key)) {
           coordsMap.set(key, { lat: v.lat_fim, long: v.long_fim });
         }
@@ -79,15 +79,16 @@ function DriverView() {
   const geocodeQueries = useQueries({
     queries: uniqueCoordinates.map((coord) => ({
       queryKey: ["geocode", coord.lat, coord.long],
-      queryFn: () => reverseGeocode(coord.lat, coord.long),
+      queryFn: fetchReverseGeocode, // Usar a nova função
       staleTime: 1000 * 60 * 60 * 24,
+      cacheTime: 1000 * 60 * 60 * 24 * 7,
     })),
   });
 
   const geocodeMap = useMemo(() => {
     const map = new Map();
     uniqueCoordinates.forEach((coord, index) => {
-      const key = `${coord.lat},${coord.long}`;
+      const key = `${coord.lat.toFixed(5)},${coord.long.toFixed(5)}`;
       map.set(key, geocodeQueries[index]?.data);
     });
     return map;
@@ -99,11 +100,13 @@ function DriverView() {
     return travels.map((viagem) => ({
       ...viagem,
       local_inicio:
-        geocodeMap.get(`${viagem.lat_inicio},${viagem.long_inicio}`) ||
-        "Carregando...",
+        geocodeMap.get(
+          `${viagem.lat_inicio.toFixed(5)},${viagem.long_inicio.toFixed(5)}`
+        ) || "Carregando...",
       local_fim:
-        geocodeMap.get(`${viagem.lat_fim},${viagem.long_fim}`) ||
-        "Carregando...",
+        geocodeMap.get(
+          `${viagem.lat_fim.toFixed(5)},${viagem.long_fim.toFixed(5)}`
+        ) || "Carregando...",
     }));
   }, [travels, geocodeMap]);
 
@@ -338,7 +341,7 @@ function DriverView() {
                         const statusColors = getTravelStatusColors(
                           viagem.realizado
                         );
-                        const statusLabel = getTravelStatusLabel(
+                        const statusLabel = getTravelStatusStatusLabel(
                           viagem.realizado
                         );
 
