@@ -13,7 +13,7 @@ from src.Validator.GenericValidator import unmask_uuid, mask_uuid
 from src.Schema.Travel.TravelResponseSchema import TravelResponseSchema
 from src.Schema.Travel.TravelCreateSchema import TravelCreateSchema
 from src.Schema.Travel.TravelRealizedEnum import TravelRealizedEnum
-from src.Schema.Travel.TravelDeleteResponseSchema import TravelDeleteResponseSchema
+from src.Schema.Travel.TravelCancelResponseSchema import TravelDeleteResponseSchema
 
 def find_all_travels(itemsPerPage: int = 15, page: int = 0) -> list[TravelResponseSchema]:
     """ Encontra todas viagens e ordena de mais recente para mais antiga """

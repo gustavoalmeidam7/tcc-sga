@@ -2,7 +2,7 @@ from fastapi import APIRouter
 
 from src.Schema.Travel.TravelResponseSchema import TravelResponseSchema
 from src.Schema.Travel.TravelCreateSchema import TravelCreateSchema
-from src.Schema.Travel.TravelDeleteResponseSchema import TravelDeleteResponseSchema
+from src.Schema.Travel.TravelCancelResponseSchema import TravelDeleteResponseSchema
 
 from uuid import UUID
 
@@ -16,7 +16,7 @@ TRAVEL_ROUTER = APIRouter(
 )
 
 @TRAVEL_ROUTER.get("/")
-async def get_travels(user: DriverDecorator.GET_AUTENTHICATED_DRIVER, page: int = 0, pageSize: int = 15) -> list[TravelResponseSchema]:
+async def get_travels(user: DriverDecorator.GET_AUTENTHICATED_DRIVER_OR_HIGER, page: int = 0, pageSize: int = 15) -> list[TravelResponseSchema]:
     return TravelService.find_all_travels(pageSize, page)
 
 @TRAVEL_ROUTER.get("/assigned")
