@@ -35,7 +35,7 @@ isDebug = (env == "DEV")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    Logging.log("Iniciando aplicação", Level.LOG)
+    Logging.log("Iniciando aplicação", Level.INFO)
     db.connect()
 
     if not is_pytest:
@@ -45,12 +45,12 @@ async def lifespan(app: FastAPI):
 
     Logging.log(f"Tokens para gerente: {[mask_uuid(t.id) for t in tokens if not t.usado and t.fator_cargo == 2]}", Level.SENSITIVE)
     
-    Logging.log("Aplicação iniciada", Level.LOG)
+    Logging.log("Aplicação iniciada", Level.INFO)
     yield
-    Logging.log("Fechando aplicação", Level.LOG)
+    Logging.log("Fechando aplicação", Level.INFO)
     db.close()
 
-    Logging.log("Aplicação fechada", Level.LOG)
+    Logging.log("Aplicação fechada", Level.INFO)
 
 app = FastAPI(debug=isDebug, title="Gerenciamento de ambulância API", description="Api para gerenciamento de ambulâncias - TCC", version="1.0.0", root_path="/api", lifespan=lifespan)
 

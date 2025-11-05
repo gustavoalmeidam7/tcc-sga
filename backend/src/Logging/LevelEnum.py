@@ -1,10 +1,14 @@
-from enum import StrEnum
-from src.Logging.ColorsEnum import Colors
+from enum import IntEnum
 
-class Level(StrEnum):
-    LOG   = f"{Colors.DEFAULT}LOG"
-    DEBUG = f"{Colors.GREEN}DEBUG"
-    WARN  = f"{Colors.BOLD_YELLOW}WARNING"
-    ERROR = f"{Colors.BOLD_RED}ERROR"
+class Level(IntEnum):
 
-    SENSITIVE = f"{Colors.BOLD_RED}SENSITIVE"
+    CRITICAL  = 50
+    FATAL     = CRITICAL
+    ERROR     = 40
+    WARNING   = 30
+    WARN      = WARNING
+    INFO      = 20
+    DEBUG     = 10
+    NOTSET    = 0
+
+    SENSITIVE = 67
