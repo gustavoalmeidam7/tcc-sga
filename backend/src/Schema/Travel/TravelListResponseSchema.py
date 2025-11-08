@@ -2,7 +2,7 @@ from src.Schema.BaseModel import BaseModel
 from pydantic import Field
 from typing import Annotated
 
-from src.Schema.Travel.TravelRealizedEnum import TravelRealizedEnum
+from src.Schema.Travel.TravelRealizedEnum import TravelRealized
 from src.Schema.Travel.TravelResponseSchema import TravelResponseSchema
 
 from uuid import uuid4

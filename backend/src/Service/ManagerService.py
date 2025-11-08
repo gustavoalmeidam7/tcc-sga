@@ -1,5 +1,5 @@
+from src.Repository import ManagerRepository, UserRepository, DriverRepository, TravelRepository
 from typing import Optional
-from src.Repository import ManagerRepository, UserRepository, DriverRepository
 
 from src.Model.UpgradeToken import UpgradeToken
 
@@ -16,6 +16,7 @@ from src.Schema.User.UserRoleEnum import UserRole
 from src.Schema.User.UserResponseFullSchema import UserResponseFullSchema
 from src.Schema.Manager.UpgradeTokenFullResponseSchema import UpgradeTokenFullResponseSchema
 from src.Schema.Driver.DriverCreateSchema import DriverCreateSchema
+from src.Schema.Travel.TravelResponseSchema import TravelResponseSchema
 
 from src.DB import db
 
@@ -28,6 +29,21 @@ def get_token_info(upgradeTokenId: UUID) -> UpgradeTokenFullResponseSchema:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token não existe")
     
     return UpgradeTokenFullResponseSchema.model_validate(token)
+
+def assign_driver_to_travel_by_id(driverId: UUID, travelId: UUID) -> TravelResponseSchema:
+    travelId = unmask_uuid(travelId)
+    driverId = unmask_uuid(driverId)
+    ambulanceId = DriverRepository.find_driver_by_id(driverId).id_ambulancia_id
+
+    assingedTravel = TravelRepository.update_travel(travelId=travelId, id_motorista=driverId, id_ambulancia=ambulanceId)
+
+    if not assingedTravel:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Viagem não encontrada"
+        )
+    
+    return TravelResponseSchema.model_validate(assingedTravel)
 
 def generate_manager_token_list(tokenNumber: int) -> list[UpgradeToken]:
     """ Gera uma lista de tokens para atualizar para gerente """

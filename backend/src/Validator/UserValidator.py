@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime
 import re
 import uuid
 
@@ -49,8 +49,8 @@ def phone_number_validator(number: str | int) -> str:
 def unmask_number(number: str) -> str:
     return re.sub(r"[^0-9]", "", number)
 
-def validate_birthday(birthday: date) -> date:
-    if birthday > date.today():
+def validate_birthday(birthday: datetime) -> datetime:
+    if birthday > datetime.today():
         raise ValueError("Data de nascimento deve ser antes de hoje")
 
     return birthday

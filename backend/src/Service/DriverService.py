@@ -1,37 +1,16 @@
-from src.Model.Driver import Driver
-from src.Repository import DriverRepository, TravelRepository, UserRepository
-
-from src.Schema.Travel.TravelResponseSchema import TravelResponseSchema
+from src.Repository import DriverRepository, UserRepository
 
 from src.Schema.Driver.DriverResponseSchema import DriverResponseSchema
 from src.Schema.Driver.DriverResponseFullSchema import DriverResponseFullSchema
-from src.Schema.Driver.DriverCreateSchema import DriverCreateSchema
 from src.Schema.Driver.DriverUpdateFieldsSchema import DriverUpdateFieldsSchema
 
 from src.Validator.GenericValidator import unmask_uuid
 
 from playhouse.shortcuts import model_to_dict
 
-from fastapi import HTTPException, status
-
 from src.Model.User import User
 
-from uuid import UUID, uuid4
-
-def assign_driver_travel(driver: User, travelId: UUID) -> TravelResponseSchema:
-    ambulanceId = get_driver_by_user(driver).id_ambulancia
-    travelId = unmask_uuid(travelId)
-    driverId = driver.id
-
-    assingedTravel = TravelRepository.update_travel(travelId=travelId, id_motorista=driverId, id_ambulancia=ambulanceId)
-
-    if not assingedTravel:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Viagem não encontrada"
-        )
-    
-    return TravelResponseSchema.model_validate(assingedTravel)
+from uuid import UUID
 
 def is_user_driver(userId: UUID) -> bool:
     return UserRepository.find_by_id(unmask_uuid(userId)).cargo == 1

@@ -23,7 +23,7 @@ USER_ROUTER = APIRouter(
 )
 
 @USER_ROUTER.post("/")
-async def create_user(user: UserCreateSchema) -> UserResponseSchema:
+async def create_user(user: UserCreateSchema) -> UserResponseFullSchema:
     return UserService.create(user)
 
 @USER_ROUTER.delete("/", status_code=status.HTTP_204_NO_CONTENT)

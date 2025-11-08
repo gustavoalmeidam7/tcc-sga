@@ -10,8 +10,6 @@ from src.Service.SessionService import get_current_user
 
 from src.Schema.User.UserRoleEnum import UserRole
 
-from src.Service import DriverService
-
 async def __get_user__(token: TOKEN_SCHEME) -> User:
     invalidCredentials = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,

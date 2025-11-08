@@ -18,11 +18,6 @@ DRIVER_ROUTER = APIRouter(
     tags=["driver"]
 )
 
-@DRIVER_ROUTER.post("/travel/{travel}")
-async def assing_driver_to_travel(driver: GET_AUTENTHICATED_DRIVER, travel: UUID) -> TravelResponseSchema:
-    """ Assina o motorista e a respectiva ambulância a uma viagem """
-    return DriverService.assign_driver_travel(driver, travel)
-
 @DRIVER_ROUTER.patch("/update/")
 async def update_driver(user: GET_AUTENTHICATED_DRIVER, driverFields: DriverUpdateFieldsSchema) -> DriverResponseFullSchema:
     """ Atualiza as informações especificas de um motorista """

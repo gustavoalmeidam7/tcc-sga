@@ -8,10 +8,10 @@ TOKEN_SCHEME = Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="token", aut
 from src.Model.User import User
 from src.Service.SessionService import get_current_user
 
-from src.Service import DriverService
+from src.Schema.User.UserRoleEnum import UserRole
 
-async def is_user_manager(user: User) -> bool:
-    return user.cargo >= 2
+def is_user_manager(user: User) -> bool:
+    return user.cargo == UserRole.MANAGER
 
 async def token_get_manager(token: TOKEN_SCHEME) -> User:
     if not token:

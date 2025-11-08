@@ -4,6 +4,8 @@ from src.DB import postgres, sqlite
 from src.Utils.env import get_env_var
 from src.Utils.singleton import singleton
 
+from src.Logging import Logging, Level
+
 db = Proxy()
 
 class connection(metaclass=singleton):
@@ -34,4 +36,4 @@ if not is_pytest:
 
     db.initialize(selected_db)
 else:
-    print("***Running in test mode***")
+    Logging.log("***Running in test mode***", Level.DEBUG)

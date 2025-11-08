@@ -1,8 +1,8 @@
-from fastapi import APIRouter, status, Depends
+from fastapi import APIRouter
 
-from src.Decorators import UserDecorators, ManagerDecorator
+from src.Decorators import ManagerDecorator
 
-from src.Schema.User.UserResponseFullSchema import UserResponseFullSchema
+from src.Schema.Travel.TravelResponseSchema import TravelResponseSchema
 from src.Schema.Manager.UpgradeTokenFullResponseSchema import UpgradeTokenFullResponseSchema
 
 from src.Service import ManagerService
@@ -13,6 +13,12 @@ MANAGER_ROUTER = APIRouter(
     prefix="/manager",
     tags=["manager"]
 )
+
+# TODO: VALIDAR SE A VIAGEM ESTÁ CANCELADA
+@MANAGER_ROUTER.post("/assigndrivertravel/{driver}/{travel}")
+async def assing_driver_to_travel(manager: ManagerDecorator.GET_AUTENTHICATED_MANAGER, driver: UUID, travel: UUID) -> TravelResponseSchema:
+    """ Assina o motorista e a respectiva ambulância a uma viagem """
+    return ManagerService.assign_driver_to_travel_by_id(driver, travel)
 
 @MANAGER_ROUTER.post("/")
 async def create_driver_upgrade_token(manager: ManagerDecorator.GET_AUTENTHICATED_MANAGER) -> UpgradeTokenFullResponseSchema:
