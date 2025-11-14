@@ -1,5 +1,6 @@
 import React, { lazy } from "react";
 import PrivateRoute from "./components/PrivateRoute";
+import PublicRoute from "./components/PublicRoute";
 import RoleBasedRoute from "./components/RoleBasedRoute";
 import AnimatedPage from "./components/ui/animated-page";
 import { ROLES } from "./lib/roles";
@@ -39,27 +40,33 @@ export const appRoutes = [
   {
     path: "/login",
     element: (
-      <AnimatedPage>
-        <Login />
-      </AnimatedPage>
+      <PublicRoute>
+        <AnimatedPage>
+          <Login />
+        </AnimatedPage>
+      </PublicRoute>
     ),
     label: "Login",
   },
   {
     path: "/registro",
     element: (
-      <AnimatedPage>
-        <Registro />
-      </AnimatedPage>
+      <PublicRoute>
+        <AnimatedPage>
+          <Registro />
+        </AnimatedPage>
+      </PublicRoute>
     ),
     label: "Registro",
   },
   {
     path: "/rec_senha",
     element: (
-      <AnimatedPage>
-        <RecSenha />
-      </AnimatedPage>
+      <PublicRoute>
+        <AnimatedPage>
+          <RecSenha />
+        </AnimatedPage>
+      </PublicRoute>
     ),
     label: "Recuperar Senha",
   },
