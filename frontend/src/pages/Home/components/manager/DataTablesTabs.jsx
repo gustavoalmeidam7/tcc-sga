@@ -19,14 +19,14 @@ function DataTablesTabs({
         <TabsList className="bg-transparent rounded-none p-0 h-auto w-full sm:w-auto sm:justify-start">
           <TabsTrigger
             value="viagens"
-            className="text-xs sm:text-base data-[state=active]:bg-accent data-[state=active]:shadow-none rounded-t-md rounded-b-none border-b-2 border-transparent data-[state=active]:border-primary flex-1 sm:flex-initial whitespace-nowrap px-2 sm:px-3"
+            className="cursor-pointer text-xs sm:text-base data-[state=active]:bg-accent data-[state=active]:shadow-none rounded-t-md rounded-b-none border-b-2 border-transparent data-[state=active]:border-primary flex-1 sm:flex-initial whitespace-nowrap px-2 sm:px-3"
           >
             <span className="hidden sm:inline">Viagens Pendentes</span>
             <span className="sm:hidden text-sm">Viagens</span>
           </TabsTrigger>
           <TabsTrigger
             value="motoristas"
-            className="text-xs sm:text-base data-[state=active]:bg-accent data-[state=active]:shadow-none rounded-t-md rounded-b-none border-b-2 border-transparent data-[state=active]:border-primary flex-1 sm:flex-initial whitespace-nowrap px-2 sm:px-3"
+            className="cursor-pointer text-xs sm:text-base data-[state=active]:bg-accent data-[state=active]:shadow-none rounded-t-md rounded-b-none border-b-2 border-transparent data-[state=active]:border-primary flex-1 sm:flex-initial whitespace-nowrap px-2 sm:px-3"
           >
             <span className="hidden sm:inline">Motoristas Ativos</span>
             <span className="sm:hidden text-sm">Motoristas</span>

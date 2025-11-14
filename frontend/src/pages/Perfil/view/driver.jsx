@@ -1,33 +1,64 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { useDeleteAccount } from "../hooks/useDeleteAccount";
-import { User, Mail, Calendar, Phone, Shield, Pencil, Save, X, Truck, MapPin, Trash2, AlertTriangle } from "lucide-react";
-import { ROLE_LABELS } from "@/lib/roles";
+import {
+  User,
+  Mail,
+  Calendar,
+  Phone,
+  Pencil,
+  Save,
+  X,
+  Truck,
+  MapPin,
+  Trash2,
+  AlertTriangle,
+  CreditCard,
+  CalendarClock,
+} from "lucide-react";
 import authService from "@/services/authService";
+import driverService from "@/services/driverService";
 import { formatarData } from "@/lib/date-utils";
 import LoadingSpinner from "@/components/layout/loading";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const InfoItem = ({ icon: Icon, label, value, field, editable = true, type = "text", editMode, formData, setFormData }) => (
-  <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50">
-    <Icon className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-    <div className="flex-1">
-      <p className="text-sm text-muted-foreground">{label}</p>
-      {editMode && field && editable ? (
-        <Input
-          type={type}
-          value={formData[field] || ""}
-          onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
-          className="mt-1"
-        />
-      ) : (
-        <p className="font-medium">{value}</p>
-      )}
-    </div>
+const InfoItem = ({
+  icon: Icon,
+  label,
+  value,
+  field,
+  editable = true,
+  type = "text",
+  editMode,
+  formData,
+  setFormData,
+}) => (
+  <div className="group relative">
+    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2 mb-2">
+      <div className="p-1.5 rounded-md bg-green-500/20 text-green-600">
+        <Icon className="h-3.5 w-3.5" />
+      </div>
+      {label}
+    </label>
+    {editMode && field && editable ? (
+      <Input
+        type={type}
+        value={formData[field] || ""}
+        onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
+        className="h-11 border-2 focus:border-primary transition-all"
+      />
+    ) : (
+      <div className="relative">
+        <p className="text-sm font-medium px-4 py-3 bg-gradient-to-br from-muted/50 to-muted/30 rounded-lg border border-border/50 group-hover:border-border transition-all">
+          {value}
+        </p>
+      </div>
+    )}
   </div>
 );
 
@@ -41,6 +72,17 @@ export default function DriverProfileView() {
     nome: user?.nome || "",
     email: user?.email || "",
     telefone: user?.telefone || "",
+  });
+
+  const {
+    data: driverInfo,
+    isLoading: isLoadingDriver,
+    error: driverError,
+  } = useQuery({
+    queryKey: ["driver", "info"],
+    queryFn: driverService.getDriverInfo,
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
   });
 
   const handleSalvar = async () => {
@@ -60,15 +102,17 @@ export default function DriverProfileView() {
         updateUserContext(updatedUser);
       }
 
-      toast.success('Perfil atualizado com sucesso!', {
-        description: 'Suas informações foram salvas.',
+      toast.success("Perfil atualizado com sucesso!", {
+        description: "Suas informações foram salvas.",
         duration: 4000,
       });
       setEditMode(false);
     } catch (err) {
       console.error("Erro ao atualizar perfil:", err);
-      const mensagemErro = err.response?.data?.detail || "Erro ao atualizar perfil. Tente novamente.";
-      toast.error('Erro ao atualizar perfil', {
+      const mensagemErro =
+        err.response?.data?.detail ||
+        "Erro ao atualizar perfil. Tente novamente.";
+      toast.error("Erro ao atualizar perfil", {
         description: mensagemErro,
         duration: 5000,
       });
@@ -95,122 +139,277 @@ export default function DriverProfileView() {
     }
   };
 
+  const getInitials = (name) => {
+    if (!name) return "??";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase();
+  };
+
   return (
-    <main className="space-y-6 lg:container lg:mx-auto pb-6">
+    <main className="min-h-screen bg-background">
       {loading && <LoadingSpinner fullScreen text="Salvando alterações..." />}
 
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-xl bg-gradient-to-r from-primary/20 via-primary/10 to-transparent p-4 md:p-5 lg:p-3 border border-primary/20"
-      >
-        <div className="relative z-10">
-          <h1 className="text-2xl md:text-2xl font-bold text-foreground mb-1">
-            🚗 Meu Perfil - Motorista
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Visualize suas informações pessoais e profissionais
-          </p>
-        </div>
-        <div className="absolute top-0 right-0 w-32 h-32 md:w-48 md:h-48 bg-primary/5 rounded-full blur-3xl" />
-      </motion.header>
+      <div className="relative bg-gradient-to-r from-green-500/80 via-green-600/90 to-green-500/80 h-48 rounded-b-3xl shadow-xl">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.15),transparent)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(0,0,0,0.1),transparent)]" />
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Informações Pessoais</CardTitle>
-            {!editMode ? (
-              <Button variant="outline" size="sm" onClick={() => setEditMode(true)}>
-                <Pencil className="h-4 w-4 mr-2" />
-                Editar
-              </Button>
-            ) : (
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={handleCancelar} disabled={loading}>
-                  <X className="h-4 w-4 mr-2" />
-                  Cancelar
-                </Button>
-                <Button size="sm" onClick={handleSalvar} disabled={loading}>
-                  <Save className="h-4 w-4 mr-2" />
-                  Salvar
-                </Button>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-24 pb-12">
+        <Card className="mb-8 border shadow-2xl overflow-hidden bg-card">
+          <div className="relative p-8">
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+              <div className="relative group">
+                <div className="h-32 w-32 rounded-2xl bg-gradient-to-br from-green-500/90 via-green-600 to-green-500/80 flex items-center justify-center text-4xl font-bold text-white shadow-xl ring-4 ring-background">
+                  {getInitials(user?.nome)}
+                </div>
+                <div className="absolute -bottom-2 -right-2 bg-green-500 h-8 w-8 rounded-full border-4 border-background flex items-center justify-center shadow-lg">
+                  <div className="h-3 w-3 bg-white rounded-full animate-pulse" />
+                </div>
               </div>
-            )}
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <InfoItem icon={User} label="Nome Completo" value={user?.nome || "Não informado"} field="nome" type="text" editMode={editMode} formData={formData} setFormData={setFormData} />
-            <InfoItem icon={Mail} label="E-mail" value={user?.email || "Não informado"} field="email" type="email" editMode={editMode} formData={formData} setFormData={setFormData} />
-            <InfoItem icon={Phone} label="Telefone" value={user?.telefone || "Não informado"} field="telefone" type="tel" editMode={editMode} formData={formData} setFormData={setFormData} />
-            <InfoItem icon={Calendar} label="Data de Nascimento" value={formatarData(user?.nascimento)} editable={false} editMode={editMode} formData={formData} setFormData={setFormData} />
-            <InfoItem icon={Shield} label="Cargo" value={ROLE_LABELS[user?.cargo] || "Não informado"} editable={false} editMode={editMode} formData={formData} setFormData={setFormData} />
-          </CardContent>
+
+              <div className="flex-1 text-center md:text-left">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+                  <div>
+                    <h1 className="text-3xl font-bold text-foreground mb-1">
+                      {user?.nome || "Motorista"}
+                    </h1>
+                    <p className="text-muted-foreground flex items-center gap-2 justify-center md:justify-start">
+                      <Mail className="h-4 w-4" />
+                      {user?.email || "Não informado"}
+                    </p>
+                  </div>
+
+                  {!editMode ? (
+                    <Button
+                      size="lg"
+                      className="shadow-lg hover:shadow-xl transition-all"
+                      onClick={() => setEditMode(true)}
+                    >
+                      <Pencil className="h-4 w-4 mr-2" />
+                      Editar Perfil
+                    </Button>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        onClick={handleCancelar}
+                        disabled={loading}
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Cancelar
+                      </Button>
+                      <Button
+                        size="lg"
+                        onClick={handleSalvar}
+                        disabled={loading}
+                        className="shadow-lg"
+                      >
+                        <Save className="h-4 w-4 mr-2" />
+                        Salvar
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Informações Profissionais</CardTitle>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <Card className="border shadow-lg hover:shadow-xl transition-all bg-card">
+            <CardHeader className="bg-muted/30 border-b">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <div className="p-2 bg-green-500/20 rounded-lg">
+                  <User className="h-5 w-5 text-green-600" />
+                </div>
+                Informações Pessoais
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6 pt-6">
+              <InfoItem
+                icon={User}
+                label="Nome Completo"
+                value={user?.nome || "Não informado"}
+                field="nome"
+                type="text"
+                editMode={editMode}
+                formData={formData}
+                setFormData={setFormData}
+              />
+              <InfoItem
+                icon={Mail}
+                label="E-mail"
+                value={user?.email || "Não informado"}
+                field="email"
+                type="email"
+                editMode={editMode}
+                formData={formData}
+                setFormData={setFormData}
+              />
+              <InfoItem
+                icon={Phone}
+                label="Telefone"
+                value={user?.telefone || "Não informado"}
+                field="telefone"
+                type="tel"
+                editMode={editMode}
+                formData={formData}
+                setFormData={setFormData}
+              />
+              <InfoItem
+                icon={CreditCard}
+                label="CPF"
+                value={user?.cpf || "Não informado"}
+                editable={false}
+                editMode={editMode}
+                formData={formData}
+                setFormData={setFormData}
+              />
+              <InfoItem
+                icon={Calendar}
+                label="Data de Nascimento"
+                value={formatarData(user?.nascimento)}
+                editable={false}
+                editMode={editMode}
+                formData={formData}
+                setFormData={setFormData}
+              />
+            </CardContent>
+          </Card>
+
+          <Card className="border shadow-lg hover:shadow-xl transition-all bg-card">
+            <CardHeader className="bg-muted/30 border-b">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <div className="p-2 bg-green-500/20 rounded-lg">
+                  <Truck className="h-5 w-5 text-green-600" />
+                </div>
+                Informações Profissionais
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6 pt-6">
+              {isLoadingDriver ? (
+                <>
+                  <Skeleton className="h-20 w-full rounded-lg" />
+                  <Skeleton className="h-20 w-full rounded-lg" />
+                  <Skeleton className="h-20 w-full rounded-lg" />
+                  <Skeleton className="h-20 w-full rounded-lg" />
+                </>
+              ) : (
+                <>
+                  <InfoItem
+                    icon={CreditCard}
+                    label="CNH"
+                    value={driverInfo?.cnh || "Não informado"}
+                    editable={false}
+                    editMode={false}
+                  />
+                  <InfoItem
+                    icon={CalendarClock}
+                    label="Vencimento CNH"
+                    value={
+                      driverInfo?.vencimento
+                        ? formatarData(driverInfo.vencimento)
+                        : "Não informado"
+                    }
+                    editable={false}
+                    editMode={false}
+                  />
+                  <InfoItem
+                    icon={Truck}
+                    label="Ambulância Atribuída"
+                    value={
+                      driverInfo?.id_ambulancia
+                        ? `Ambulância #${driverInfo.id_ambulancia}`
+                        : "Aguardando atribuição"
+                    }
+                    editable={false}
+                    editMode={false}
+                  />
+                  <InfoItem
+                    icon={MapPin}
+                    label="Status"
+                    value={
+                      driverInfo?.em_viagem ? "🚨 Em viagem" : "✅ Disponível"
+                    }
+                    editable={false}
+                    editMode={false}
+                  />
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card className="border-2 border-destructive/30 bg-destructive/5 shadow-lg max-w-2xl">
+          <CardHeader className="border-b border-destructive/20 bg-destructive/10 p-3">
+            <CardTitle className="text-sm flex items-center gap-2 text-destructive">
+              <div className="p-1 bg-destructive/20 rounded flex-shrink-0">
+                <AlertTriangle className="h-4 w-4" />
+              </div>
+              Zona de Perigo
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <InfoItem icon={Truck} label="Ambulância Atribuída" value={user?.ambulanciaNome || "Aguardando atribuição"} editable={false} editMode={false} />
-            <InfoItem icon={MapPin} label="Viagens Realizadas (Total)" value={`${user?.totalViagens || 0} viagens`} editable={false} editMode={false} />
-            <InfoItem icon={Calendar} label="Viagens Este Mês" value={`${user?.viagensMesAtual || 0} viagens`} editable={false} editMode={false} />
+          <CardContent className="p-3">
+            <h3 className="font-semibold text-sm mb-1">Deletar Conta</h3>
+            <p className="text-xs text-muted-foreground mb-3">
+              Todos os seus dados serão removidos permanentemente.
+            </p>
+
+            {!showDeleteConfirm ? (
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={isDeleting}
+                className="shadow-md"
+              >
+                <Trash2 className="h-3.5 w-3.5 mr-2" />
+                Deletar Conta
+              </Button>
+            ) : (
+              <div className="space-y-3 p-3 border-2 border-destructive/50 rounded-lg bg-card shadow-inner">
+                <div className="flex items-start gap-2">
+                  <div className="p-1 bg-destructive/20 rounded flex-shrink-0">
+                    <AlertTriangle className="h-4 w-4 text-destructive" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm mb-0.5">Tem certeza?</p>
+                    <p className="text-xs text-muted-foreground">
+                      Esta ação é irreversível.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setShowDeleteConfirm(false)}
+                    disabled={isDeleting}
+                    className="flex-1"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={handleDeleteAccount}
+                    disabled={isDeleting}
+                    className="flex-1 shadow-md"
+                  >
+                    <Trash2 className="h-3.5 w-3.5 mr-2" />
+                    Confirmar
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardContent className="p-4">
-          <p className="text-sm text-muted-foreground">
-            <strong>Nota:</strong> As informações profissionais serão atualizadas automaticamente conforme você realiza viagens e recebe atribuições.
-          </p>
-        </CardContent>
-      </Card>
-      <Card className="border-destructive/50">
-        <CardContent className="p-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1">
-              <h3 className="font-semibold text-sm text-destructive mb-1 flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4" />
-                Deletar Conta
-              </h3>
-              <p className="text-xs text-muted-foreground">
-                Ao deletar sua conta, todos os seus dados serão removidos permanentemente.
-              </p>
-            </div>
-            {!showDeleteConfirm ? (
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => setShowDeleteConfirm(true)}
-                disabled={isDeleting}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Deletar
-              </Button>
-            ) : (
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowDeleteConfirm(false)}
-                  disabled={isDeleting}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={handleDeleteAccount}
-                  disabled={isDeleting}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Confirmar
-                </Button>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
     </main>
   );
 }

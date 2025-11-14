@@ -14,6 +14,7 @@ import {
   Navigation,
   CheckCircle2,
   AlertCircle,
+  FileDown,
 } from "lucide-react";
 import {
   getTravelStatusLabel,
@@ -40,6 +41,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { DetailCard } from "../components/DetailCard";
 import { PatientCard } from "../components/PatientCard";
 import { StatusCard } from "../components/StatusCard";
+import { generateTravelReportPDF } from "@/lib/pdf-utils";
 
 export default function UserDetalhesView() {
   const { id } = useParams();
@@ -59,6 +61,37 @@ export default function UserDetalhesView() {
   const handleEnderecosCarregados = useCallback((data) => {
     setEnderecos(data);
   }, []);
+
+  const handleExportPdf = async () => {
+    if (!viagem || !enderecos.origem || !enderecos.destino) {
+      toast.error("Dados incompletos", {
+        description: "Aguarde o carregamento completo dos dados da viagem.",
+      });
+      return;
+    }
+
+    const toastId = toast.loading("Gerando Relatório PDF...", {
+      description: "Aguarde enquanto preparamos seu documento.",
+      duration: 3000,
+    });
+
+    try {
+      const solicitante = { nome: "Você" };
+      await generateTravelReportPDF(viagem, enderecos, solicitante);
+      toast.success("PDF gerado com sucesso!", {
+        id: toastId,
+        description: "Seu download deve começar em breve.",
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+      toast.error("Falha ao gerar PDF", {
+        id: toastId,
+        description: "Ocorreu um erro inesperado. Tente novamente.",
+        duration: 5000,
+      });
+    }
+  };
 
   const deleteMutation = useMutation({
     mutationFn: () => deleteTravel(id),
@@ -125,7 +158,12 @@ export default function UserDetalhesView() {
   return (
     <main className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate(-1)}
+          className="print:hidden"
+        >
           <ArrowLeft className="h-5 w-5 text-foreground" />
         </Button>
         <div className="flex-1">
@@ -137,6 +175,14 @@ export default function UserDetalhesView() {
             <p className="text-sm text-muted-foreground font-mono">{id}</p>
           </div>
         </div>
+        <Button
+          onClick={handleExportPdf}
+          variant="outline"
+          size="icon"
+          className="print:hidden"
+        >
+          <FileDown className="h-5 w-5" />
+        </Button>
         <Badge className={`${statusColors.className} text-base px-4 py-2`}>
           {statusLabel}
         </Badge>

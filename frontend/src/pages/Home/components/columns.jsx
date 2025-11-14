@@ -125,33 +125,73 @@ export const columns_motoristas = [
         </Button>
       );
     },
+    cell: ({ row }) => <div className="font-medium">{row.original.nome}</div>,
     meta: {
       headerText: "Nome",
     },
   },
   {
-    accessorKey: "status",
+    accessorKey: "email",
+    header: "Email",
+    cell: ({ row }) => (
+      <div className="text-sm text-muted-foreground max-w-[180px] truncate">
+        {row.original.email || "N/A"}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "telefone",
+    header: "Telefone",
+    cell: ({ row }) => (
+      <div className="text-sm">{row.original.telefone || "N/A"}</div>
+    ),
+  },
+  {
+    accessorKey: "driverInfo.cnh",
+    header: "CNH",
+    cell: ({ row }) => (
+      <div className="text-sm font-mono">
+        {row.original.driverInfo?.cnh || "N/A"}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "driverInfo.em_viagem",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.getValue("status");
-      const variant =
-        {
-          Ativo: "bg-primary/20 text-primary font-semibold",
-          Inativo: "bg-destructive/20 text-destructive font-semibold",
-        }[status] ?? "bg-muted/20 text-muted-foreground";
+      const emViagem = row.original.driverInfo?.em_viagem;
+      const isLoading = row.original.driverInfo === undefined;
 
-      return (
-        <div
-          className={`px-2 py-1 rounded-full text-xs text-center w-20 ${variant}`}
-        >
-          {status}
-        </div>
+      if (isLoading) {
+        return (
+          <Badge variant="outline" className="text-xs">
+            Carregando...
+          </Badge>
+        );
+      }
+
+      return emViagem ? (
+        <Badge className="bg-amber-500 hover:bg-amber-600 text-xs">
+          Em Viagem
+        </Badge>
+      ) : (
+        <Badge className="bg-green-500 hover:bg-green-600 text-xs">
+          Disponível
+        </Badge>
       );
     },
   },
   {
-    accessorKey: "ambulancia",
+    accessorKey: "driverInfo.id_ambulancia",
     header: "Ambulância",
+    cell: ({ row }) => {
+      const ambulanciaId = row.original.driverInfo?.id_ambulancia;
+      return (
+        <div className="text-sm font-mono max-w-[100px] truncate">
+          {ambulanciaId ? `#${ambulanciaId.slice(0, 8)}...` : "N/A"}
+        </div>
+      );
+    },
   },
   {
     id: "actions",

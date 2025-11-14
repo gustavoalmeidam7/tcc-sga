@@ -21,10 +21,11 @@ import {
   MapPinned,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { memo } from "react";
 import { useUserDashboard } from "../hooks/staticUser";
-import LoadingSpinner from "@/components/layout/loading";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export default function UserView() {
+function UserView() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -62,7 +63,52 @@ export default function UserView() {
       </header>
 
       {loading ? (
-        <LoadingSpinner text="Carregando dashboard..." />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="space-y-6">
+            <div className="grid grid-cols-3 gap-3 sm:gap-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Card key={i}>
+                  <CardContent className="p-3 sm:p-4">
+                    <div className="space-y-2">
+                      <Skeleton className="h-3 w-20" />
+                      <Skeleton className="h-8 w-12" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <div className="space-y-4">
+              {Array.from({ length: 2 }).map((_, i) => (
+                <Card key={i}>
+                  <CardHeader>
+                    <Skeleton className="h-6 w-32" />
+                    <Skeleton className="h-4 w-48 mt-2" />
+                  </CardHeader>
+                  <CardContent>
+                    <Skeleton className="h-4 w-full" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-40" />
+              <Skeleton className="h-4 w-56 mt-2" />
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="p-4 border rounded-lg space-y-3">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-6">
@@ -85,7 +131,10 @@ export default function UserView() {
                         </p>
                       </div>
                       <div className="hidden sm:block p-2 bg-blue-500/10 rounded-full">
-                        <Clock className="h-5 w-5 text-blue-500" aria-hidden="true" />
+                        <Clock
+                          className="h-5 w-5 text-blue-500"
+                          aria-hidden="true"
+                        />
                       </div>
                     </div>
                   </CardContent>
@@ -105,7 +154,10 @@ export default function UserView() {
                         </p>
                       </div>
                       <div className="hidden sm:block p-2 bg-green-500/10 rounded-full">
-                        <CheckCircle2 className="h-5 w-5 text-green-500" aria-hidden="true" />
+                        <CheckCircle2
+                          className="h-5 w-5 text-green-500"
+                          aria-hidden="true"
+                        />
                       </div>
                     </div>
                   </CardContent>
@@ -125,7 +177,10 @@ export default function UserView() {
                         </p>
                       </div>
                       <div className="hidden sm:block p-2 bg-purple-500/10 rounded-full">
-                        <TrendingUp className="h-5 w-5 text-purple-500" aria-hidden="true" />
+                        <TrendingUp
+                          className="h-5 w-5 text-purple-500"
+                          aria-hidden="true"
+                        />
                       </div>
                     </div>
                   </CardContent>
@@ -301,7 +356,7 @@ export default function UserView() {
             <div className="space-y-1">
               <p className="font-semibold text-sm">Dica importante</p>
               <p className="text-xs text-muted-foreground">
-                Lembre-se de agendar suas viagens com pelo menos 1 dia útil de
+                Lembre-se de agendar suas viagens com 3 dias úteis de
                 antecedência. Em caso de emergência, entre em contato
                 diretamente com nossa central.
               </p>
@@ -312,3 +367,5 @@ export default function UserView() {
     </main>
   );
 }
+
+export default memo(UserView);

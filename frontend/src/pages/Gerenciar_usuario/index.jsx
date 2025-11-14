@@ -5,16 +5,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Eye } from "lucide-react";
+import { Eye, Sparkles } from "lucide-react";
 import { ROLE_LABELS } from "@/lib/roles";
 import authService from "@/services/authService";
 import { toast } from "sonner";
 import { formatarData } from "@/lib/date-utils";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
+import { GenerateTokenModal } from "./components/modals/GenerateTokenModal";
 
 function Usuarios() {
   const navigate = useNavigate();
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isTokenModalOpen, setIsTokenModalOpen] = useState(false);
 
   useEffect(() => {
     carregarUsuarios();
@@ -113,33 +116,46 @@ function Usuarios() {
         animate={{ opacity: 1, y: 0 }}
         className="relative overflow-hidden rounded-xl bg-gradient-to-r from-primary/20 via-primary/10 to-transparent p-4 md:p-5 lg:p-3 border border-primary/20"
       >
-        <div className="relative z-10">
-          <h1 className="text-2xl md:text-2xl font-bold text-foreground mb-1">
-            👥 Gerenciamento de Usuários
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Visualize e gerencie todos os usuários do sistema
-          </p>
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h1 className="text-2xl md:text-2xl font-bold text-foreground mb-1">
+              👥 Gerenciamento de Usuários
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Visualize e gerencie todos os usuários do sistema
+            </p>
+          </div>
+          <Button
+            onClick={() => setIsTokenModalOpen(true)}
+            className="flex-shrink-0"
+            size="sm"
+          >
+            <Sparkles className="h-4 w-4 mr-2" />
+            Gerar Chave de Acesso
+          </Button>
         </div>
         <div className="absolute top-0 right-0 w-32 h-32 md:w-48 md:h-48 bg-primary/5 rounded-full blur-3xl" />
       </motion.header>
 
-      <Card>
-        <CardContent className="p-6">
-          {loading ? (
-            <div className="flex justify-center items-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          ) : (
+      <GenerateTokenModal
+        open={isTokenModalOpen}
+        onOpenChange={setIsTokenModalOpen}
+      />
+
+      {loading ? (
+        <TableSkeleton rows={8} columns={5} />
+      ) : (
+        <Card>
+          <CardContent className="p-6">
             <DataTable
               columns={columns}
               data={usuarios}
               filterColumn="nome"
               filterPlaceholder="Buscar por nome..."
             />
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </main>
   );
 }

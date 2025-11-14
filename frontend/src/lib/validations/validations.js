@@ -117,3 +117,40 @@ export const alterarSenhaSchema = z
     message: "A nova senha deve ser diferente da senha atual.",
     path: ["novaSenha"],
   });
+
+export const validarCNH = (cnh) => {
+  if (typeof cnh !== "string") return false;
+  const cnhLimpa = cnh.replace(/\D/g, "");
+
+  if (cnhLimpa.length !== 11) return false;
+  if (/^(\d)\1{10}$/.test(cnhLimpa)) return false;
+
+  return true;
+};
+
+export const validarDataVencimento = (data) => {
+  if (!data) return false;
+  const dataVencimento = new Date(data);
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+
+  return dataVencimento >= hoje;
+};
+
+export const cnhSchema = z.string().refine(validarCNH, {
+  message: "CNH deve ter 11 dígitos numéricos válidos.",
+});
+
+export const vencimentoCNHSchema = z.string().refine(validarDataVencimento, {
+  message: "A CNH não pode estar vencida.",
+});
+
+export const ambulanciaIdSchema = z.string().min(1, {
+  message: "ID da ambulância é obrigatório.",
+});
+
+export const motoristaSchema = z.object({
+  cnh: cnhSchema,
+  vencimento: vencimentoCNHSchema,
+  id_ambulancia: ambulanciaIdSchema,
+});

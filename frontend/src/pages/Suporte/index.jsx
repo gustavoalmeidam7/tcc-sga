@@ -83,6 +83,16 @@ export default function Suporte() {
       resposta:
         "Não. Este sistema é exclusivo para agendamento de transporte programado de pacientes. Em casos de emergência médica, ligue 192 (SAMU).",
     },
+    {
+      pergunta: "Quais os requisitos para um motorista se cadastrar?",
+      resposta:
+        "O motorista precisa ter uma CNH válida na categoria apropriada e receber uma chave de acesso de um gerente do sistema para poder se cadastrar na plataforma como motorista.",
+    },
+    {
+      pergunta: "É possível integrar o SGA com outros sistemas hospitalares?",
+      resposta:
+        "Atualmente, o SGA funciona como um sistema independente. Apenas para fins academicos",
+    },
   ];
 
   return (

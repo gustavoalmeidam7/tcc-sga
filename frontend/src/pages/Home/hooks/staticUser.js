@@ -1,9 +1,9 @@
-import { useQuery, useQueries } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { getTravels } from "@/services/travelService";
+import { getAssignedTravels } from "@/services/travelService";
 import { formatarDataHora } from "@/lib/date-utils";
 import { TravelStatus } from "@/lib/travel-status";
-import { reverseGeocode } from "@/hooks/useReverseGeocode";
+import { useGeocodeQueries } from "@/hooks/useGeocodeQueries";
 
 export function useUserDashboard() {
   const {
@@ -11,8 +11,8 @@ export function useUserDashboard() {
     isLoading: loading,
     error,
   } = useQuery({
-    queryKey: ["travels", "user"],
-    queryFn: () => getTravels(100, 0),
+    queryKey: ["travels", "assigned"],
+    queryFn: () => getAssignedTravels(100, 0),
     staleTime: 1000 * 60 * 2,
   });
 
@@ -27,24 +27,8 @@ export function useUserDashboard() {
       .slice(0, 3);
   }, [viagensAtivas]);
 
-  const geocodeQueries = useQueries({
-    queries: proximasViagensList.flatMap((v) => [
-      {
-        queryKey: ["geocode", v.lat_inicio, v.long_inicio],
-        queryFn: () => reverseGeocode(v.lat_inicio, v.long_inicio),
-        enabled: !!(v.lat_inicio && v.long_inicio),
-        staleTime: 1000 * 60 * 60 * 24,
-        cacheTime: 1000 * 60 * 60 * 24 * 7,
-      },
-      {
-        queryKey: ["geocode", v.lat_fim, v.long_fim],
-        queryFn: () => reverseGeocode(v.lat_fim, v.long_fim),
-        enabled: !!(v.lat_fim && v.long_fim),
-        staleTime: 1000 * 60 * 60 * 24,
-        cacheTime: 1000 * 60 * 60 * 24 * 7,
-      },
-    ]),
-  });
+  const { geocodeMap, isLoading: isLoadingGeocodes } =
+    useGeocodeQueries(proximasViagensList);
 
   const dashboardData = useMemo(() => {
     const stats = {
@@ -56,16 +40,20 @@ export function useUserDashboard() {
       total: viagens.length,
     };
 
-    const proximasViagens = proximasViagensList.map((v, index) => {
-      const origemIndex = index * 2;
-      const destinoIndex = index * 2 + 1;
+    const proximasViagens = proximasViagensList.map((v) => {
+      const enderecoOrigem = geocodeMap.get(
+        `${v.lat_inicio.toFixed(5)},${v.long_inicio.toFixed(5)}`
+      );
+      const enderecoDestino = geocodeMap.get(
+        `${v.lat_fim.toFixed(5)},${v.long_fim.toFixed(5)}`
+      );
 
       return {
         id: v.id,
         dataHoraCompleta: formatarDataHora(v.inicio),
         dataISO: v.inicio,
-        origem: geocodeQueries[origemIndex]?.data || "Carregando...",
-        destino: geocodeQueries[destinoIndex]?.data || "Carregando...",
+        origem: enderecoOrigem || "Carregando...",
+        destino: enderecoDestino || "Carregando...",
         status:
           v.realizado === TravelStatus.NAO_REALIZADO
             ? "pendente"
@@ -77,11 +65,11 @@ export function useUserDashboard() {
     });
 
     return { stats, proximasViagens };
-  }, [viagens, proximasViagensList, geocodeQueries]);
+  }, [viagens, proximasViagensList, geocodeMap]);
 
   return {
     dashboardData,
-    loading,
+    loading: loading || isLoadingGeocodes,
     error,
   };
 }
