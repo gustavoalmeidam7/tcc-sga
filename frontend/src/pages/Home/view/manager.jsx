@@ -32,7 +32,11 @@ function ManagerView() {
   const [isAmbulanciasModalOpen, setIsAmbulanciasModalOpen] = useState(false);
   const [isResumoModalOpen, setIsResumoModalOpen] = useState(false);
 
-  const { data: travels = [], isLoading: isLoadingTravels, error: travelsError } = useQuery({
+  const {
+    data: travels = [],
+    isLoading: isLoadingTravels,
+    error: travelsError,
+  } = useQuery({
     queryKey: ["travels"],
     queryFn: () => getTravels(15, 0),
     staleTime: 1000 * 60 * 2,
@@ -45,7 +49,10 @@ function ManagerView() {
   });
 
   const { geocodeMap } = useGeocodeQueries(travels);
-  const { enrichedTravels, hasIncompleteData } = useEnrichedTravels(travels, geocodeMap);
+  const { enrichedTravels, hasIncompleteData } = useEnrichedTravels(
+    travels,
+    geocodeMap
+  );
 
   const isLoadingData = isLoadingTravels || hasIncompleteData;
 
@@ -66,7 +73,7 @@ function ManagerView() {
   }, [usersError]);
 
   const viagensPendentes = useMemo(
-    () => enrichedTravels.filter((t) => t.realizado === 0),
+    () => enrichedTravels.filter((t) => !t.cancelada && t.realizado === 0),
     [enrichedTravels]
   );
 

@@ -141,13 +141,26 @@ async function fetchWithNominatim(lat, lon, signal) {
 export async function fetchReverseGeocode({ queryKey, signal }) {
   const [_key, lat, lon] = queryKey;
 
+  const isAborted = (error) =>
+    error.name === "AbortError" ||
+    error.message?.includes("aborted") ||
+    error.message?.includes("signal is aborted");
+
   try {
     return await fetchWithGeoapify(lat, lon, signal);
   } catch (error) {
+    if (isAborted(error)) {
+      return `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+    }
+
     console.warn("Geoapify falhou, tentando Nominatim. Erro:", error.message);
     try {
       return await fetchWithNominatim(lat, lon, signal);
     } catch (fallbackError) {
+      if (isAborted(fallbackError)) {
+        return `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+      }
+
       console.error("Nominatim também falhou:", fallbackError.message);
       return `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
     }

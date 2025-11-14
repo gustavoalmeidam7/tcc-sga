@@ -8,12 +8,31 @@ export function extractErrorMessage(error, defaultMessage = "Ocorreu um erro") {
       return detail
         .map((err) => {
           const field = err.loc ? err.loc.slice(1).join(".") : "campo";
-          return `${field}: ${err.msg}`;
+          let message = err.msg;
+
+          if (message.includes("Input should be a valid UUID")) {
+            message = "ID inválido. O formato do identificador está incorreto.";
+          } else if (message.includes("value_error")) {
+            message = message.replace(/value_error\.\w+\./, "");
+            message = message.replace(
+              /Input should be a valid /,
+              "Valor inválido para "
+            );
+            message = message.replace(
+              /invalid character: expected .* found `(\w+)` at \d+/,
+              "caractere inválido: '$1'"
+            );
+          }
+
+          return `${field}: ${message}`;
         })
         .join("; ");
     }
 
     if (typeof detail === "string") {
+      if (detail.includes("Input should be a valid UUID")) {
+        return "ID inválido. O formato do identificador está incorreto.";
+      }
       return detail;
     }
   }

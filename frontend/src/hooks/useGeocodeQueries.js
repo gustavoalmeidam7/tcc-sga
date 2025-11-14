@@ -19,15 +19,20 @@ export function useGeocodeQueries(items, options = {}) {
     items.forEach((item) => {
       const start = getStartCoords(item);
       const end = getEndCoords(item);
+      const hasStartAddress =
+        item.end_inicio ||
+        (options.getStartAddress && options.getStartAddress(item));
+      const hasEndAddress =
+        item.end_fim || (options.getEndAddress && options.getEndAddress(item));
 
-      if (start.lat && start.long) {
+      if (start.lat && start.long && !hasStartAddress) {
         const key = `${start.lat.toFixed(5)},${start.long.toFixed(5)}`;
         if (!coordsMap.has(key)) {
           coordsMap.set(key, { lat: start.lat, long: start.long });
         }
       }
 
-      if (end.lat && end.long) {
+      if (end.lat && end.long && !hasEndAddress) {
         const key = `${end.lat.toFixed(5)},${end.long.toFixed(5)}`;
         if (!coordsMap.has(key)) {
           coordsMap.set(key, { lat: end.lat, long: end.long });
@@ -36,7 +41,7 @@ export function useGeocodeQueries(items, options = {}) {
     });
 
     return Array.from(coordsMap.values());
-  }, [items, getStartCoords, getEndCoords]);
+  }, [items, getStartCoords, getEndCoords, options]);
 
   const geocodeQueries = useQueries({
     queries: uniqueCoordinates.map((coord) => ({

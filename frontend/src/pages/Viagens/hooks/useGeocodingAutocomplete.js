@@ -41,7 +41,9 @@ async function fetchFromGeoapify(text, signal) {
 }
 
 async function fetchFromNominatim(text, signal) {
-  toast.info("Usando servidor de mapas alternativo.");
+  toast.info("Usando servidor de mapas alternativo.", {
+    duration: 3000,
+  });
   const response = await fetch(
     `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
       text
@@ -62,9 +64,18 @@ async function fetchSuggestions({ queryKey, signal }) {
   const [_key, searchTerm] = queryKey;
   if (!searchTerm) return [];
 
+  const isAborted = (error) =>
+    error.name === "AbortError" ||
+    error.message?.includes("aborted") ||
+    error.message?.includes("signal is aborted");
+
   try {
     return await fetchFromGeoapify(searchTerm, signal);
   } catch (error) {
+    if (isAborted(error)) {
+      return [];
+    }
+
     console.warn(
       "Geoapify autocomplete falhou, tentando Nominatim. Erro:",
       error.message
@@ -72,12 +83,17 @@ async function fetchSuggestions({ queryKey, signal }) {
     try {
       return await fetchFromNominatim(searchTerm, signal);
     } catch (fallbackError) {
+      if (isAborted(fallbackError)) {
+        return [];
+      }
+
       console.error(
         "Nominatim autocomplete também falhou:",
         fallbackError.message
       );
       toast.error("Erro ao buscar endereços", {
         description: "Ambos os serviços de geocoding falharam.",
+        duration: 5000,
       });
       return [];
     }

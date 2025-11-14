@@ -2,7 +2,11 @@ import { ArrowUpDown, Eye, Calendar } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatarDataHora } from "@/lib/date-utils";
-import { getTravelStatusLabel, getTravelStatusColors } from "@/lib/travel-status";
+import {
+  getTravelStatusLabel,
+  getTravelStatusColors,
+  TravelStatus,
+} from "@/lib/travel-status";
 
 export const createColumnsHistorico = (navigate) => [
   {
@@ -31,7 +35,9 @@ export const createColumnsHistorico = (navigate) => [
     accessorKey: "_solicitante",
     header: "Solicitante",
     cell: ({ row }) => (
-      <div className="max-w-[150px] truncate">{row.original._solicitante || "N/A"}</div>
+      <div className="max-w-[150px] truncate">
+        {row.original._solicitante || "N/A"}
+      </div>
     ),
     enableColumnFilter: false,
   },
@@ -59,16 +65,20 @@ export const createColumnsHistorico = (navigate) => [
     accessorKey: "fim",
     header: "Concluída em",
     cell: ({ row }) => {
-      return row.original.fim
-        ? formatarDataHora(row.original.fim)
-        : <span className="text-muted-foreground text-sm">-</span>;
+      return row.original.fim ? (
+        formatarDataHora(row.original.fim)
+      ) : (
+        <span className="text-muted-foreground text-sm">-</span>
+      );
     },
   },
   {
     accessorKey: "realizado",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.original.realizado;
+      const status = row.original.cancelada
+        ? TravelStatus.CANCELADO
+        : row.original.realizado;
       const label = getTravelStatusLabel(status);
       const colors = getTravelStatusColors(status);
 
@@ -85,7 +95,9 @@ export const createColumnsHistorico = (navigate) => [
           <Button
             variant="outline"
             size="sm"
-            onClick={() => navigate && navigate(`/viagens/detalhes/${viagem.id}`)}
+            onClick={() =>
+              navigate && navigate(`/viagens/detalhes/${viagem.id}`)
+            }
           >
             <Eye className="h-4 w-4 mr-1" />
             Ver detalhes

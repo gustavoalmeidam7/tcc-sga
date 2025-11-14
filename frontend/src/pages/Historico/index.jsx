@@ -26,20 +26,21 @@ function Historico() {
     error: queryError,
   } = useQuery({
     queryKey: ["travels", isManager ? "historico-all" : "historico-assigned"],
-    queryFn: () => isManager ? getTravels(50, 0) : getAssignedTravels(50, 0),
+    queryFn: () => (isManager ? getTravels(50, 0) : getAssignedTravels(50, 0)),
     staleTime: 1000 * 60 * 5,
   });
 
   const viagensConcluidas = useMemo(
-    () => viagens.filter((v) => v.realizado === TravelStatus.REALIZADO),
+    () =>
+      viagens.filter(
+        (v) => v.realizado === TravelStatus.REALIZADO || v.cancelada
+      ),
     [viagens]
   );
 
   const { geocodeMap } = useGeocodeQueries(viagensConcluidas);
-  const { enrichedTravels: enrichedViagens, hasIncompleteData } = useEnrichedTravels(
-    viagensConcluidas,
-    geocodeMap
-  );
+  const { enrichedTravels: enrichedViagens, hasIncompleteData } =
+    useEnrichedTravels(viagensConcluidas, geocodeMap);
 
   const isLoadingData = loading || hasIncompleteData;
 
@@ -67,7 +68,7 @@ function Historico() {
               Histórico de Viagens
             </h1>
             <p className="text-sm text-muted-foreground">
-              Visualize todas as viagens concluídas
+              Visualize todas as viagens concluídas e canceladas
             </p>
           </div>
         </div>
@@ -80,33 +81,34 @@ function Historico() {
         <Card>
           <CardContent className="p-6">
             {enrichedViagens.length === 0 ? (
-            <div className="text-center py-12">
-              <History className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">
-                Nenhuma viagem concluída
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Quando as viagens forem concluídas, elas aparecerão aqui.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="text-center py-12">
+                <History className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">
+                  Nenhuma viagem no histórico
+                </h3>
                 <p className="text-sm text-muted-foreground">
-                  {enrichedViagens.length}{" "}
-                  {enrichedViagens.length === 1
-                    ? "viagem concluída"
-                    : "viagens concluídas"}
+                  Quando as viagens forem concluídas ou canceladas, elas
+                  aparecerão aqui.
                 </p>
               </div>
-              <DataTable
-                columns={columns}
-                data={enrichedViagens}
-                filterColumn="_endereco_origem"
-                filterPlaceholder="Buscar por origem..."
-                isLoading={isLoadingData}
-              />
-            </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    {enrichedViagens.length}{" "}
+                    {enrichedViagens.length === 1
+                      ? "viagem no histórico"
+                      : "viagens no histórico"}
+                  </p>
+                </div>
+                <DataTable
+                  columns={columns}
+                  data={enrichedViagens}
+                  filterColumn="_endereco_origem"
+                  filterPlaceholder="Buscar por origem..."
+                  isLoading={isLoadingData}
+                />
+              </div>
             )}
           </CardContent>
         </Card>

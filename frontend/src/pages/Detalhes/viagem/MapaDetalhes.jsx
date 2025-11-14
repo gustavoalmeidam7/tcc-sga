@@ -8,6 +8,8 @@ export function MapaDetalhes({
   long_inicio,
   lat_fim,
   long_fim,
+  end_inicio,
+  end_fim,
   onEnderecosCarregados,
 }) {
   const [coordOrigem, setCoordOrigem] = useState(null);
@@ -27,17 +29,34 @@ export function MapaDetalhes({
     setCoordDestino(coordsDest);
 
     if (onEnderecosCarregados) {
-      Promise.all([
-        fetchReverseGeocode({ queryKey: ["geocode", lat_inicio, long_inicio] }),
-        fetchReverseGeocode({ queryKey: ["geocode", lat_fim, long_fim] }),
-      ]).then(([enderecoOrigem, enderecoDestino]) => {
+      if (end_inicio && end_fim) {
         onEnderecosCarregados({
-          origem: enderecoOrigem,
-          destino: enderecoDestino,
+          origem: end_inicio,
+          destino: end_fim,
         });
-      });
+      } else {
+        Promise.all([
+          fetchReverseGeocode({
+            queryKey: ["geocode", lat_inicio, long_inicio],
+          }),
+          fetchReverseGeocode({ queryKey: ["geocode", lat_fim, long_fim] }),
+        ]).then(([enderecoOrigem, enderecoDestino]) => {
+          onEnderecosCarregados({
+            origem: enderecoOrigem,
+            destino: enderecoDestino,
+          });
+        });
+      }
     }
-  }, [lat_inicio, long_inicio, lat_fim, long_fim, onEnderecosCarregados]);
+  }, [
+    lat_inicio,
+    long_inicio,
+    lat_fim,
+    long_fim,
+    end_inicio,
+    end_fim,
+    onEnderecosCarregados,
+  ]);
 
   const handleRotaCalculada = useCallback((resultado) => {
     if (resultado) setRota(resultado.coordinates);
@@ -61,10 +80,13 @@ export function MapaDetalhes({
       zoom={zoom}
       coordOrigem={coordOrigem}
       coordDestino={coordDestino}
-      origem={`Lat: ${lat_inicio?.toFixed(6)}, Long: ${long_inicio?.toFixed(
-        6
-      )}`}
-      destino={`Lat: ${lat_fim?.toFixed(6)}, Long: ${long_fim?.toFixed(6)}`}
+      origem={
+        end_inicio ||
+        `Lat: ${lat_inicio?.toFixed(6)}, Long: ${long_inicio?.toFixed(6)}`
+      }
+      destino={
+        end_fim || `Lat: ${lat_fim?.toFixed(6)}, Long: ${long_fim?.toFixed(6)}`
+      }
       rota={rota}
       loading={loading}
     />
