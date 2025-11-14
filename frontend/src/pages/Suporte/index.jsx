@@ -167,7 +167,7 @@ export default function Suporte() {
                 <div>
                   <p className="font-medium">E-mail</p>
                   <p className="text-sm text-muted-foreground">
-                    suporte@sga.com.br
+                    sga.suporte.br@gmail.com
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
                     Resposta em até 24h úteis
