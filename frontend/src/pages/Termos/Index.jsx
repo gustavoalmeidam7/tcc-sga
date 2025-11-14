@@ -4,7 +4,7 @@ import { FileText, Info } from "lucide-react";
 
 export default function Termos() {
   return (
-    <main className="space-y-6 max-w-4xl mx-auto px-4 sm:px-6 lg:px-5 pb-6 pt-10">
+    <main className="space-y-6 max-w-4xl mx-auto px-4 sm:px-6 lg:px-5 pb-6 pt-5">
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
