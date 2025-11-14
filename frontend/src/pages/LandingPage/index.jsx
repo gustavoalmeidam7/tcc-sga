@@ -149,7 +149,7 @@ function LandingPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <section className="relative overflow-hidden from-primary/10 via-primary/5 to-background py-20 md:py-32">
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-primary/5 to-background py-20 md:py-32">
         <div className="absolute inset-0 opacity-5">
           <div
             className="absolute inset-0"
@@ -289,17 +289,17 @@ function LandingPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <Tabs defaultValue="benefits" className="max-w-5xl mx-auto">
             <div className="flex justify-center mb-5">
-              <TabsList className="grid w-full sm:w-auto grid-cols-2 gap-1 bg-muted/40 p-1 rounded-xl border border-border/50 shadow-sm">
+              <TabsList className="inline-flex items-center w-auto gap-2 bg-muted/40 h-12 px-3 rounded-2xl border border-border/50 shadow-sm">
                 <TabsTrigger
                   value="benefits"
-                  className="cursor-pointer h-8 px-3 text-sm rounded-lg bg-primary shadow-md text-muted-foreground hover:bg-muted/60 hover:text-foreground transition-all duration-200"
+                  className="cursor-pointer h-9 px-4 text-sm rounded-lg data-[state=active]:!bg-primary data-[state=active]:!text-white data-[state=active]:!shadow-md data-[state=inactive]:!bg-transparent data-[state=inactive]:!text-muted-foreground data-[state=inactive]:hover:!bg-muted/60 data-[state=inactive]:hover:!text-foreground transition-all duration-200"
                 >
-                  <CheckCircle2 className="mr-2 h-3.5 w-3.5" />
+                  <CheckCircle2 className="mr-2 h-4 w-4" />
                   Benefícios
                 </TabsTrigger>
                 <TabsTrigger
                   value="tech"
-                  className="cursor-pointer h-8 px-3 text-sm rounded-lg bg-primary shadow-md text-muted-foreground hover:bg-muted/60 hover:text-foreground transition-all duration-200"
+                  className="cursor-pointer h-9 px-4 text-sm rounded-lg data-[state=active]:!bg-primary data-[state=active]:!text-white data-[state=active]:!shadow-md data-[state=inactive]:!bg-transparent data-[state=inactive]:!text-muted-foreground data-[state=inactive]:hover:!bg-muted/60 data-[state=inactive]:hover:!text-foreground transition-all duration-200"
                 >
                   <Code className="mr-2 h-3.5 w-3.5" />
                   Tecnologias
@@ -336,7 +336,7 @@ function LandingPage() {
                         transition={{ duration: 0.6, delay: index * 0.1 }}
                         className="flex items-center gap-3"
                       >
-                        <CheckCircle2 className="h-6 w-6 text-primary" />
+                        <CheckCircle2 className="h-6 w-6 text-primary flex-shrink-0" />
                         <span className="text-foreground">{benefit}</span>
                       </motion.div>
                     ))}
@@ -350,7 +350,7 @@ function LandingPage() {
                   transition={{ duration: 0.6 }}
                   className="relative"
                 >
-                  <Card className="p-8 from-primary/15 via-primary/10 to-primary/5 border-2 border-primary/30 shadow-lg">
+                  <Card className="p-8 bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 border-2 border-primary/30 shadow-lg">
                     <CardHeader>
                       <CardTitle className="text-2xl flex items-center gap-2">
                         <Heart className="h-6 w-6 text-primary" />
@@ -481,7 +481,7 @@ function LandingPage() {
                 className="relative h-full flex"
               >
                 {index < steps.length - 1 && (
-                  <div className="hidden md:block absolute top-12 left-full w-full h-0.5 from-primary/30 via-primary/20 to-transparent -z-10">
+                  <div className="hidden md:block absolute top-12 left-full w-full h-0.5 bg-gradient-to-r from-primary/30 via-primary/20 to-transparent -z-10">
                     <ArrowRight className="absolute right-0 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
                   </div>
                 )}
@@ -532,7 +532,7 @@ function LandingPage() {
         </div>
       </section>
 
-      <section className="py-20 from-primary/15 via-primary/10 to-primary/5">
+      <section className="py-20 bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
