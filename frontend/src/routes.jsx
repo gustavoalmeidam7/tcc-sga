@@ -24,7 +24,7 @@ const Perfil = lazy(() => import("./pages/Perfil"));
 const RecSenha = lazy(() => import("./pages/Rec_senha"));
 const SaibaMais = lazy(() => import("./pages/Saiba_mais"));
 const Suporte = lazy(() => import("./pages/Suporte"));
-const Termos = lazy(() => import("./pages/Termos"));
+const Termos = lazy(() => import("./pages/Termos/Index"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 export const appRoutes = [
