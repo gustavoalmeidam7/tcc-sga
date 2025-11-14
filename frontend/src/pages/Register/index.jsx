@@ -298,6 +298,16 @@ export default function Registro({ className, ...props }) {
                         )}
                       </Button>
 
+                      <div className="text-center text-xs text-muted-foreground pt-2">
+                        Ao se cadastrar, você concorda com nossos{" "}
+                        <Link
+                          to="/termos"
+                          className="underline underline-offset-2 hover:text-primary font-medium"
+                        >
+                          Termos de Uso
+                        </Link>
+                      </div>
+
                       <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t mt-2">
                         <span className="bg-card text-muted-foreground relative z-10 px-2">
                           Já Possui Conta?
