@@ -176,7 +176,7 @@ export default function Termos() {
               <p className="text-sm text-muted-foreground leading-6">
                 Se você tiver dúvidas sobre estes termos, entre em contato
                 conosco através dos canais de suporte disponíveis no sistema ou
-                através do e-mail sga.suporte.br@gmail.com.
+                através do e-mail suporte@sga.com.br.
               </p>
             </section>
           </div>
