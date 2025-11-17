@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from src.Validator.UserValidator import validate_uuid
+from src.Validator.GenericValidator import validate_uuid
 from src.Model.User import User
 
 from src.Model.UserSession import Session
@@ -19,6 +19,17 @@ def find_all_by_user(user: User) -> list[Session]:
 def find_by_id(id: UUID) -> Session | None:
     """ Procuta sessão pelo id da mesma, se não for encontrada retorna None """
     return Session.select().where(Session.id == validate_uuid(id)).first()
+
+def find_session_by_session_id(id: str | UUID) -> Session | None:
+    """ Retorna uma sessão pela sessão do mesmo """
+    if type(id) == UUID:
+        id = validate_uuid(id)
+    
+    session = Session.select().where(Session.id == id).first()
+    if session is None:
+        return None
+
+    return session
 
 def find_user_by_session_id(id: str | UUID) -> User | None:
     """ Retorna o usuário pela sessão do mesmo """

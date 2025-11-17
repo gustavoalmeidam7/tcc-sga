@@ -7,6 +7,8 @@ def initialize_db() -> Proxy:
 
     if not is_pytest:
         db.create_tables([User.User, Driver.Driver, Travel.Travel, UserSession.Session, Ambulance.Ambulance, Equipment.Equipment, Manager.Manager, UpgradeToken.UpgradeToken])
+    
+    return db
 
 def close_db() -> None:
     db.close()

@@ -16,11 +16,11 @@ MANAGER_ROUTER = APIRouter(
 
 # TODO: VALIDAR SE A VIAGEM ESTÁ CANCELADA
 @MANAGER_ROUTER.post("/assigndrivertravel/{driver}/{travel}")
-async def assing_driver_to_travel(manager: ManagerDecorator.GET_AUTENTHICATED_MANAGER, driver: UUID, travel: UUID) -> TravelResponseSchema:
+async def assing_driver_to_travel(manager: ManagerDecorator.GET_AUTHENTICATED_MANAGER, driver: UUID, travel: UUID) -> TravelResponseSchema:
     """ Assina o motorista e a respectiva ambulância a uma viagem """
     return ManagerService.assign_driver_to_travel_by_id(driver, travel)
 
 @MANAGER_ROUTER.post("/")
-async def create_driver_upgrade_token(manager: ManagerDecorator.GET_AUTENTHICATED_MANAGER) -> UpgradeTokenFullResponseSchema:
+async def create_driver_upgrade_token(manager: ManagerDecorator.GET_AUTHENTICATED_MANAGER) -> UpgradeTokenFullResponseSchema:
     """ Cria um token para atualizar um usuário para motorista """
     return ManagerService.generate_driver_token()

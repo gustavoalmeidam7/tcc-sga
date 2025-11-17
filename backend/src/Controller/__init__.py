@@ -21,7 +21,7 @@ def initialize_controller() -> FastAPI:
     __app__ = FastAPI(debug=isDebug, title="Gerenciamento de ambulância API", description="Api para gerenciamento de ambulâncias - TCC", version="1.0.0", root_path="/api") # lifespan=lifespan
 
     for route in routers:
-      __app__.include_router(route)
+        __app__.include_router(route)
 
     global app
     app = __app__

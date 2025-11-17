@@ -22,7 +22,7 @@ async def post_travel(user: UserDecorators.GET_AUTENTHICATED_USER, travel: Trave
 
 
 @TRAVEL_ROUTER.get("/")
-async def get_all_travels(user: ManagerDecorator.GET_AUTENTHICATED_MANAGER, page: int = 0, pageSize: int = 15) -> list[TravelResponseSchema]:
+async def get_all_travels(user: ManagerDecorator.GET_AUTHENTICATED_MANAGER, page: int = 0, pageSize: int = 15) -> list[TravelResponseSchema]:
     return TravelService.find_all_travels(pageSize, page)
 
 @TRAVEL_ROUTER.get("/assigned/")
@@ -34,15 +34,14 @@ async def get_travel_by_id(user: UserDecorators.GET_AUTENTHICATED_USER, id: UUID
     return TravelService.find_travel_by_id(id)
 
 
-@TRAVEL_ROUTER.post("/cancel/{id}")
-async def cancel_travel(user: UserDecorators.GET_AUTENTHICATED_USER, id: UUID) -> TravelResponseSchema:
-    return TravelService.update_assigned_travel_ignore_none_by_id(id, user, cancelada=True)
+@TRAVEL_ROUTER.post("/cancel/{travelId}")
+async def cancel_travel(user: UserDecorators.GET_AUTENTHICATED_USER, travelId: UUID) -> TravelResponseSchema:
+    return TravelService.cancel_travel_by_id(user, travelId)
 
-# TODO: VALIDAR SE A VIAGEM ESTÁ CANCELADA
 @TRAVEL_ROUTER.post("/start/{id}")
-async def start_travel(user: DriverDecorator.GET_AUTENTHICATED_DRIVER, id: UUID) -> TravelResponseSchema:
-    return TravelService.update_assigned_travel_ignore_none_by_id(id, user, realizado=TravelRealized.EM_PROGRESSO)
+async def start_travel(driver: DriverDecorator.GET_AUTHENTICATED_DRIVER, id: UUID) -> TravelResponseSchema:
+    return TravelService.start_travel_by_id(driver, id)
 
 @TRAVEL_ROUTER.post("/end/{id}")
-async def end_travel(user: DriverDecorator.GET_AUTENTHICATED_DRIVER, id: UUID) -> TravelResponseSchema:
-    return TravelService.update_assigned_travel_ignore_none_by_id(id, user, realizado=TravelRealized.REALIZADO)
+async def end_travel(user: DriverDecorator.GET_AUTHENTICATED_DRIVER, id: UUID) -> TravelResponseSchema:
+    return TravelService.end_travel_by_id(user, id)

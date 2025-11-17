@@ -4,7 +4,7 @@ from src.Service import DriverService
 
 from uuid import UUID
 
-from src.Decorators.DriverDecorator import GET_AUTENTHICATED_DRIVER
+from src.Decorators.DriverDecorator import GET_AUTHENTICATED_DRIVER
 
 from src.Schema.Driver.DriverResponseSchema import DriverResponseSchema
 from src.Schema.Driver.DriverResponseFullSchema import DriverResponseFullSchema
@@ -19,11 +19,11 @@ DRIVER_ROUTER = APIRouter(
 )
 
 @DRIVER_ROUTER.patch("/update/")
-async def update_driver(user: GET_AUTENTHICATED_DRIVER, driverFields: DriverUpdateFieldsSchema) -> DriverResponseFullSchema:
+async def update_driver(user: GET_AUTHENTICATED_DRIVER, driverFields: DriverUpdateFieldsSchema) -> DriverResponseFullSchema:
     """ Atualiza as informações especificas de um motorista """
     return DriverService.update_driver(user, driverFields)
 
 @DRIVER_ROUTER.get("/")
-async def get_driver_info(driver: GET_AUTENTHICATED_DRIVER) -> DriverResponseSchema:
+async def get_driver_info(driver: GET_AUTHENTICATED_DRIVER) -> DriverResponseSchema:
     """ Encontra as informações do motorista """
     return DriverService.get_driver_by_user(driver)

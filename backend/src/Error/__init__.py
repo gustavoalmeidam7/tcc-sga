@@ -17,7 +17,8 @@ def register_error_handlers(app):
             content={
                 "erro": error.error,
                 "mensagem": error.userMessage
-            }
+            },
+            headers=error.headers
         )
 
     @app.exception_handler(NotFoundError.NotFoundError)
