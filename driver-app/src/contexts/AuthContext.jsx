@@ -6,6 +6,8 @@ import {
   getAuthToken,
   setAuthToken,
 } from "../services/tokenStore";
+import { setOnTokenExpired } from "../services/api";
+import { ROLES } from "@/src/lib/roles";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -30,6 +32,15 @@ export const AuthProvider = ({ children }) => {
 
       try {
         const userData = await authService.getMe();
+
+        if (userData.cargo !== ROLES.DRIVER) {
+          await clearAuthToken();
+          setUser(null);
+          throw new Error(
+            "Acesso negado. Este aplicativo é exclusivo para motoristas."
+          );
+        }
+
         setUser(userData);
         setError(null);
         return userData;
@@ -70,6 +81,19 @@ export const AuthProvider = ({ children }) => {
     loadUserOnMount();
   }, [updateUser]);
 
+  useEffect(() => {
+    const handleTokenExpired = async () => {
+      console.log("Token expirado detectado, fazendo logout...");
+      await logout();
+    };
+
+    setOnTokenExpired(handleTokenExpired);
+
+    return () => {
+      setOnTokenExpired(null);
+    };
+  }, [logout]);
+
   const login = useCallback(async (email, senha) => {
     if (loginInProgressRef.current) {
       throw new Error("Login já em andamento");
@@ -94,6 +118,15 @@ export const AuthProvider = ({ children }) => {
       await setAuthToken(access_token);
 
       const userData = await authService.getMe();
+
+      if (userData.cargo !== ROLES.DRIVER) {
+        await clearAuthToken();
+        setUser(null);
+        throw new Error(
+          "Acesso negado. Este aplicativo é exclusivo para motoristas."
+        );
+      }
+
       setUser(userData);
 
       return { success: true, user: userData };

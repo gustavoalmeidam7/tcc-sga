@@ -3,8 +3,8 @@ import { StatusBar } from 'expo-status-bar';
 import React, { Suspense } from 'react';
 import { ActivityIndicator } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Slot } from 'expo-router';
 import { AuthProvider } from '../contexts/AuthContext';
-const Routes = React.lazy(() => import('./routes'));
 
 export default function RootLayout() {
   return (
@@ -20,7 +20,7 @@ export default function RootLayout() {
             />
           }
         >
-          <Routes />
+          <Slot />
         </Suspense>
       </SafeAreaProvider>
     </AuthProvider>
