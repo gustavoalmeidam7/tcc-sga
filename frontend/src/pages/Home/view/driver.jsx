@@ -22,7 +22,7 @@ import {
   getTravelStatusColors,
 } from "@/lib/travel-status";
 import { useNavigate } from "react-router-dom";
-import { fetchReverseGeocode } from "@/hooks/useReverseGeocode"; // Importação corrigida
+import { fetchReverseGeocode } from "@/hooks/useReverseGeocode";
 import { StatsCardSkeleton } from "@/components/ui/stats-skeleton";
 
 function DriverView() {
@@ -112,7 +112,9 @@ function DriverView() {
 
   const viagensAtribuidas = useMemo(
     () =>
-      viagensEnriquecidas.filter((t) => t.realizado === 0 || t.realizado === 1),
+      viagensEnriquecidas.filter(
+        (t) => !t.cancelada && (t.realizado === 0 || t.realizado === 1)
+      ),
     [viagensEnriquecidas]
   );
 

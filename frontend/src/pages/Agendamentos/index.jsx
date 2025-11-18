@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getTravels,
   getAssignedTravels,
-  deleteTravel,
+  cancelTravel,
 } from "@/services/travelService";
 import { DataTable } from "@/components/ui/data-table";
 import { Card, CardContent } from "@/components/ui/card";
@@ -46,8 +46,9 @@ function Agendamentos() {
     () =>
       viagens.filter(
         (v) =>
-          v.realizado === TravelStatus.NAO_REALIZADO ||
-          v.realizado === TravelStatus.EM_PROGRESSO
+          !v.cancelada &&
+          (v.realizado === TravelStatus.NAO_REALIZADO ||
+            v.realizado === TravelStatus.EM_PROGRESSO)
       ),
     [viagens]
   );
@@ -58,36 +59,37 @@ function Agendamentos() {
 
   const isLoadingData = loading || hasIncompleteData;
 
-  const deleteMutation = useMutation({
-    mutationFn: deleteTravel,
-    onSuccess: (_, deletedTravelId) => {
-      queryClient.removeQueries({ queryKey: ["travel", deletedTravelId] });
-
+  const cancelMutation = useMutation({
+    mutationFn: cancelTravel,
+    onSuccess: (response, canceledTravelId) => {
       queryClient.setQueriesData({ queryKey: ["travels"] }, (oldData) => {
         if (!oldData) return oldData;
         if (Array.isArray(oldData)) {
-          return oldData.filter((v) => v.id !== deletedTravelId);
+          return oldData.map((v) =>
+            v.id === canceledTravelId ? { ...v, cancelada: true } : v
+          );
         }
         return oldData;
       });
 
       queryClient.invalidateQueries({ queryKey: ["travels"] });
+      queryClient.invalidateQueries({ queryKey: ["travel", canceledTravelId] });
 
       setViagemExcluir(null);
-      showSuccessToast("Viagem excluída!", {
-        description: "O agendamento foi removido da lista.",
+      showSuccessToast("Viagem cancelada!", {
+        description: "O agendamento foi cancelado e movido para o histórico.",
       });
     },
     onError: (error) => {
-      showErrorToast(error, "Erro ao excluir viagem", {
-        defaultMessage: "Não foi possível excluir a viagem. Tente novamente.",
+      showErrorToast(error, "Erro ao cancelar viagem", {
+        defaultMessage: "Não foi possível cancelar a viagem. Tente novamente.",
       });
     },
   });
 
-  const handleExcluir = () => {
+  const handleCancelar = () => {
     if (!viagemExcluir) return;
-    deleteMutation.mutate(viagemExcluir.id);
+    cancelMutation.mutate(viagemExcluir.id);
   };
 
   useEffect(() => {
@@ -205,9 +207,9 @@ function Agendamentos() {
       <DeleteTravelDialog
         viagem={viagemExcluir}
         isOpen={!!viagemExcluir}
-        isPending={deleteMutation.isPending}
+        isPending={cancelMutation.isPending}
         onClose={() => setViagemExcluir(null)}
-        onConfirm={handleExcluir}
+        onConfirm={handleCancelar}
       />
     </main>
   );

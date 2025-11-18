@@ -9,9 +9,20 @@ import { DadosPaciente } from "./components/DadosPaciente";
 import { ModalConfirmacao } from "./components/ModalConfirmacao";
 import { createTravel } from "@/services/travelService";
 import { formatarDateTimeParaBackend } from "@/lib/date-utils";
+import { unmaskCPF } from "@/lib/format-utils";
 import { useState, useCallback, useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+
+const mapearEstadoPaciente = (estadoSaude) => {
+  const mapeamento = {
+    andando: 0,
+    cadeirante: 0,
+    maca: 1,
+    acamado: 2,
+  };
+  return mapeamento[estadoSaude] ?? 0;
+};
 
 function Viagens() {
   const viagem = useViagem();
@@ -140,14 +151,20 @@ function Viagens() {
         viagem.horaAgendamento,
         viagem.duracao
       );
+      const cpfLimpo = unmaskCPF(viagem.cpfPaciente);
 
       const dadosBackend = {
         inicio: inicioFormatado,
         fim: fimFormatado,
+        cpf_paciente: cpfLimpo,
+        estado_paciente: mapearEstadoPaciente(viagem.estadoSaude),
+        observacoes: viagem.observacoes || null,
         lat_inicio: viagem.coordOrigem[0],
         long_inicio: viagem.coordOrigem[1],
+        end_inicio: viagem.origem,
         lat_fim: viagem.coordDestino[0],
         long_fim: viagem.coordDestino[1],
+        end_fim: viagem.destino,
       };
 
       await createTravelMutation.mutateAsync(dadosBackend);

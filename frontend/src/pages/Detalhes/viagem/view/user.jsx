@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   AlertCircle,
   FileDown,
+  Phone,
 } from "lucide-react";
 import {
   getTravelStatusLabel,
@@ -33,27 +34,43 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { deleteTravel, getTravelById } from "@/services/travelService";
+import { cancelTravel, getTravelById } from "@/services/travelService";
+import authService from "@/services/authService";
 import { toast } from "sonner";
 import { useTheme } from "@/context/ThemeContext";
+import { useAuth } from "@/hooks/useAuth";
 import { DetailCard } from "../components/DetailCard";
 import { PatientCard } from "../components/PatientCard";
 import { StatusCard } from "../components/StatusCard";
 import { generateTravelReportPDF } from "@/lib/pdf-utils";
+import { TravelStatus } from "@/lib/travel-status";
 
 export default function UserDetalhesView() {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { theme } = useTheme();
+  const { user } = useAuth();
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
 
-  const { data: viagem, isLoading: loadingViagem } = useQuery({
+  const {
+    data: viagem,
+    isLoading: loadingViagem,
+    error: viagemError,
+  } = useQuery({
     queryKey: ["travel", id],
     queryFn: () => getTravelById(id),
+    enabled: !!id,
     staleTime: 1000 * 60 * 2,
+  });
+
+  const { data: motorista, isLoading: loadingMotorista } = useQuery({
+    queryKey: ["user", viagem?.id_motorista],
+    queryFn: () => authService.getUserById(viagem.id_motorista),
+    enabled: !!viagem?.id_motorista,
+    staleTime: 1000 * 60 * 5,
   });
 
   const [enderecos, setEnderecos] = useState({ origem: null, destino: null });
@@ -62,10 +79,20 @@ export default function UserDetalhesView() {
     setEnderecos(data);
   }, []);
 
+  useEffect(() => {
+    if (viagem?.end_inicio && viagem?.end_fim) {
+      setEnderecos({
+        origem: viagem.end_inicio,
+        destino: viagem.end_fim,
+      });
+    }
+  }, [viagem?.end_inicio, viagem?.end_fim]);
+
   const handleExportPdf = async () => {
     if (!viagem || !enderecos.origem || !enderecos.destino) {
       toast.error("Dados incompletos", {
         description: "Aguarde o carregamento completo dos dados da viagem.",
+        duration: 3000,
       });
       return;
     }
@@ -93,8 +120,8 @@ export default function UserDetalhesView() {
     }
   };
 
-  const deleteMutation = useMutation({
-    mutationFn: () => deleteTravel(id),
+  const cancelMutation = useMutation({
+    mutationFn: () => cancelTravel(id),
     onSuccess: () => {
       toast.success("Viagem cancelada", {
         description: "A viagem foi cancelada com sucesso.",
@@ -118,7 +145,7 @@ export default function UserDetalhesView() {
   });
 
   const handleCancelarViagem = () => {
-    deleteMutation.mutate();
+    cancelMutation.mutate();
     setIsCancelDialogOpen(false);
   };
 
@@ -152,8 +179,18 @@ export default function UserDetalhesView() {
     );
   }
 
-  const statusColors = getTravelStatusColors(viagem.realizado);
-  const statusLabel = getTravelStatusLabel(viagem.realizado);
+  const statusColors = viagem.cancelada
+    ? { className: "bg-red-500 hover:bg-red-600" }
+    : getTravelStatusColors(viagem.realizado);
+  const statusLabel = viagem.cancelada
+    ? "Cancelada"
+    : getTravelStatusLabel(viagem.realizado);
+
+  const isCriador = user?.id === viagem.id_paciente;
+  const podeCancelar =
+    isCriador &&
+    !viagem.cancelada &&
+    viagem.realizado !== TravelStatus.REALIZADO;
 
   return (
     <main className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
@@ -240,22 +277,60 @@ export default function UserDetalhesView() {
               <StatusCard
                 icon={CheckCircle2}
                 title="Motorista Atribuído"
-                status={`ID: ${viagem.id_motorista}`}
+                status={
+                  loadingMotorista
+                    ? "Carregando..."
+                    : motorista?.nome || "Motorista atribuído"
+                }
                 statusType="success"
               >
-                <p className="text-xs text-muted-foreground mt-2">
-                  Viagem possui motorista designado
-                </p>
+                <div className="mt-3 pt-3 border-t border-green-500/20 space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <User className="h-4 w-4 text-primary" />
+                    <span className="text-muted-foreground">Nome:</span>
+                    <span className="font-semibold text-foreground">
+                      {loadingMotorista
+                        ? "Carregando..."
+                        : motorista?.nome || "N/A"}
+                    </span>
+                  </div>
+                  {motorista?.email && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <FileUser className="h-4 w-4 text-primary" />
+                      <span className="text-muted-foreground">Email:</span>
+                      <span className="text-foreground">{motorista.email}</span>
+                    </div>
+                  )}
+                  {motorista?.telefone && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Phone className="h-4 w-4 text-primary" />
+                      <span className="text-muted-foreground">Telefone:</span>
+                      <span className="text-foreground">
+                        {motorista.telefone}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </StatusCard>
             ) : (
               <StatusCard
                 icon={AlertCircle}
-                title="Aguardando Atribuição"
-                status="Nenhum motorista atribuído"
-                statusType="warning"
+                title={
+                  viagem.cancelada
+                    ? "Viagem Cancelada"
+                    : "Aguardando Atribuição"
+                }
+                status={
+                  viagem.cancelada
+                    ? "Não requer motorista"
+                    : "Nenhum motorista atribuído"
+                }
+                statusType={viagem.cancelada ? "info" : "warning"}
               >
                 <p className="text-xs text-muted-foreground mt-2">
-                  Esta viagem ainda não possui motorista designado
+                  {viagem.cancelada
+                    ? "Esta viagem foi cancelada e não requer mais atribuição de motorista."
+                    : "Esta viagem ainda não possui motorista designado"}
                 </p>
               </StatusCard>
             )}
@@ -276,30 +351,51 @@ export default function UserDetalhesView() {
               <StatusCard
                 icon={CheckCircle2}
                 title="Ambulância Atribuída"
-                status={`ID: ${viagem.id_ambulancia}`}
+                status="Veículo alocado para a viagem"
                 statusType="success"
               >
                 <p className="text-xs text-muted-foreground mt-2">
                   Veículo alocado para a viagem
                 </p>
+                <div className="mt-3 pt-3 border-t border-green-500/20">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Hash className="h-4 w-4 text-primary" />
+                    <span className="text-muted-foreground">ID:</span>
+                    <span className="font-mono text-foreground">
+                      {viagem.id_ambulancia}
+                    </span>
+                  </div>
+                </div>
               </StatusCard>
             ) : (
               <StatusCard
                 icon={AlertCircle}
                 title={
-                  viagem.id_motorista
+                  viagem.cancelada
+                    ? "Viagem Cancelada"
+                    : viagem.id_motorista
                     ? "Aguardando Atribuição Automática"
                     : "Aguardando Motorista"
                 }
                 status={
-                  viagem.id_motorista
+                  viagem.cancelada
+                    ? "Não requer ambulância"
+                    : viagem.id_motorista
                     ? "Será atribuída automaticamente"
                     : "Requer motorista primeiro"
                 }
-                statusType={viagem.id_motorista ? "info" : "warning"}
+                statusType={
+                  viagem.cancelada
+                    ? "info"
+                    : viagem.id_motorista
+                    ? "info"
+                    : "warning"
+                }
               >
                 <p className="text-xs mt-2 text-muted-foreground">
-                  {viagem.id_motorista
+                  {viagem.cancelada
+                    ? "Esta viagem foi cancelada e não requer mais alocação de ambulância."
+                    : viagem.id_motorista
                     ? "A ambulância será vinculada automaticamente após a confirmação do motorista."
                     : "Atribua um motorista para que a ambulância seja alocada."}
                 </p>
@@ -322,73 +418,77 @@ export default function UserDetalhesView() {
             long_inicio={viagem.long_inicio}
             lat_fim={viagem.lat_fim}
             long_fim={viagem.long_fim}
+            end_inicio={viagem.end_inicio}
+            end_fim={viagem.end_fim}
             onEnderecosCarregados={handleEnderecosCarregados}
           />
         </CardContent>
       </Card>
 
-      <Card className="border-destructive/30 bg-destructive/5">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-destructive mb-1">
-                Zona de Perigo
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Ações irreversíveis que afetam esta viagem
-              </p>
+      {podeCancelar && (
+        <Card className="border-destructive/30 bg-destructive/5">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-destructive mb-1">
+                  Zona de Perigo
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Ações irreversíveis que afetam esta viagem
+                </p>
+              </div>
+              <AlertDialog
+                open={isCancelDialogOpen}
+                onOpenChange={setIsCancelDialogOpen}
+              >
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="lg">
+                    <AlertTriangle className="h-4 w-4 mr-2" />
+                    Cancelar Viagem
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="flex items-center gap-2 text-xl text-foreground">
+                      <AlertTriangle className="h-6 w-6 text-destructive" />
+                      Confirmar Cancelamento
+                    </AlertDialogTitle>
+                    <AlertDialogDescription asChild>
+                      <div className="space-y-3 pt-2">
+                        <p>
+                          Tem certeza que deseja cancelar esta viagem? Esta ação
+                          não pode ser desfeita.
+                        </p>
+                        {viagem.id_motorista && (
+                          <div className="rounded-lg bg-destructive/20 border border-destructive/30 p-3">
+                            <p className="text-sm font-medium text-destructive">
+                              ⚠️ O motorista atribuído será notificado
+                              automaticamente sobre o cancelamento.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Voltar</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleCancelarViagem}
+                      disabled={cancelMutation.isPending}
+                      className="bg-destructive hover:bg-destructive/90"
+                      style={{ color: theme === "dark" ? "white" : "black" }}
+                    >
+                      {cancelMutation.isPending
+                        ? "Cancelando..."
+                        : "Confirmar Cancelamento"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
-            <AlertDialog
-              open={isCancelDialogOpen}
-              onOpenChange={setIsCancelDialogOpen}
-            >
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="lg">
-                  <AlertTriangle className="h-4 w-4 mr-2" />
-                  Cancelar Viagem
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="flex items-center gap-2 text-xl text-foreground">
-                    <AlertTriangle className="h-6 w-6 text-destructive" />
-                    Confirmar Cancelamento
-                  </AlertDialogTitle>
-                  <AlertDialogDescription asChild>
-                    <div className="space-y-3 pt-2">
-                      <p>
-                        Tem certeza que deseja cancelar esta viagem? Esta ação
-                        não pode ser desfeita.
-                      </p>
-                      {viagem.id_motorista && (
-                        <div className="rounded-lg bg-destructive/20 border border-destructive/30 p-3">
-                          <p className="text-sm font-medium text-destructive">
-                            ⚠️ O motorista atribuído será notificado
-                            automaticamente sobre o cancelamento.
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Voltar</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleCancelarViagem}
-                    disabled={deleteMutation.isPending}
-                    className="bg-destructive hover:bg-destructive/90"
-                    style={{ color: theme === "dark" ? "white" : "black" }}
-                  >
-                    {deleteMutation.isPending
-                      ? "Cancelando..."
-                      : "Confirmar Cancelamento"}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </main>
   );
 }

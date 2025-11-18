@@ -17,7 +17,10 @@ export function useUserDashboard() {
   });
 
   const viagensAtivas = useMemo(
-    () => viagens.filter((v) => v.realizado !== TravelStatus.REALIZADO),
+    () =>
+      viagens.filter(
+        (v) => !v.cancelada && v.realizado !== TravelStatus.REALIZADO
+      ),
     [viagens]
   );
 
@@ -41,12 +44,16 @@ export function useUserDashboard() {
     };
 
     const proximasViagens = proximasViagensList.map((v) => {
-      const enderecoOrigem = geocodeMap.get(
-        `${v.lat_inicio.toFixed(5)},${v.long_inicio.toFixed(5)}`
-      );
-      const enderecoDestino = geocodeMap.get(
-        `${v.lat_fim.toFixed(5)},${v.long_fim.toFixed(5)}`
-      );
+      const enderecoOrigem =
+        v.end_inicio ||
+        geocodeMap.get(
+          `${v.lat_inicio?.toFixed(5)},${v.long_inicio?.toFixed(5)}`
+        ) ||
+        null;
+      const enderecoDestino =
+        v.end_fim ||
+        geocodeMap.get(`${v.lat_fim?.toFixed(5)},${v.long_fim?.toFixed(5)}`) ||
+        null;
 
       return {
         id: v.id,

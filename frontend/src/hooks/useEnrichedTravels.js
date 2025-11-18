@@ -11,7 +11,9 @@ export function useEnrichedTravels(travels, geocodeMap, options = {}) {
     const ids = new Set();
     travels.forEach((t) => {
       const userId = getUserIdFromTravel(t);
-      if (userId) ids.add(userId);
+      if (userId) {
+        ids.add(userId);
+      }
     });
     return Array.from(ids);
   }, [travels, getUserIdFromTravel]);
@@ -27,7 +29,7 @@ export function useEnrichedTravels(travels, geocodeMap, options = {}) {
         : [],
   });
 
-  const queriesData = userQueries.map(q => q.data);
+  const queriesData = userQueries.map((q) => q.data);
 
   const userMap = useMemo(() => {
     const map = new Map();
@@ -45,13 +47,23 @@ export function useEnrichedTravels(travels, geocodeMap, options = {}) {
     return travels.map((viagem) => {
       const userId = getUserIdFromTravel(viagem);
       const user = userMap.get(userId);
+      const enderecoOrigem =
+        viagem.end_inicio ||
+        geocodeMap.get(
+          `${viagem.lat_inicio?.toFixed(5)},${viagem.long_inicio?.toFixed(5)}`
+        ) ||
+        null;
+      const enderecoDestino =
+        viagem.end_fim ||
+        geocodeMap.get(
+          `${viagem.lat_fim?.toFixed(5)},${viagem.long_fim?.toFixed(5)}`
+        ) ||
+        null;
 
       return {
         ...viagem,
-        _endereco_origem:
-          geocodeMap.get(`${viagem.lat_inicio.toFixed(5)},${viagem.long_inicio.toFixed(5)}`) || null,
-        _endereco_destino:
-          geocodeMap.get(`${viagem.lat_fim.toFixed(5)},${viagem.long_fim.toFixed(5)}`) || null,
+        _endereco_origem: enderecoOrigem,
+        _endereco_destino: enderecoDestino,
         _solicitante: user?.nome || null,
         _solicitante_completo: user || null,
       };

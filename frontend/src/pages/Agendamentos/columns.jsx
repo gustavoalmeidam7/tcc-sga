@@ -3,7 +3,10 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, Eye } from "lucide-react";
 import { formatarDataHora } from "@/lib/date-utils";
 import { calcularDuracao } from "./utils";
-import { getTravelStatusLabel, getTravelStatusColors } from "@/lib/travel-status";
+import {
+  getTravelStatusLabel,
+  getTravelStatusColors,
+} from "@/lib/travel-status";
 
 export const createColumns = (onDelete, navigate) => [
   {
@@ -21,7 +24,9 @@ export const createColumns = (onDelete, navigate) => [
     accessorKey: "_solicitante",
     header: "Solicitante",
     cell: ({ row }) => (
-      <div className="max-w-[150px] truncate">{row.original._solicitante || "N/A"}</div>
+      <div className="max-w-[150px] truncate">
+        {row.original._solicitante || "N/A"}
+      </div>
     ),
     enableColumnFilter: false,
   },
@@ -29,7 +34,9 @@ export const createColumns = (onDelete, navigate) => [
     accessorKey: "_endereco_origem",
     header: "Origem",
     cell: ({ row }) => (
-      <div className="max-w-[200px] truncate">{row.original._endereco_origem || "N/A"}</div>
+      <div className="max-w-[200px] truncate">
+        {row.original._endereco_origem || "N/A"}
+      </div>
     ),
     enableColumnFilter: false,
   },
@@ -37,7 +44,9 @@ export const createColumns = (onDelete, navigate) => [
     accessorKey: "_endereco_destino",
     header: "Destino",
     cell: ({ row }) => (
-      <div className="max-w-[200px] truncate">{row.original._endereco_destino || "N/A"}</div>
+      <div className="max-w-[200px] truncate">
+        {row.original._endereco_destino || "N/A"}
+      </div>
     ),
     enableColumnFilter: false,
   },
@@ -54,6 +63,9 @@ export const createColumns = (onDelete, navigate) => [
     accessorKey: "realizado",
     header: "Status",
     cell: ({ row }) => {
+      if (row.original.cancelada) {
+        return <Badge className="bg-red-500 hover:bg-red-600">Cancelada</Badge>;
+      }
       const status = row.original.realizado;
       const label = getTravelStatusLabel(status);
       const colors = getTravelStatusColors(status);
@@ -61,6 +73,9 @@ export const createColumns = (onDelete, navigate) => [
     },
     enableColumnFilter: true,
     filterFn: (row, id, value) => {
+      if (row.original.cancelada) {
+        return "cancelada".toLowerCase().includes(value.toLowerCase());
+      }
       const label = getTravelStatusLabel(row.original.realizado);
       return label.toLowerCase().includes(value.toLowerCase());
     },
@@ -75,7 +90,9 @@ export const createColumns = (onDelete, navigate) => [
           <Button
             variant="outline"
             size="sm"
-            onClick={() => navigate && navigate(`/viagens/detalhes/${viagem.id}`)}
+            onClick={() =>
+              navigate && navigate(`/viagens/detalhes/${viagem.id}`)
+            }
           >
             <Eye className="h-4 w-4 mr-1" />
             Ver detalhes

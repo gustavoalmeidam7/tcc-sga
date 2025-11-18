@@ -1,10 +1,5 @@
 import { memo } from "react";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -131,14 +126,14 @@ function DadosPacienteComponent({
               </select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="dataAgendamento">
-                  Data *
-                  <span className="text-xs text-muted-foreground ml-2">
-                    (mín: 3 dia útil de antecedência)
+                <div className="flex flex-col gap-1">
+                  <Label htmlFor="dataAgendamento">Data *</Label>
+                  <span className="text-xs text-muted-foreground">
+                    Mín: 3 dias úteis de antecedência
                   </span>
-                </Label>
+                </div>
                 <Input
                   id="dataAgendamento"
                   type="date"

@@ -16,9 +16,9 @@ function DeleteTravelDialog({ viagem, isOpen, isPending, onClose, onConfirm }) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Confirmar Exclusão</DialogTitle>
+          <DialogTitle>Confirmar Cancelamento</DialogTitle>
           <DialogDescription>
-            Tem certeza que deseja excluir este agendamento?
+            Tem certeza que deseja cancelar este agendamento?
           </DialogDescription>
         </DialogHeader>
 
@@ -48,12 +48,12 @@ function DeleteTravelDialog({ viagem, isOpen, isPending, onClose, onConfirm }) {
             {isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Excluindo...
+                Cancelando...
               </>
             ) : (
               <>
                 <Trash2 className="mr-2 h-4 w-4" />
-                Excluir
+                Cancelar
               </>
             )}
           </Button>
