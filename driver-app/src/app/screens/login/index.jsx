@@ -146,7 +146,10 @@ export default function Login() {
             <View className="items-center mt-8 mb-4">
               <Text className="text-xs text-light-foreground-muted text-center">
                 Ao entrar, você concorda com nossos{" "}
-                <Text className="underline text-light-foreground-secondary">
+                <Text 
+                  className="underline text-light-primary font-semibold"
+                  onPress={() => navigation.navigate("Termos")}
+                >
                   Termos de Uso
                 </Text>
               </Text>

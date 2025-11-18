@@ -1,9 +1,13 @@
 import axios from "axios";
 import { clearAuthToken, getAuthToken } from "./tokenStore.js";
 
-const API_URL = __DEV__
-  ? "http://127.0.0.1:8000"
-  : "https://tcc-sga.onrender.com";
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
+
+let onTokenExpiredCallback = null;
+
+export const setOnTokenExpired = (callback) => {
+  onTokenExpiredCallback = callback;
+};
 
 const API = axios.create({
   baseURL: API_URL,
@@ -51,6 +55,9 @@ API.interceptors.response.use(
 
     if (status === 401) {
       await clearAuthToken();
+      if (onTokenExpiredCallback) {
+        onTokenExpiredCallback();
+      }
       return Promise.reject({
         ...error,
         message: "Sua sessão expirou. Faça login novamente.",
