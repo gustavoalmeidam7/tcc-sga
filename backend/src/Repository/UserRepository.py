@@ -10,7 +10,7 @@ from uuid import UUID
 def create(userModel: User) -> User:
     """ Cria um usuário """
     userModel.save(force_insert=True)
-    return userModel
+    return User.select().where(User.id == userModel.id).first()
 
 
 def find_by_id(id: str) -> User | None:

@@ -1,7 +1,9 @@
-from typing import Annotated
-from pydantic import BaseModel, ConfigDict, Field, AfterValidator, EmailStr
+from src.Schema.BaseModel import BaseModel
 
-from datetime import date
+from typing import Annotated
+from pydantic import Field, EmailStr
+
+from datetime import datetime
 
 from src.Schema.User.UserRoleEnum import UserRole
 
@@ -9,12 +11,10 @@ from src.Validator import UserValidator
 from uuid import UUID
 
 class UserResponseFullSchema(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-    
-    id          : Annotated[UUID,     Field(example=UserValidator.generate_uuid())]
-    nome        : Annotated[str,      Field(example="Ronaldo de Assis Moreira", max_length=35)]
-    nascimento  : Annotated[date,     Field(example=date(1980, 3, 21)), AfterValidator(UserValidator.validate_birthday)]
-    email       : Annotated[EmailStr, Field(example="ronaldo@mail.com", max_length=45)]
-    cpf         : Annotated[str,      Field(example="12345678910")]
-    telefone    : Annotated[str,      Field(example="1699542346785")]
-    cargo       : Annotated[int,      Field(example=UserRole.USER)]
+    id          : Annotated[UUID,     Field(examples=[UserValidator.generate_uuid()])]
+    nome        : Annotated[str,      Field(examples=["Ronaldo de Assis Moreira"])]
+    nascimento  : Annotated[datetime, Field(examples=[datetime(1980, 3, 21)])]
+    email       : Annotated[EmailStr, Field(examples=["ronaldo@mail.com"])]
+    cpf         : Annotated[str,      Field(examples=["12345678910"])]
+    telefone    : Annotated[str,      Field(examples=["1699542346785"])]
+    cargo       : Annotated[int,      Field(examples=[UserRole.USER])]

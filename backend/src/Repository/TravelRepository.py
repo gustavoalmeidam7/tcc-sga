@@ -9,9 +9,13 @@ def insert_travel(travel: Travel) -> Travel:
     return travel
 
 
-def find_assigned_travels(user: User) -> list[Travel]:
+def find_assigned_travels(user: User, page: int, pageSize: int) -> list[Travel]:
     """ Encontra todas viagens atribuidas a o usuário user """
-    return Travel.select().where(Travel.id_motorista == user | Travel.id_paciente == user)
+    travels = (Travel.select()
+                      .where((Travel.id_paciente == user.id) | (Travel.id_motorista == user.id))
+                      .paginate(page, pageSize))
+    
+    return list(travels)
 
 def find_all_travels(itemsPerPage: int = 15, page: int = 0) -> list[Travel]:
     """ Encontra todas viagens e ordena de mais recente para mais antiga """
@@ -28,17 +32,6 @@ def find_travel_by_id(travelId: str) -> Travel | None:
 def delete_travel_by_id(travelId: str) -> None:
     """ Deleta uma travel pelo seu ID """
     Travel.delete_by_id(travelId)
-
-
-def update_travel_ignore_none(travelId: str, **args) -> Travel | None:
-    """ Atualiza uma viagem ignorando valores nulos """
-
-    filteredArgs = [x for x in args if x is not None]
-
-    query = Travel.update(filteredArgs).where(Travel.id == travelId)
-    query.execute()
-
-    return Travel.select().where(Travel.id == travelId).first()
 
 def update_travel(travelId: str, **args) -> Travel | None:
     """ Atualiza uma viagem """

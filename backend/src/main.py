@@ -1,41 +1,32 @@
-from fastapi import Request, FastAPI
-from fastapi.responses import JSONResponse
 from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 
-from contextlib import asynccontextmanager
-
 from src.Utils.env import get_env_var
 
-from src.Controller import AuthController, DriverController, TravelController, UserController
+from src import Controller
+from src.DB import Migration
+from src.Error import register_error_handlers
 
-from src.Model import User, Driver, Travel, UserSession, Ambulance, Equipment, Manager
+from src.Logging import Logging, Level
+from src.Service.ManagerService import generate_manager_token_list
+from src.Validator.GenericValidator import mask_uuid
 
-from src.Error.ErrorClass import ErrorClass
+Debug = get_env_var("environment", "DEV") == "DEV"
 
-from src.Utils.env import get_env_var
+app = Controller.initialize_controller()
+register_error_handlers(app)
 
-from src.DB import db, is_pytest
+def main():
+    tokens = generate_manager_token_list(int(get_env_var("TOKENS", "5") or "5"))
 
-routers = [AuthController.AUTH_ROUTER, DriverController.DriverRouter, TravelController.TravelRouter, UserController.USER_ROUTER]
+    Logging.log(f"Tokens para gerente: {[mask_uuid(t.id) for t in tokens if not t.usado and t.fator_cargo == 2]}", Level.SENSITIVE)
+    
 
-env = get_env_var("environment", "DEV")
+app.add_event_handler("startup", Migration.initialize_db)
+app.add_event_handler("startup", Controller.initialize_controller)
+app.add_event_handler("startup", main)
 
-isDebug = (env == "DEV")
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    db.connect()
-
-    if not is_pytest:
-        db.create_tables([User.User, Driver.Driver, Travel.Travel, UserSession.Session, Ambulance.Ambulance, Equipment.Equipment, Manager.Manager])
-    yield
-    db.close()
-
-app = FastAPI(debug=isDebug, title="Gerenciamento de ambulância API", description="Api para gerenciamento de ambulâncias - TCC", version="1.0.0", root_path="/api", lifespan=lifespan)
-
-for route in routers:
-  app.include_router(route)
+app.add_event_handler("shutdown", Migration.close_db)
 
 app.add_middleware(
     CORSMiddleware,
@@ -45,12 +36,5 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-if get_env_var("ENVIRONMENT", "DEV") != "DEV":
+if not Debug:
     app.add_middleware(HTTPSRedirectMiddleware)
-
-@app.exception_handler(ErrorClass)
-def error_handler(request: Request, error: ErrorClass):
-    return JSONResponse(
-        status_code=error.statusCode,
-        content={"Erros": error.errors}
-    )

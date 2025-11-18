@@ -10,23 +10,21 @@ from src.Model.User import User
 from src.Schema.User.UserRoleEnum import UserRole
 
 from src.Decorators import get_user_auth_user
+from src.Error.User.UserInvalidCredentials import invalidCredentials
 from src.Error.User.UserRBACError import UserRBACError
 
-async def token_get_driver(request: Request, token: TOKEN_SCHEME) -> User:
+def is_user_manager(user: User) -> bool:
+    return bool(user.cargo == UserRole.MANAGER)
+
+async def token_get_manager(request: Request, token: TOKEN_SCHEME) -> User:
+    if not token:
+        raise invalidCredentials()
+    
     currentUser = await get_user_auth_user(request, token)
 
-    if currentUser.cargo != UserRole.DRIVER:
+    if not is_user_manager(currentUser):
         raise UserRBACError()
     
     return currentUser
 
-async def token_get_driver_or_higher(request: Request, token: TOKEN_SCHEME) -> User:
-    currentUser = await get_user_auth_user(request, token)
-
-    if currentUser.cargo < UserRole.DRIVER:
-        raise UserRBACError()
-    
-    return currentUser
-
-GET_AUTHENTICATED_DRIVER = Annotated[User, Depends(token_get_driver)]
-GET_AUTHENTICATED_DRIVER_OR_HIGHER = Annotated[User, Depends(token_get_driver_or_higher)]
+GET_AUTHENTICATED_MANAGER = Annotated[User, Depends(token_get_manager)]

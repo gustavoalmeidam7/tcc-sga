@@ -1,17 +1,31 @@
-from peewee import CharField, DateField, IntegerField
+from peewee import CharField, DateTimeField, IntegerField
 from src.Model.BaseModel import BaseModel
 
-from src.Validator.UserValidator import generate_uuid
+from src.Validator.GenericValidator import generate_uuid, unmask_uuid, mask_uuid
+
+from uuid import UUID
+from datetime import datetime
 
 class User(BaseModel):
-    id              = CharField(default=generate_uuid, max_length=32, primary_key=True)
-    email           = CharField(max_length=100, unique=True, null=False)
-    senha           = CharField(max_length=60, null=False)
-    nome            = CharField(max_length=50, null=False)
-    nascimento      = DateField(null=False)
-    cpf             = CharField(max_length=11, unique=True, null=False)
-    telefone        = CharField(max_length=12, unique=True, null=False)
-    cargo           = IntegerField(default=0, null=False)
+    id         : str      | CharField     = CharField(default=generate_uuid, max_length=32, primary_key=True)
+    email      : str      | CharField     = CharField(max_length=100, unique=True, null=False)
+    senha      : str      | CharField     = CharField(max_length=60, null=False)
+    nome       : str      | CharField     = CharField(max_length=50, null=False)
+    nascimento : datetime | DateTimeField = DateTimeField(null=False)
+    cpf        : str      | CharField     = CharField(max_length=11, unique=True, null=False)
+    telefone   : str      | CharField     = CharField(max_length=12, unique=True, null=False)
+    cargo      : int      | IntegerField  = IntegerField(default=0, null=False)
+
+    @property
+    def str_id(self) -> str:
+        return str(self.id)
+    
+    @property
+    def uuid_id(self) -> UUID | None:
+        return mask_uuid(str(self.id))
+    
+    def compare_uuid(self, compared_uuid: UUID | str) -> bool:
+        return self.str_id == unmask_uuid(compared_uuid)
 
     class Meta:
         table_name = "usuario"

@@ -8,10 +8,10 @@ from src.Repository import UserRepository
 from src.Schema.Auth.RevokeSessionSchema import RevokeSessionSchema
 from src.Schema.Auth.UserSessionListSchema import UserSessionListSchema
 
+from src.Error.User.UserInvalidCredentials import invalidCredentials
+
 from src.Model.UserSession import Session
 from src.Model.User import User
-
-from peewee import DoesNotExist
 
 from src.Repository import SessionRepository
 
@@ -63,26 +63,37 @@ def generate_jwt_token(id: str) -> dict:
     content = {"sub": id}
     return jwt.encode(content, SECRET_KEY, algorithm=ALGORITHM)
 
-def get_current_user(token: TOKEN_SCHEME) -> 'User':
-    """ Retorn o usuário pelo token """
-
-    credentialsException = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Não foi possível validar as credenciais de usuário, tente entrar novamente",
-        headers={"WWW-Authenticate": "Bearer"}
-    )
+def get_current_session_by_token(token: TOKEN_SCHEME) -> Session:
+    """ Retorna a sessão pelo token """
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         id = payload.get("sub")
     except:
-        raise credentialsException
+        raise invalidCredentials()
+    
+
+    sessionModel = SessionRepository.find_session_by_session_id(id)
+
+    if sessionModel is None:
+        raise invalidCredentials()
+
+    return sessionModel
+
+def get_current_user(token: TOKEN_SCHEME) -> User:
+    """ Retorna o usuário pelo token """
+
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        id = payload.get("sub")
+    except:
+        raise invalidCredentials()
     
 
     userModel = SessionRepository.find_user_by_session_id(id)
 
     if userModel is None:
-        raise credentialsException
+        raise invalidCredentials()
 
     return userModel
 
