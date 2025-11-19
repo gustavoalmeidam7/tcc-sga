@@ -22,8 +22,6 @@ def mask_uuid(uuid: str | None) -> UUID | None:
 
 def unmask_uuid(uuid: UUID | str) -> str:
     """ Desmascara um uuid tranformando em string """
-    if type(uuid) is str:
-        return uuid
     
     uuid_str = str(uuid).replace("-", "")
     return uuid_str

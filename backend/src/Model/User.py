@@ -1,6 +1,8 @@
 from peewee import CharField, DateTimeField, IntegerField
 from src.Model.BaseModel import BaseModel
 
+from src.Schema.User.UserRoleEnum import UserRole
+
 from src.Validator.GenericValidator import generate_uuid, unmask_uuid, mask_uuid
 
 from uuid import UUID
@@ -14,7 +16,7 @@ class User(BaseModel):
     nascimento : datetime | DateTimeField = DateTimeField(null=False)
     cpf        : str      | CharField     = CharField(max_length=11, unique=True, null=False)
     telefone   : str      | CharField     = CharField(max_length=12, unique=True, null=False)
-    cargo      : int      | IntegerField  = IntegerField(default=0, null=False)
+    cargo      : UserRole | IntegerField  = IntegerField(default=0, null=False)
 
     @property
     def str_id(self) -> str:
@@ -26,6 +28,13 @@ class User(BaseModel):
     
     def compare_uuid(self, compared_uuid: UUID | str) -> bool:
         return self.str_id == unmask_uuid(compared_uuid)
+    
+    
+    def is_manager(self) -> bool:
+        return bool(self.cargo == UserRole.MANAGER)
+    
+    def is_driver(self) -> bool:
+        return bool(self.cargo == UserRole.DRIVER)
 
     class Meta:
         table_name = "usuario"

@@ -10,6 +10,7 @@ from src.Model.Manager import Manager
 from src.Model.Driver import Driver
 
 from src.Validator.GenericValidator import unmask_uuid
+from src.Validator import ManagerValidator
 
 from src.Schema.User.UserRoleEnum import UserRole
 
@@ -17,6 +18,9 @@ from src.Schema.User.UserResponseFullSchema import UserResponseFullSchema
 from src.Schema.Manager.UpgradeTokenFullResponseSchema import UpgradeTokenFullResponseSchema
 from src.Schema.Driver.DriverCreateSchema import DriverCreateSchema
 from src.Schema.Travel.TravelResponseSchema import TravelResponseSchema
+
+from src.Error.User.UserRBACError import UserRBACError
+from src.Error.Server.InternalServerError import InternalServerError
 
 from src.DB import db
 
@@ -67,32 +71,24 @@ def generate_driver_token() -> UpgradeTokenFullResponseSchema:
     
     return UpgradeTokenFullResponseSchema.model_validate(driverToken)
 
-def upgrade_to_driver_by_id(userId: UUID) -> UserResponseFullSchema:
-    """ Atualiza um usuário para motorista pelo seu id """
-    pass
-
 def upgrade_user_with_token_id(user: User, tokenId: UUID, driverFields: Optional[DriverCreateSchema]) -> UserResponseFullSchema:
     """ Atualiza um usuário para o fator do respectivo UpgradeToken id """
-
-    token = ManagerRepository.find_token_by_id(unmask_uuid(tokenId))
 
     upgrade_cargo = {
         UserRole.DRIVER: upgrade_user_to_driver,
         UserRole.MANAGER: upgrade_user_to_manager
     }
 
-    if token is None:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token não existe")
-    
-    if token.usado:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token já utilizado")
+    token = ManagerRepository.find_token_by_id(unmask_uuid(tokenId))
 
-    return upgrade_cargo[token.fator_cargo](user, token, driverFields)
+    ManagerValidator.validate_upgrade_token(token, driverFields)
+
+    return upgrade_cargo[UserRole(token.fator_cargo)](user, token, driverFields)
 
 def upgrade_user_to_manager(user: User, token: UpgradeToken, driverFields: DriverCreateSchema) -> UserResponseFullSchema:
     """ Atualiza um usuário para gerente usando token """
 
-    if user.cargo == UserRole.MANAGER:
+    if user.is_manager():
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Usuário já é gerente")
     
     if token.fator_cargo != UserRole.MANAGER:
@@ -122,7 +118,7 @@ def upgrade_user_to_manager(user: User, token: UpgradeToken, driverFields: Drive
 def upgrade_user_to_driver(user: User, token: UpgradeToken, driverFields: DriverCreateSchema) -> UserResponseFullSchema:
     """ Atualiza um usuário para motorista usando token """
 
-    if user.cargo == UserRole.DRIVER:
+    if user.is_driver():
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Usuário já é motorista")
     
     if token.fator_cargo != UserRole.DRIVER:
@@ -131,11 +127,19 @@ def upgrade_user_to_driver(user: User, token: UpgradeToken, driverFields: Driver
     userUpdated = None
 
     with db.atomic():
-        userUpdated = UserRepository.update_user_by_id(unmask_uuid(user.id), cargo=UserRole.DRIVER)
-        driver = DriverRepository.find_driver_by_id(unmask_uuid(userUpdated.id))
+        userUpdated = UserRepository.update_user_by_id(user.str_id, cargo=UserRole.DRIVER)
+
+        if not userUpdated:
+            raise InternalServerError()
+        
+        userUpdated: User = userUpdated
+
+        driver = DriverRepository.find_driver_by_id(userUpdated.str_id)
 
         if driver is None:
-            driver = Driver(**{**driverFields.model_dump(), "id":userUpdated.id})
+            driverDict = {**driverFields.model_dump()}
+            driverDict.update({"id_ambulancia": unmask_uuid(driverFields.id_ambulancia), "id":userUpdated.id})
+            driver = Driver(**driverDict)
             DriverRepository.create_driver_by_id(driver)
         
         ManagerRepository.update_token_by_id(
@@ -146,6 +150,6 @@ def upgrade_user_to_driver(user: User, token: UpgradeToken, driverFields: Driver
         )
 
     if userUpdated is None:
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Erro no servidor, tente novamente mais tarde")
+        raise InternalServerError()
 
     return UserResponseFullSchema.model_validate(userUpdated)
