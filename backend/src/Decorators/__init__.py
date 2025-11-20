@@ -28,7 +28,7 @@ async def get_user_auth_user(request: Request, token: TOKEN_SCHEME) -> User:
     if currentSession.ip != userIP:
         raise invalidCredentials()
     
-    if datetime.fromisoformat(currentSession.valido_ate_iso_str) <= datetime.now():
+    if datetime.fromisoformat(currentSession.valido_ate_iso_str).astimezone(timezone.utc) <= datetime.now(timezone.utc):
         raise invalidCredentials()
 
     if currentUser is None:
