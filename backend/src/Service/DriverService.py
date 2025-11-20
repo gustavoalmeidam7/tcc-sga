@@ -13,16 +13,17 @@ from src.Model.User import User
 from uuid import UUID
 
 def is_user_driver(userId: UUID) -> bool:
-    return UserRepository.find_by_id(unmask_uuid(userId)).cargo == 1
+    return bool(UserRepository.find_by_id(unmask_uuid(userId)).is_driver())
 
 def is_user_driver_or_higer(userId: UUID) -> bool:
-    return UserRepository.find_by_id(unmask_uuid(userId)).cargo >= 1
+    return bool(UserRepository.find_by_id(unmask_uuid(userId)).cargo >= 1)
 
 def get_driver_by_user(user: User) -> DriverResponseSchema:
-    driver = DriverRepository.find_driver_by_id(user.id)
+    driver = DriverRepository.find_driver_by_id(user.str_id)
 
     driverDict = model_to_dict(driver)
     driverDict.update(model_to_dict(driver.id))
+    driverDict.update({"id_ambulancia": driver.id_ambulancia_id})
     
     return DriverResponseSchema.model_validate(driverDict)
 
@@ -30,6 +31,6 @@ def update_driver(user: User, driverFields: DriverUpdateFieldsSchema) -> DriverR
     """ Atualiza os campos especificos do motorista """
     driverFields = {k: v for k, v in driverFields.model_dump().items() if v is not None}
 
-    driver = DriverRepository.update_driver_by_id(user.id, **driverFields)
+    driver = DriverRepository.update_driver_by_id(user.str_id, **driverFields)
 
     return DriverResponseFullSchema.model_validate(driver)

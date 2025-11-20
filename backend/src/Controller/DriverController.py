@@ -2,16 +2,11 @@ from fastapi import APIRouter
 
 from src.Service import DriverService
 
-from uuid import UUID
-
 from src.Decorators.DriverDecorator import GET_AUTHENTICATED_DRIVER
 
 from src.Schema.Driver.DriverResponseSchema import DriverResponseSchema
 from src.Schema.Driver.DriverResponseFullSchema import DriverResponseFullSchema
 from src.Schema.Driver.DriverUpdateFieldsSchema import DriverUpdateFieldsSchema
-
-from src.Schema.Travel.TravelResponseSchema import TravelResponseSchema
-from src.Schema.Travel.TravelListResponseSchema import TravelListResponseSchema
 
 DRIVER_ROUTER = APIRouter(
     prefix="/driver",
@@ -19,9 +14,9 @@ DRIVER_ROUTER = APIRouter(
 )
 
 @DRIVER_ROUTER.patch("/update/")
-async def update_driver(user: GET_AUTHENTICATED_DRIVER, driverFields: DriverUpdateFieldsSchema) -> DriverResponseFullSchema:
+async def update_driver(driver: GET_AUTHENTICATED_DRIVER, driverFields: DriverUpdateFieldsSchema) -> DriverResponseFullSchema:
     """ Atualiza as informações especificas de um motorista """
-    return DriverService.update_driver(user, driverFields)
+    return DriverService.update_driver(driver, driverFields)
 
 @DRIVER_ROUTER.get("/")
 async def get_driver_info(driver: GET_AUTHENTICATED_DRIVER) -> DriverResponseSchema:
