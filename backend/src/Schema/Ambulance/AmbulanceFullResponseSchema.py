@@ -10,8 +10,9 @@ from src.Schema.Equipment.EquipmentResponseSchema import EquipmentResponseSchema
 from uuid import UUID, uuid4
 
 class AmbulanceFullResponseSchema(BaseModel):
-    id           : Annotated[UUID                   , Field(examples=[uuid4()])]
-    status       : Annotated[AmbulanceStatus        , Field(examples=[AmbulanceStatus.ative])]
-    placa        : Annotated[str                    , Field(examples=["lab1b42"], max_length=8)]
-    tipo         : Annotated[AmbulanceType          , Field(examples=[AmbulanceType.A])]
-    equipamentos : Annotated[EquipmentResponseSchema, Field(examples=[])]
+    id           : Annotated[UUID                         , Field(examples=[uuid4()])]
+    status       : Annotated[AmbulanceStatus              , Field(examples=[AmbulanceStatus.ative])]
+    placa        : Annotated[str                          , Field(examples=["lab1b42"], max_length=8)]
+    tipo         : Annotated[AmbulanceType                , Field(examples=[AmbulanceType.A])]
+    equipamentos : Annotated[list[EquipmentResponseSchema], Field(examples=[[]])]
+    motorista_id : Annotated[UUID | None                  , Field(examples=[uuid4()])]

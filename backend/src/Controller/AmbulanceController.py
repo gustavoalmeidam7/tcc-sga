@@ -48,6 +48,19 @@ async def get_ambulances(user: DriverDecorator.GET_AUTHENTICATED_DRIVER_OR_HIGHE
 
     return AmbulanceService.get_ambulances_by_page(page, pageSize)
 
+@AMBULANCE_ROUTER.get("/{ambulanceID}")
+async def get_ambulance_by_id(user: DriverDecorator.GET_AUTHENTICATED_DRIVER_OR_HIGHER, ambulanceID: UUID) -> AmbulanceFullResponseSchema:
+    """
+    Procura uma ambulância pelo seu id :
+
+    **parâmetro**: Route parameter: \n
+        `ambulanceID` \n
+    **retorno**: devolve: \n
+        `AmbulanceResponseSchema`
+    """
+
+    return AmbulanceService.get_ambulance_by_id(ambulanceID)
+
 @AMBULANCE_ROUTER.patch("/{id}")
 async def update_ambulance(
     user: DriverDecorator.GET_AUTHENTICATED_DRIVER_OR_HIGHER, id: UUID, updateAmbulance: AmbulanceUpdateSchema
@@ -67,7 +80,6 @@ async def update_ambulance(
 async def add_equipment_by_ambulance_id(
     user: DriverDecorator.GET_AUTHENTICATED_DRIVER_OR_HIGHER, id: UUID, equipment: EquipmentCreateSchema
 ) -> EquipmentResponseSchema:
-    #TODO: IMPLEMENT
     """
     Procura por todas as ambulâncias presentes no :
 
@@ -77,4 +89,4 @@ async def add_equipment_by_ambulance_id(
         `AmbulanceResponseSchema`
     """
 
-    pass
+    return AmbulanceService.create_equipment_by_ambulance_id(id, equipment)
