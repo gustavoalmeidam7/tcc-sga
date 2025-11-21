@@ -37,22 +37,64 @@ USER_NOT_FOUND_EXCEPTION = NotFoundResource("usuário", "O usuário não foi enc
     }
 })
 async def create_user(user: UserCreateSchema) -> UserResponseFullSchema:
+    """
+    Cadastra um novo usuário:
+
+    **parâmetro**: Body: \n
+        `UserCreateSchema` \n
+    **retorno**: devolve: \n
+        `UserResponseFullSchema`
+    """
     return UserService.create(user)
 
 @USER_ROUTER.delete("/", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(user: GET_AUTHENTICATED_USER) -> None:
+    """
+    Deleta a conta do usuário:
+
+    **acesso**: `USER` \n
+    **parâmetro**: Sem parâmetros\n
+    **retorno**: 204 No content
+    """
     UserService.delete_by_id(user.id)
 
 @USER_ROUTER.patch("/")
-async def update_user(user: GET_AUTHENTICATED_USER, userUpdate: UserUpdateSchema) -> UserUpdateResponseSchema:
+async def update_user(user: GET_AUTHENTICATED_USER, userUpdate: UserUpdateSchema) -> UserUpdateSchema:
+    """
+    Atualiza os dados cadastrais de um usuário:
+
+    **acesso**: `USER` \n
+    **parâmetro**: Body: \n
+        `UserUpdateSchema` \n
+    **retorno**: devolve: \n
+        `UserUpdateSchema`
+    """
     return UserService.update_user(user, userUpdate)
 
 @USER_ROUTER.get("/")
 async def get_user(user: GET_AUTHENTICATED_USER) -> UserResponseFullSchema:
+    """
+    Encontra as informações cadastrais de um usuário:
+
+    **acesso**: `USER` \n
+    **parâmetro**: Sem parâmetros\n
+    **retorno**: devolve: \n
+        `UserResponseFullSchema`
+    """
     return UserResponseFullSchema.model_validate(user)
 
 @USER_ROUTER.get("/getusers")
 async def get_users(user: GET_AUTHENTICATED_DRIVER_OR_HIGHER, page: int = 1, pagesize: int = 15) -> list[UserResponseSchema]:
+    """
+    Encontra todos usuários com paginação:
+
+    **acesso**: `DRIVER_OR_HIGHER` \n
+    **parâmetro**: Query params:\n
+        `page` \n
+        `pagesize` \n
+    **retorno**: devolve: \n
+        `list[UserResponseSchema]`
+    """
     return UserService.find_all_page_dict(int(page), int(pagesize))
 
 
@@ -67,6 +109,15 @@ async def get_users(user: GET_AUTHENTICATED_DRIVER_OR_HIGHER, page: int = 1, pag
     }
 })
 async def get_user_by_id(user: GET_AUTHENTICATED_DRIVER_OR_HIGHER, userId: UUID) -> UserResponseFullSchema:
+    """
+    Cria uma nova ambulância:
+
+    **acesso**: `DRIVER_OR_HIGHER` \n
+    **parâmetro**: Body: \n
+        `AmbulanceCreateSchema` \n
+    **retorno**: devolve: \n
+        `AmbulanceResponseSchema`
+    """
     user = UserService.find_user_by_id(userId)
     if user is None:
         raise USER_NOT_FOUND_EXCEPTION

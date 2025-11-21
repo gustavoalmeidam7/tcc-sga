@@ -16,9 +16,10 @@ from src.Schema.Travel.TravelRealizedEnum import TravelRealized
 
 from src.Validator.TravelValidator import TravelValidator
 
-from src.Error.User.UserRBACError import UserRBACError
+from src.Error.User.NotUserResourceError import NotUserResource
 from src.Error.Base.NotFoundError import NotFoundError
 
+NOT_USER_RESOURCE = NotUserResource()
 
 def update_travel_by_id_ignore_none(travelId: UUID, **fields) -> TravelResponseSchema:
     """ Atualiza uma viagem com os campos (fields) fornecidos ignorando campos nulos """
@@ -39,7 +40,7 @@ def create_travel(travel: TravelCreateSchema, user: User) -> TravelResponseSchem
     travelDict = travel.model_dump()
     
     travelModel = Travel(**travelDict)
-    travelModel.id_paciente = str(user.id)
+    travelModel.id_paciente = user.str_id
     travelModel.criado_em = datetime.now(timezone.utc)
     travelModel.realizado = TravelRealized.NAO_REALIZADO
 
@@ -83,8 +84,8 @@ def cancel_travel_by_id(user: User, travelId: UUID) -> TravelResponseSchema:
 
     travel = find_travel_by_id(travelId)
 
-    if travel.id_paciente != mask_uuid(user.id):
-        raise UserRBACError("O usuário não pode modificar este recurso.")
+    if travel.id_paciente != user.uuid_id:
+        raise NOT_USER_RESOURCE
 
     if not travel.cancelada:
         travel = update_travel_by_id_ignore_none(travel.id, cancelada=True)

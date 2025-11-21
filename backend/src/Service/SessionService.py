@@ -21,6 +21,9 @@ import jwt
 from passlib.context import CryptContext
 from uuid import UUID
 
+from src.Error.User.UserRBACError import UserRBACError
+from src.Error.Resource.NotFoundResourceError import NotFoundResource
+
 TOKEN_SCHEME = Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="token"))]
 
 PWD_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -106,21 +109,18 @@ def get_user_sessions(token: TOKEN_SCHEME) -> UserSessionListSchema:
         "sessoes": SessionRepository.find_all_by_user(user)
     })
 
-def revoke_session(token: TOKEN_SCHEME, sessionId: RevokeSessionSchema) -> None:
+def revoke_session(token: TOKEN_SCHEME, sessionSchema: RevokeSessionSchema) -> None:
     """ Revoga uma sessão pelo id da mesma """
 
     mySessionId = jwt.decode(token, SECRET_KEY, ALGORITHM).get("sub")
 
-    if UUID(mySessionId) == sessionId.id_sessao:
+    if UUID(mySessionId) == sessionSchema.id_sessao:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Impossível revogar o próprio token")
     
-    # user = get_current_user(token)
-    # sessionToRevoke = SessionRepository.find_by_id(sessionId.id_sessao) or Session() 
-
-    if SessionRepository.find_user_by_session_id(sessionId.id_sessao) is not None:
-        SessionRepository.delete_token_by_id(sessionId.id_sessao)
+    if SessionRepository.find_user_by_session_id(sessionSchema.id_sessao) is not None:
+        SessionRepository.delete_token_by_id(sessionSchema.id_sessao)
     else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Token não encontrado")
+        raise NotFoundResource("token", "Token não encontrado.")
     
 def revoke_all_sessions_by_user_id(id: int) -> None:
     """ Revoga todas sessões de um usuário pelo token do mesmo """

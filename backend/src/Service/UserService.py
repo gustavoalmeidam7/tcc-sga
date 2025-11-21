@@ -21,7 +21,6 @@ from src.Repository import UserRepository
 from src.Service import SessionService
 
 def create(userSchema: UserCreateSchema) -> UserResponseFullSchema:
-    ## TODO VALIDAR MELHOR CPF E TELEFONE
     userModel = User(**userSchema.model_dump())
     userModel.senha = SessionService.get_password_hash(str(userModel.senha))
 

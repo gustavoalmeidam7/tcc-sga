@@ -15,11 +15,27 @@ MANAGER_ROUTER = APIRouter(
 )
 
 @MANAGER_ROUTER.post("/assigndrivertravel/{driver}/{travel}")
-async def assing_driver_to_travel(manager: ManagerDecorator.GET_AUTHENTICATED_MANAGER, driver: UUID, travel: UUID) -> TravelResponseSchema:
-    """ Assina o motorista e a respectiva ambulância a uma viagem """
+async def assign_driver_to_travel(manager: ManagerDecorator.GET_AUTHENTICATED_MANAGER, driver: UUID, travel: UUID) -> TravelResponseSchema:
+    """
+    Assina uma viagem a um motorista pelo seu id:
+
+    **acesso**: `MANAGER` \n
+    **parâmetro**: Route param: \n
+        `driver` \n
+        `travel` \n
+    **retorno**: devolve: \n
+        `TravelResponseSchema`
+    """
     return ManagerService.assign_driver_to_travel_by_id(driver, travel)
 
 @MANAGER_ROUTER.post("/")
 async def create_driver_upgrade_token(manager: ManagerDecorator.GET_AUTHENTICATED_MANAGER) -> UpgradeTokenFullResponseSchema:
-    """ Cria um token para atualizar um usuário para motorista """
+    """
+    Cria um token de atualização para motorista:
+
+    **acesso**: `MANAGER` \n
+    **parâmetro**: Sem parâmetros \n
+    **retorno**: devolve: \n
+        `UpgradeTokenFullResponseSchema`
+    """
     return ManagerService.generate_driver_token()

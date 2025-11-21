@@ -5,6 +5,8 @@ from src.Model.BaseModel import BaseModel
 from src.Schema.Travel.TravelRealizedEnum import TravelRealized
 from src.Schema.Travel.TravelPatientStateEnum import PatientState
 
+from src.Schema.Travel.TravelRealizedEnum import TravelRealized
+
 from datetime import datetime, timezone
 from src.Validator.UserValidator import generate_uuid
 
@@ -27,6 +29,18 @@ class Travel(BaseModel):
     end_fim         : str            | CharField       = CharField(max_length=350, null=False)
     cancelada       : bool           | BooleanField    = BooleanField(null=False, default=False)
     criado_em       : datetime       | DateTimeField   = DateTimeField(default=datetime.now(timezone.utc), null=False)
+
+    @property
+    def in_progress(self) -> bool:
+        return bool(self.realizado == TravelRealized.EM_PROGRESSO)
+    
+    @property
+    def not_started(self) -> bool:
+        return bool(self.realizado == TravelRealized.NAO_REALIZADO)
+    
+    @property
+    def finished(self) -> bool:
+        return bool(self.realizado == TravelRealized.REALIZADO)
 
     class Meta:
         table_name = "transporte"

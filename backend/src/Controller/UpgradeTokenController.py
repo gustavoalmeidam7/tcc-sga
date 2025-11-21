@@ -29,7 +29,15 @@ status.HTTP_409_CONFLICT: {
     }
 }})
 async def get_upgrade_token_info(user: UserDecorators.GET_AUTHENTICATED_USER, token: UUID) -> UpgradeTokenFullResponseSchema:
-    """ Recupera as informações de um upgrade token pelo seu id """
+    """
+    Pega as informações de um token de upgrade:
+
+    **acesso**: `USER` \n
+    **parâmetro**: Route Param: \n
+        `token` \n
+    **retorno**: devolve: \n
+        `UpgradeTokenFullResponseSchema`
+    """
     return ManagerService.get_token_info(token)
 
 @UPGRADE_TOKEN_ROUTER.post("/{token}", responses={
@@ -51,5 +59,15 @@ async def get_upgrade_token_info(user: UserDecorators.GET_AUTHENTICATED_USER, to
     },
 })
 async def upgrade_account(user: UserDecorators.GET_AUTHENTICATED_USER, token: UUID, driverFields: DriverCreateSchema | None = None) -> UserResponseFullSchema:
-    """ Atualiza uma conta a partir de um id de UpgradeToken """
+    """
+    Faz upgrade de uma conta com um token de atualização:
+
+    **acesso**: `USER` \n
+    **parâmetro**: Route Param: \n
+        `token` \n
+    Body: \n
+        `Optional[DriverCreateSchema]`
+    **retorno**: devolve: \n
+        `UserResponseFullSchema`
+    """
     return ManagerService.upgrade_user_with_token_id(user, token, driverFields)

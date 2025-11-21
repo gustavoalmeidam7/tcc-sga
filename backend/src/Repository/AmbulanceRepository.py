@@ -26,12 +26,12 @@ def create_equipment(equipment: Equipment) -> Equipment:
 def find_ambulances_by_page(page: int, pageSize: int) -> list[Ambulance]:
     """ Encontra todas as ambulâncias presentes na página x de tamanho x """
 
-    return Ambulance.select().order_by(Ambulance.id.asc()).paginate(page, pageSize)
+    return Ambulance.select().order_by(Ambulance.id.asc()).paginate(page, pageSize) # type: ignore
 
 def find_ambulances_by_page_(page: int, pageSize: int) -> list[Ambulance]:
     """ Encontra todas as ambulâncias presentes na página x de tamanho x """
 
-    return Ambulance.select().order_by(Ambulance.id.asc()).paginate(page, pageSize)
+    return Ambulance.select().order_by(Ambulance.id.asc()).paginate(page, pageSize) # type: ignore
 
 def find_ambulance_by_id(id: str) -> Ambulance | None:
     """ Encontra uma ambulância pelo seu ID """
