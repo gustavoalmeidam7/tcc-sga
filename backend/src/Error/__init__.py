@@ -7,7 +7,7 @@ def register_error_handlers(app):
     def base_error_list_handler(request: Request, error: ErrorListClass.ErrorListClass):
         return responses.JSONResponse(
             status_code=error.statusCode,
-            content={"erros": error.errors}
+            content=error.jsonObject
         )
 
     @app.exception_handler(ErrorClass.ErrorClass)
@@ -25,9 +25,5 @@ def register_error_handlers(app):
     def base_not_found_handler(request: Request, error: NotFoundError.NotFoundError):
         return responses.JSONResponse(
             status_code=error.statusCode,
-            content={
-                "erro": error.error,
-                "recurso": error.resource,
-                "mensagem": error.userMessage
-            }
+            content=error.jsonObject
         )

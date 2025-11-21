@@ -14,7 +14,6 @@ MANAGER_ROUTER = APIRouter(
     tags=["manager"]
 )
 
-# TODO: VALIDAR SE A VIAGEM ESTÁ CANCELADA
 @MANAGER_ROUTER.post("/assigndrivertravel/{driver}/{travel}")
 async def assing_driver_to_travel(manager: ManagerDecorator.GET_AUTHENTICATED_MANAGER, driver: UUID, travel: UUID) -> TravelResponseSchema:
     """ Assina o motorista e a respectiva ambulância a uma viagem """

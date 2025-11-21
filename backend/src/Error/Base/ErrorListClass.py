@@ -4,4 +4,6 @@ class ErrorListClass(Exception):
     def __init__(self, errors: list[dict], statusCode: int) -> None:
         self.statusCode = statusCode
         self.errors = errors
+
+        self.jsonObject = {"erros": self.errors}
         super().__init__(errors)

@@ -7,14 +7,9 @@ TOKEN_SCHEME = Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="token", aut
 
 from src.Model.User import User
 
-from src.Schema.User.UserRoleEnum import UserRole
-
 from src.Decorators import get_user_auth_user
 from src.Error.User.UserInvalidCredentials import invalidCredentials
 from src.Error.User.UserRBACError import UserRBACError
-
-def is_user_manager(user: User) -> bool:
-    return bool(user.cargo == UserRole.MANAGER)
 
 async def token_get_manager(request: Request, token: TOKEN_SCHEME) -> User:
     if not token:
@@ -22,7 +17,7 @@ async def token_get_manager(request: Request, token: TOKEN_SCHEME) -> User:
     
     currentUser = await get_user_auth_user(request, token)
 
-    if not is_user_manager(currentUser):
+    if not currentUser.is_manager:
         raise UserRBACError()
     
     return currentUser

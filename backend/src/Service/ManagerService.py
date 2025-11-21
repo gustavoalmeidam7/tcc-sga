@@ -21,16 +21,21 @@ from src.Schema.Travel.TravelResponseSchema import TravelResponseSchema
 
 from src.Error.User.UserRBACError import UserRBACError
 from src.Error.Server.InternalServerError import InternalServerError
+from src.Error.Resource.NotFoundResourceError import NotFoundResource
 
 from src.DB import db
 
 from datetime import datetime
 from uuid import UUID
 
+USER_ALREADY_MANAGER = HTTPException(status.HTTP_400_BAD_REQUEST, "Usuário já é gerente")
+USER_ALREADY_DRIVER = HTTPException(status.HTTP_400_BAD_REQUEST, "Usuário já é motorista")
+INSUFFICIENT_TOKEN = HTTPException(status.HTTP_401_UNAUTHORIZED, "Impossível realizar ação com este token")
+
 def get_token_info(upgradeTokenId: UUID) -> UpgradeTokenFullResponseSchema:
     token = ManagerRepository.find_token_by_id(unmask_uuid(upgradeTokenId))
     if token is None:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token não existe")
+        raise NotFoundResource("token", "Token não encontrado")
     
     return UpgradeTokenFullResponseSchema.model_validate(token)
 
@@ -88,17 +93,17 @@ def upgrade_user_with_token_id(user: User, tokenId: UUID, driverFields: Optional
 def upgrade_user_to_manager(user: User, token: UpgradeToken, driverFields: DriverCreateSchema) -> UserResponseFullSchema:
     """ Atualiza um usuário para gerente usando token """
 
-    if user.is_manager():
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Usuário já é gerente")
+    if user.is_manager:
+        raise USER_ALREADY_MANAGER
     
     if token.fator_cargo != UserRole.MANAGER:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Impossível realizar ação com este token")
+        raise INSUFFICIENT_TOKEN
     
     userUpdated = None
 
     with db.atomic():
-        userUpdated = UserRepository.update_user_by_id(unmask_uuid(user.id), cargo=UserRole.MANAGER)
-        manager = ManagerRepository.find_manager_by_id(unmask_uuid(user.id))
+        userUpdated = UserRepository.update_user_by_id(user.str_id, cargo=UserRole.MANAGER)
+        manager = ManagerRepository.find_manager_by_id(user.str_id)
 
         if manager is None:
             ManagerRepository.create_manager(Manager(id=user.id))
@@ -118,11 +123,11 @@ def upgrade_user_to_manager(user: User, token: UpgradeToken, driverFields: Drive
 def upgrade_user_to_driver(user: User, token: UpgradeToken, driverFields: DriverCreateSchema) -> UserResponseFullSchema:
     """ Atualiza um usuário para motorista usando token """
 
-    if user.is_driver():
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Usuário já é motorista")
+    if user.is_driver:
+        raise USER_ALREADY_DRIVER
     
     if token.fator_cargo != UserRole.DRIVER:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Impossível realizar ação com este token")
+        raise INSUFFICIENT_TOKEN
     
     userUpdated = None
 

@@ -12,8 +12,6 @@ TOKEN_SCHEME = Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="token", aut
 from src.Model.User import User
 from src.Service import SessionService
 
-from datetime import datetime, timezone
-
 async def get_user_auth_user(request: Request, token: TOKEN_SCHEME) -> User:
     """ Pega o usuário autenticado """
 
@@ -25,10 +23,10 @@ async def get_user_auth_user(request: Request, token: TOKEN_SCHEME) -> User:
     currentSession = SessionService.get_current_session_by_token(token)
     currentUser    = SessionService.get_current_user(token)
 
-    if currentSession.ip != userIP:
+    if not currentSession.ip_equals(userIP):
         raise invalidCredentials()
     
-    if datetime.fromisoformat(currentSession.valido_ate_iso_str).astimezone(timezone.utc) <= datetime.now(timezone.utc):
+    if currentSession.is_expired:
         raise invalidCredentials()
 
     if currentUser is None:
