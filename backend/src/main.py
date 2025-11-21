@@ -27,6 +27,7 @@ app.add_event_handler("startup", Controller.initialize_controller)
 app.add_event_handler("startup", main)
 
 app.add_event_handler("shutdown", Migration.close_db)
+app.add_event_handler("shutdown", Migration.drop_test_db)
 
 app.add_middleware(
     CORSMiddleware,
