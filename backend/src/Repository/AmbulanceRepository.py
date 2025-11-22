@@ -2,6 +2,8 @@ from src.Model.Ambulance import Ambulance
 from src.Model.Equipment import Equipment
 from src.Model.Driver import Driver
 
+from src.Error.Server.InternalServerError import InternalServerError
+
 """
     Criar
 """
@@ -80,6 +82,32 @@ def update_ambulance(travelId: str, **args) -> Ambulance | None:
 
     return Ambulance.select().where(Ambulance.id == travelId).first()
 
+def update_equipment_ignore_none(equipmentId: str, **args) -> Equipment | None:
+    """ Atualiza um equipamento ignorando valores nulos """
+
+    filteredArgs = {k: v for k, v in args.items() if v is not None}
+
+    query = Equipment.update(filteredArgs).where(Equipment.id == equipmentId)
+    query.execute()
+
+    return Equipment.select().where(Equipment.id == equipmentId).first()
+
 """
     Deletar
 """
+
+def delete_equipment(equipmentId: str) -> None:
+    """ Excluí um equipamento pelo seu id """
+
+    Equipment.delete().where(Equipment.id == equipmentId).execute()
+
+    if equipment_exits_by_id(equipmentId):
+        raise InternalServerError()
+    
+def delete_ambulance(ambulanceId: str) -> None:
+    """ Excluí um equipamento pelo seu id """
+
+    Ambulance.delete().where(Ambulance.id == ambulanceId).execute()
+
+    if ambulance_exits_by_id(ambulanceId):
+        raise InternalServerError()

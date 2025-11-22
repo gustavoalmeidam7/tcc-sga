@@ -1,13 +1,20 @@
 from src.Model.Travel import Travel
 from src.Model.User import User
 
-from uuid import UUID
+
+"""
+    Criar
+"""
 
 def insert_travel(travel: Travel) -> Travel:
     """ Insere uma nova viagem """
     travel.save(force_insert=True)
     return travel
 
+
+"""
+    Ler
+"""
 
 def find_assigned_travels(user: User, page: int, pageSize: int) -> list[Travel]:
     """ Encontra todas viagens atribuidas a o usuário user """
@@ -28,10 +35,9 @@ def find_travel_by_id(travelId: str) -> Travel | None:
     """ Encontra uma viagem pelo seu ID, se não encontrar retorna None """
     return Travel.select().where(Travel.id == travelId).first()
 
-
-def delete_travel_by_id(travelId: str) -> None:
-    """ Deleta uma travel pelo seu ID """
-    Travel.delete_by_id(travelId)
+"""
+    Atualizar
+"""
 
 def update_travel(travelId: str, **args) -> Travel | None:
     """ Atualiza uma viagem """
@@ -40,3 +46,12 @@ def update_travel(travelId: str, **args) -> Travel | None:
     query.execute()
 
     return Travel.select().where(Travel.id == travelId).first()
+
+
+"""
+    Deletar
+"""
+
+def delete_travel_by_id(travelId: str) -> None:
+    """ Deleta uma travel pelo seu ID """
+    Travel.delete_by_id(travelId)

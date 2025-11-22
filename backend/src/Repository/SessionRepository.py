@@ -8,6 +8,19 @@ from src.Model.UserSession import Session
 from typing import List
 from uuid import UUID
 
+
+"""
+    Criar
+"""
+
+def insert_session(session: Session) -> None:
+    """ Insere uma sessão no banco de dados """
+    session.save(force_insert=True)
+
+"""
+    Ler
+"""
+
 def find_all() -> List[Session]:
     """ Retorna todas as sessões """
     return list(Session.select())
@@ -43,9 +56,13 @@ def find_user_by_session_id(id: str | UUID) -> User | None:
     
     return userModel
 
-def insert_session(session: Session) -> None:
-    """ Insere uma sessão no banco de dados """
-    session.save(force_insert=True)
+"""
+    Atualizar
+"""
+
+"""
+    Deletar
+"""
 
 def delete_token_by_id(token: UUID) -> None:
     """ Deleta uma sessão pelo seu ID """
