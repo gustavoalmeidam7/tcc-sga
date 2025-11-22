@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, status
 
 from src.Schema.Ambulance.AmbulanceCreateSchema import AmbulanceCreateSchema
 from src.Schema.Ambulance.AmbulanceResponseSchema import AmbulanceResponseSchema
@@ -7,6 +7,7 @@ from src.Schema.Ambulance.AmbulanceUpdateSchema import AmbulanceUpdateSchema
 
 from src.Schema.Equipment.EquipmentCreateSchema import EquipmentCreateSchema
 from src.Schema.Equipment.EquipmentResponseSchema import EquipmentResponseSchema
+from src.Schema.Equipment.EquipmentUpdateSchema import EquipmentUpdateSchema
 
 from src.Service import AmbulanceService
 
@@ -26,6 +27,7 @@ async def create_ambulance(user: DriverDecorator.GET_AUTHENTICATED_DRIVER_OR_HIG
     """
     Cria uma nova ambulância:
 
+    **acesso**: `DRIVER_OR_HIGHER` \n
     **parâmetro**: Body: \n
         `AmbulanceCreateSchema` \n
     **retorno**: devolve: \n
@@ -39,6 +41,7 @@ async def get_ambulances(user: DriverDecorator.GET_AUTHENTICATED_DRIVER_OR_HIGHE
     """
     Procura por todas as ambulâncias presentes no :
 
+    **acesso**: `DRIVER_OR_HIGHER` \n
     **parâmetro**: Query parameters: \n
         `page` \n
         `pageSize` \n
@@ -53,6 +56,7 @@ async def get_ambulance_by_id(user: DriverDecorator.GET_AUTHENTICATED_DRIVER_OR_
     """
     Procura uma ambulância pelo seu id :
 
+    **acesso**: `DRIVER_OR_HIGHER` \n
     **parâmetro**: Route parameter: \n
         `ambulanceID` \n
     **retorno**: devolve: \n
@@ -68,6 +72,7 @@ async def update_ambulance(
     """
     Procura por todas as ambulâncias presentes no :
 
+    **acesso**: `DRIVER_OR_HIGHER` \n
     **parâmetro**: Route parameter: \n
         `id` : ID da ambulância que sera atualizada \n
     **retorno**: devolve: \n
@@ -83,6 +88,7 @@ async def add_equipment_by_ambulance_id(
     """
     Procura por todas as ambulâncias presentes no :
 
+    **acesso**: `DRIVER_OR_HIGHER` \n
     **parâmetro**: Route parameter: \n
         `id` : ID da ambulância que sera atualizada \n
     **retorno**: devolve: \n
@@ -90,3 +96,55 @@ async def add_equipment_by_ambulance_id(
     """
 
     return AmbulanceService.create_equipment_by_ambulance_id(id, equipment)
+
+@AMBULANCE_ROUTER.post("/update-equipment/{equipmentId}")
+async def update_equipment_by_id(
+    user: DriverDecorator.GET_AUTHENTICATED_DRIVER_OR_HIGHER,
+    equipmentId: UUID,
+    updateEquipment: EquipmentUpdateSchema
+) -> EquipmentResponseSchema:
+    """
+    Atualiza um equipamento pelo seu id :
+
+    **acesso**: `DRIVER_OR_HIGHER` \n
+    **parâmetro**: Route parameter: \n
+        `id` : ID do equipamento que será atualizado \n
+    Body: \n
+        `EquipmentUpdateSchema` \n
+    **retorno**: devolve: \n
+        `EquipmentResponseSchema`
+    """
+
+    return AmbulanceService.update_equipment_by_id(equipmentId, updateEquipment)
+
+@AMBULANCE_ROUTER.delete("/equipment/{equipmentId}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_equipment_by_id(
+    user: DriverDecorator.GET_AUTHENTICATED_DRIVER_OR_HIGHER,
+    equipmentId: UUID,
+) -> None:
+    """
+    Deleta um equipamento pelo seu id :
+
+    **acesso**: `DRIVER_OR_HIGHER` \n
+    **parâmetro**: Route parameter: \n
+        `id` : ID do equipamento que será atualizado \n
+    **retorno**: 204 NO CONTENT
+    """
+
+    return AmbulanceService.delete_equipment_by_id(equipmentId)
+
+@AMBULANCE_ROUTER.delete("/{equipmentId}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_equipment_by_id(
+    user: DriverDecorator.GET_AUTHENTICATED_DRIVER_OR_HIGHER,
+    ambulanceId: UUID,
+) -> None:
+    """
+    Deleta uma ambulância pelo seu id :
+
+    **acesso**: `DRIVER_OR_HIGHER` \n
+    **parâmetro**: Route parameter: \n
+        `id` : ID da ambulância que será atualizado \n
+    **retorno**: 204 NO CONTENT
+    """
+
+    return AmbulanceService.delete_ambulance_by_id(ambulanceId)
