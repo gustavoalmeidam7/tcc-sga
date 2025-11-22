@@ -16,6 +16,7 @@ from src.Schema.Ambulance.AmbulanceUpdateSchema import AmbulanceUpdateSchema
 
 from src.Schema.Equipment.EquipmentCreateSchema import EquipmentCreateSchema
 from src.Schema.Equipment.EquipmentResponseSchema import EquipmentResponseSchema
+from src.Schema.Equipment.EquipmentUpdateSchema import EquipmentUpdateSchema
 
 from src.Error.Server.InternalServerError import InternalServerError
 
@@ -119,3 +120,24 @@ def update_ambulance_by_id(id: UUID, ambulanceUpdate: AmbulanceUpdateSchema) -> 
             raise InternalServerError()
         
     return add_ambulance_atributes(ambulanceUpdated)
+
+def update_equipment_by_id(equipmentId: UUID, equipmentUpdate: EquipmentUpdateSchema) -> EquipmentResponseSchema:
+    """ Atualiza um equipamento pelo seu ID """
+
+    equipmentUpdated = AmbulanceRepository.update_equipment_ignore_none(unmask_uuid(equipmentId), **equipmentUpdate.model_dump())
+
+    return EquipmentResponseSchema.model_validate(equipmentUpdated)
+
+"""
+    Deletar
+"""
+
+def delete_equipment_by_id(equipmentId: UUID) -> None:
+    """ Delete um equipamento pelo seu ID """
+
+    AmbulanceRepository.delete_equipment(unmask_uuid(equipmentId))
+
+def delete_ambulance_by_id(ambulanceId: UUID) -> None:
+    """ Delete um ambulância pelo seu ID """
+
+    AmbulanceRepository.delete_ambulance(unmask_uuid(ambulanceId))

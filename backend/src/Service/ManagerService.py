@@ -32,27 +32,10 @@ USER_ALREADY_MANAGER = HTTPException(status.HTTP_400_BAD_REQUEST, "Usuário já 
 USER_ALREADY_DRIVER = HTTPException(status.HTTP_400_BAD_REQUEST, "Usuário já é motorista")
 INSUFFICIENT_TOKEN = HTTPException(status.HTTP_401_UNAUTHORIZED, "Impossível realizar ação com este token")
 
-def get_token_info(upgradeTokenId: UUID) -> UpgradeTokenFullResponseSchema:
-    token = ManagerRepository.find_token_by_id(unmask_uuid(upgradeTokenId))
-    if token is None:
-        raise NotFoundResource("token", "Token não encontrado")
-    
-    return UpgradeTokenFullResponseSchema.model_validate(token)
 
-def assign_driver_to_travel_by_id(driverId: UUID, travelId: UUID) -> TravelResponseSchema:
-    travelId = unmask_uuid(travelId)
-    driverId = unmask_uuid(driverId)
-    ambulanceId = DriverRepository.find_driver_by_id(driverId).id_ambulancia_id
-
-    assingedTravel = TravelRepository.update_travel(travelId=travelId, id_motorista=driverId, id_ambulancia=ambulanceId)
-
-    if not assingedTravel:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Viagem não encontrada"
-        )
-    
-    return TravelResponseSchema.model_validate(assingedTravel)
+"""
+    Criar
+"""
 
 def generate_manager_token_list(tokenNumber: int) -> list[UpgradeToken]:
     """ Gera uma lista de tokens para atualizar para gerente """
@@ -75,6 +58,21 @@ def generate_driver_token() -> UpgradeTokenFullResponseSchema:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Erro no servidor, tente novamente mais tarde")
     
     return UpgradeTokenFullResponseSchema.model_validate(driverToken)
+
+"""
+    Ler
+"""
+
+def get_token_info(upgradeTokenId: UUID) -> UpgradeTokenFullResponseSchema:
+    token = ManagerRepository.find_token_by_id(unmask_uuid(upgradeTokenId))
+    if token is None:
+        raise NotFoundResource("token", "Token não encontrado")
+    
+    return UpgradeTokenFullResponseSchema.model_validate(token)
+
+"""
+    Atualizar
+"""
 
 def upgrade_user_with_token_id(user: User, tokenId: UUID, driverFields: Optional[DriverCreateSchema]) -> UserResponseFullSchema:
     """ Atualiza um usuário para o fator do respectivo UpgradeToken id """
@@ -158,3 +156,22 @@ def upgrade_user_to_driver(user: User, token: UpgradeToken, driverFields: Driver
         raise InternalServerError()
 
     return UserResponseFullSchema.model_validate(userUpdated)
+
+def assign_driver_to_travel_by_id(driverId: UUID, travelId: UUID) -> TravelResponseSchema:
+    travelId = unmask_uuid(travelId)
+    driverId = unmask_uuid(driverId)
+    ambulanceId = DriverRepository.find_driver_by_id(driverId).id_ambulancia_id
+
+    assingedTravel = TravelRepository.update_travel(travelId=travelId, id_motorista=driverId, id_ambulancia=ambulanceId)
+
+    if not assingedTravel:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Viagem não encontrada"
+        )
+    
+    return TravelResponseSchema.model_validate(assingedTravel)
+
+"""
+    Deletar
+"""

@@ -31,6 +31,10 @@ PWD_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
 SECRET_KEY = get_env_var("secret_key_jwt", "CHANGEME")
 ALGORITHM = get_env_var("algorithm_jwt", "HS256")
 
+"""
+    Helpers
+"""
+
 def get_password_hash(password: str) -> str:
     """ Gera um hash da senha para ser armazenada no banco de dados """
     return PWD_CONTEXT.hash(password)
@@ -39,6 +43,10 @@ def verify_password(plain_password: str, hash_password: str) -> bool:
     """ Verifica o hash da senha comparando o hash da senha atual
     com a armazenada no banco de dados """
     return PWD_CONTEXT.verify(plain_password, hash_password)
+
+"""
+    Criar
+"""
 
 def create_session(userEmail: str, plain_password: str, userIP: str) -> Session:
     """ Cria uma nova sessão """
@@ -65,6 +73,10 @@ def generate_jwt_token(id: str) -> dict:
     """ Encoda em JWT uma sessão pelo ID da mesma """
     content = {"sub": id}
     return jwt.encode(content, SECRET_KEY, algorithm=ALGORITHM)
+
+"""
+    Ler
+"""
 
 def get_current_session_by_token(token: TOKEN_SCHEME) -> Session:
     """ Retorna a sessão pelo token """
@@ -109,6 +121,10 @@ def get_user_sessions(token: TOKEN_SCHEME) -> UserSessionListSchema:
         "sessoes": SessionRepository.find_all_by_user(user)
     })
 
+"""
+    Atualizar
+"""
+
 def revoke_session(token: TOKEN_SCHEME, sessionSchema: RevokeSessionSchema) -> None:
     """ Revoga uma sessão pelo id da mesma """
 
@@ -126,3 +142,7 @@ def revoke_all_sessions_by_user_id(id: int) -> None:
     """ Revoga todas sessões de um usuário pelo token do mesmo """
 
     SessionRepository.delete_all_user_tokens_by_id(id)
+
+"""
+    Deletar
+"""
