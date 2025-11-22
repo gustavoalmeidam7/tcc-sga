@@ -111,7 +111,7 @@ def test_update_user(client: TestClient):
     TestUserHelper.register_user(client, userData)
     userToken = TestUserHelper.authenticate_user(client, userData["email"], userData["senha"])
 
-    # TODO: Test update only few fields inted of bulk update
+    # TODO: Test update only few fields instead of bulk update
 
     updateData = TestUserHelper.generate_user()
     updateData.pop("cpf")

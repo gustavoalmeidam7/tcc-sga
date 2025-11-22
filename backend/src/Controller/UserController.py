@@ -59,7 +59,7 @@ async def delete_user(user: GET_AUTHENTICATED_USER) -> None:
     UserService.delete_by_id(user.id)
 
 @USER_ROUTER.patch("/")
-async def update_user(user: GET_AUTHENTICATED_USER, userUpdate: UserUpdateSchema) -> UserUpdateSchema:
+async def update_user(user: GET_AUTHENTICATED_USER, userUpdate: UserUpdateSchema) -> UserUpdateResponseSchema:
     """
     Atualiza os dados cadastrais de um usuário:
 
