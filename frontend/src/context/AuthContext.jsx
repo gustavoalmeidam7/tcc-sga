@@ -88,6 +88,7 @@ export const AuthProvider = ({ children }) => {
     loginInProgressRef.current = true;
     setIsLoading(true);
     setError(null);
+    clearAuthToken();
 
     try {
       if (!email || !senha) {

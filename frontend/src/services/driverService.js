@@ -11,7 +11,13 @@ export const getDriverInfo = async () => {
 
 export const getDriverTravels = async () => {
   try {
-    const response = await API.get("/driver/travels");
+    const response = await API.get("/travel/assigned/", {
+      params: {
+        page: 0,
+        pageSize: 100,
+        canceled: false,
+      },
+    });
     return response.data;
   } catch (error) {
     throw error;
