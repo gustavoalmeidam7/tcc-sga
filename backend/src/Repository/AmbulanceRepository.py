@@ -2,6 +2,8 @@ from src.Model.Ambulance import Ambulance
 from src.Model.Equipment import Equipment
 from src.Model.Driver import Driver
 
+from typing import Any
+
 from src.Error.Server.InternalServerError import InternalServerError
 
 """
@@ -30,15 +32,15 @@ def find_ambulances_by_page(page: int, pageSize: int) -> list[Ambulance]:
 
     return Ambulance.select().order_by(Ambulance.id.asc()).paginate(page, pageSize) # type: ignore
 
-def find_ambulances_by_page_(page: int, pageSize: int) -> list[Ambulance]:
-    """ Encontra todas as ambulâncias presentes na página x de tamanho x """
-
-    return Ambulance.select().order_by(Ambulance.id.asc()).paginate(page, pageSize) # type: ignore
-
 def find_ambulance_by_id(id: str) -> Ambulance | None:
     """ Encontra uma ambulância pelo seu ID """
 
     return Ambulance.select().where(Ambulance.id == id).first()
+
+def find_ambulance_joined_by_id(id: str) -> Ambulance | None:
+    """ Encontra uma ambulância e faz join pelo seu ID """
+
+    return Ambulance.select().where(Ambulance.id == id).join(Equipment, on=(Ambulance.id == Equipment.id_ambulancia)).join(Driver, on=(Ambulance.id == Driver.id_ambulancia)).first()
 
 def find_driver_by_ambulance_id(id: str) -> Driver | None:
     """ Encontra motoristas atrelados a uma ambulância pelo seu id """

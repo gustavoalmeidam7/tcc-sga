@@ -19,7 +19,7 @@ register_error_handlers(app)
 def main():
     tokens = generate_manager_token_list(int(get_env_var("TOKENS", "5") or "5"))
 
-    Logging.log(f"Tokens para gerente: {[mask_uuid(t.id) for t in tokens if not t.usado and t.fator_cargo == 2]}", Level.SENSITIVE)
+    Logging.log(f"Tokens para gerente: {[mask_uuid(t.str_id) for t in tokens if not t.usado and t.fator_cargo == 2]}", Level.SENSITIVE)
     
 
 app.add_event_handler("startup", Migration.initialize_db)
