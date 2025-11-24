@@ -16,6 +16,7 @@ import {
   AlertCircle,
   FileDown,
   Phone,
+  Info,
 } from "lucide-react";
 import {
   getTravelStatusLabel,
@@ -46,6 +47,8 @@ import { PatientCard } from "../components/PatientCard";
 import { StatusCard } from "../components/StatusCard";
 import { generateTravelReportPDF } from "@/lib/pdf-utils";
 import { TravelStatus } from "@/lib/travel-status";
+import { getAmbulanceById } from "@/services/ambulanceService";
+import { getAmbulanceTypeLabel } from "@/lib/ambulance";
 
 export default function UserDetalhesView() {
   const { id } = useParams();
@@ -70,6 +73,20 @@ export default function UserDetalhesView() {
     queryKey: ["user", viagem?.id_motorista],
     queryFn: () => authService.getUserById(viagem.id_motorista),
     enabled: !!viagem?.id_motorista,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const { data: solicitanteCompleto } = useQuery({
+    queryKey: ["user", viagem?.id_paciente],
+    queryFn: () => authService.getUserById(viagem.id_paciente),
+    enabled: !!viagem?.id_paciente,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const { data: ambulancia, isLoading: loadingAmbulancia } = useQuery({
+    queryKey: ["ambulance", viagem?.id_ambulancia],
+    queryFn: () => getAmbulanceById(viagem.id_ambulancia),
+    enabled: !!viagem?.id_ambulancia,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -103,8 +120,8 @@ export default function UserDetalhesView() {
     });
 
     try {
-      const solicitante = { nome: "Você" };
-      await generateTravelReportPDF(viagem, enderecos, solicitante);
+      const solicitante = solicitanteCompleto || { nome: user?.nome || "Você" };
+      await generateTravelReportPDF(viagem, enderecos, solicitante, motorista);
       toast.success("PDF gerado com sucesso!", {
         id: toastId,
         description: "Seu download deve começar em breve.",
@@ -261,7 +278,11 @@ export default function UserDetalhesView() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <PatientCard viagem={viagem} loading={loadingViagem} />
+            <PatientCard
+              viagem={viagem}
+              loading={loadingViagem}
+              solicitante={solicitanteCompleto}
+            />
           </CardContent>
         </Card>
 
@@ -357,14 +378,37 @@ export default function UserDetalhesView() {
                 <p className="text-xs text-muted-foreground mt-2">
                   Veículo alocado para a viagem
                 </p>
-                <div className="mt-3 pt-3 border-t border-green-500/20">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Hash className="h-4 w-4 text-primary" />
-                    <span className="text-muted-foreground">ID:</span>
-                    <span className="font-mono text-foreground">
-                      {viagem.id_ambulancia}
-                    </span>
-                  </div>
+                <div className="mt-3 pt-3 border-t border-green-500/20 space-y-2">
+                  {loadingAmbulancia ? (
+                    <div className="text-sm text-muted-foreground">
+                      Carregando informações da ambulância...
+                    </div>
+                  ) : ambulancia ? (
+                    <>
+                      <div className="flex items-center gap-2 text-sm">
+                        <Ambulance className="h-4 w-4 text-primary" />
+                        <span className="text-muted-foreground">Placa:</span>
+                        <span className="font-mono font-semibold text-foreground">
+                          {ambulancia.placa || "N/A"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <Info className="h-4 w-4 text-primary" />
+                        <span className="text-muted-foreground">Tipo:</span>
+                        <span className="font-semibold text-foreground">
+                          {getAmbulanceTypeLabel(ambulancia.tipo)}
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Hash className="h-4 w-4 text-primary" />
+                      <span className="text-muted-foreground">ID:</span>
+                      <span className="font-mono text-foreground">
+                        {viagem.id_ambulancia}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </StatusCard>
             ) : (

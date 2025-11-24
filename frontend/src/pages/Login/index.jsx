@@ -28,7 +28,7 @@ export default function Login({ className, ...props }) {
   } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || "/";
+  const from = location.state?.from?.pathname || "/home";
 
   const form = useForm({
     resolver: zodResolver(loginSchema),
@@ -46,13 +46,16 @@ export default function Login({ className, ...props }) {
       });
       setTimeout(() => navigate(from, { replace: true }), 500);
     } catch (err) {
-      console.error("Erro no login:", err);
-      if (err.message) {
-        toast.error("Erro no login", {
-          description: err.message,
-          duration: 5000,
-        });
-      }
+      const errorMessage =
+        err.response?.data?.Erros?.[0] ||
+        err.response?.data?.detail ||
+        err.message ||
+        "Erro ao fazer login. Verifique suas credenciais.";
+
+      toast.error("Erro no login", {
+        description: errorMessage,
+        duration: 5000,
+      });
     }
   }
 

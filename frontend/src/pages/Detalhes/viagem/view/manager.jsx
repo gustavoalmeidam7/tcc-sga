@@ -69,6 +69,8 @@ import { PersonCard } from "../components/PersonCard";
 import { PatientCard } from "../components/PatientCard";
 import { StatusCard } from "../components/StatusCard";
 import { generateTravelReportPDF } from "@/lib/pdf-utils";
+import { getAmbulanceById } from "@/services/ambulanceService";
+import { getAmbulanceTypeLabel } from "@/lib/ambulance";
 
 export default function ManagerDetalhesView() {
   const { id } = useParams();
@@ -108,6 +110,13 @@ export default function ManagerDetalhesView() {
     staleTime: 1000 * 60 * 5,
   });
 
+  const { data: ambulancia, isLoading: loadingAmbulancia } = useQuery({
+    queryKey: ["ambulance", viagem?.id_ambulancia],
+    queryFn: () => getAmbulanceById(viagem.id_ambulancia),
+    enabled: !!viagem?.id_ambulancia,
+    staleTime: 1000 * 60 * 5,
+  });
+
   const [enderecos, setEnderecos] = useState({ origem: null, destino: null });
 
   const handleEnderecosCarregados = useCallback((data) => {
@@ -138,7 +147,7 @@ export default function ManagerDetalhesView() {
     });
 
     try {
-      await generateTravelReportPDF(viagem, enderecos, solicitante);
+      await generateTravelReportPDF(viagem, enderecos, solicitante, motorista);
       toast.success("PDF gerado com sucesso!", {
         id: toastId,
         description: "Seu download deve começar em breve.",
@@ -343,7 +352,7 @@ export default function ManagerDetalhesView() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <PatientCard viagem={viagem} loading={loadingSolicitante} />
+            <PatientCard viagem={viagem} loading={loadingSolicitante} solicitante={solicitante} />
           </CardContent>
         </Card>
       </div>
@@ -565,12 +574,31 @@ export default function ManagerDetalhesView() {
                 status="Veículo alocado para a viagem"
                 statusType="success"
               >
-                <div className="mt-3 pt-3 border-t border-green-500/20">
-                  <InfoRow
-                    icon={Hash}
-                    label="ID da Ambulância"
-                    value={viagem.id_ambulancia}
-                  />
+                <div className="mt-3 pt-3 border-t border-green-500/20 space-y-2">
+                  {loadingAmbulancia ? (
+                    <div className="text-sm text-muted-foreground">
+                      Carregando informações da ambulância...
+                    </div>
+                  ) : ambulancia ? (
+                    <>
+                      <InfoRow
+                        icon={Ambulance}
+                        label="Placa"
+                        value={ambulancia.placa || "N/A"}
+                      />
+                      <InfoRow
+                        icon={Info}
+                        label="Tipo"
+                        value={getAmbulanceTypeLabel(ambulancia.tipo)}
+                      />
+                    </>
+                  ) : (
+                    <InfoRow
+                      icon={Hash}
+                      label="ID da Ambulância"
+                      value={viagem.id_ambulancia}
+                    />
+                  )}
                 </div>
               </StatusCard>
             ) : (

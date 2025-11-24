@@ -12,15 +12,16 @@ const API = axios.create({
 
 API.interceptors.request.use(
   (config) => {
-    const token = getAuthToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    const isLoginRequest = config.url?.includes("/token");
+    if (!isLoginRequest) {
+      const token = getAuthToken();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 API.interceptors.response.use(
@@ -50,9 +51,15 @@ API.interceptors.response.use(
     }
 
     if (status === 401) {
-      clearAuthToken();
+      const isLoginRequest = error.config?.url?.includes("/token");
 
-      if (!window.location.pathname.includes("/login")) {
+      if (isLoginRequest) {
+        return Promise.reject(error);
+      }
+
+      clearAuthToken();
+      const isLoginPage = window.location.pathname.includes("/login");
+      if (!isLoginPage) {
         window.dispatchEvent(new CustomEvent("auth:unauthorized"));
       }
 
