@@ -1,6 +1,7 @@
 import { useQuery, useQueries } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { getAmbulances, getAmbulanceById } from "@/services/ambulanceService";
+import { getDriverById } from "@/services/driverService";
 
 export function useDriversInfo(motoristas) {
   const { data: ambulancesResponse } = useQuery({
@@ -23,6 +24,15 @@ export function useDriversInfo(motoristas) {
     return mapa;
   }, [ambulances]);
 
+  const driverQueries = useQueries({
+    queries: motoristas.map((motorista) => ({
+      queryKey: ["driver", motorista.id],
+      queryFn: () => getDriverById(motorista.id),
+      enabled: !!motorista.id,
+      staleTime: 1000 * 60 * 5,
+    })),
+  });
+
   const ambulanceQueries = useQueries({
     queries: motoristas
       .filter((m) => {
@@ -41,6 +51,14 @@ export function useDriversInfo(motoristas) {
   });
 
   const enrichedDrivers = useMemo(() => {
+    const driverInfoMap = {};
+    motoristas.forEach((motorista, index) => {
+      const driverQuery = driverQueries[index];
+      if (driverQuery?.data) {
+        driverInfoMap[motorista.id] = driverQuery.data;
+      }
+    });
+
     const ambulanceMap = {};
     let queryIndex = 0;
     motoristas.forEach((motorista) => {
@@ -54,13 +72,15 @@ export function useDriversInfo(motoristas) {
       }
     });
 
-    return motoristas.map((motorista) => {
+    return motoristas.map((motorista, index) => {
+      const driverInfoData = driverInfoMap[motorista.id];
       const amb = ambulanciaPorMotorista[motorista.id];
-      const ambulancia = ambulanceMap[motorista.id] || null;
+      const ambulancia =
+        ambulanceMap[motorista.id] || driverInfoData?.ambulancia || null;
 
       const driverInfo = {
-        id_ambulancia: amb?.id || null,
-        em_viagem: motorista.em_viagem || false,
+        id_ambulancia: amb?.id || driverInfoData?.ambulancia?.id || null,
+        em_viagem: driverInfoData?.em_viagem || motorista.em_viagem || false,
         cnh: motorista.cnh || null,
         vencimento: motorista.vencimento || null,
       };
@@ -71,9 +91,11 @@ export function useDriversInfo(motoristas) {
         ambulancia,
       };
     });
-  }, [motoristas, ambulanciaPorMotorista, ambulanceQueries]);
+  }, [motoristas, ambulanciaPorMotorista, ambulanceQueries, driverQueries]);
 
-  const isLoading = ambulanceQueries.some((q) => q.isLoading);
+  const isLoading =
+    driverQueries.some((q) => q.isLoading) ||
+    ambulanceQueries.some((q) => q.isLoading);
 
   return {
     enrichedDrivers,
