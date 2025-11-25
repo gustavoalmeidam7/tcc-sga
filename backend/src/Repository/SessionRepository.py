@@ -71,3 +71,7 @@ def delete_token_by_id(token: UUID) -> None:
 def delete_all_user_tokens_by_id(id: int) -> None:
     """ Deleta todas sessões associadas a um usuário pelo seu ID """
     Session.delete().where(Session.usuario == id).execute()
+
+def delete_expired_sessions() -> None:
+    """ Deleta todas sessões expiradas """
+    Session.delete().where(Session.is_expired == True).execute()

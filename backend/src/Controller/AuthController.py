@@ -80,3 +80,25 @@ async def generate_token(request: Request, formdata: OAUTH2_FORM) -> Response:
     # return TokenResponseSchema.model_validate({"access_token": token, "token_type": "bearer"})
 
     return SessionService.generate_access_token(request, formdata)
+
+@AUTH_ROUTER.post("/refresh-token", responses={
+    status.HTTP_200_OK: {
+        "description": "Token criado com sucesso",
+        "content": {
+            "application/json": {
+                "example": TokenResponseSchema.model_json_schema()
+            }
+        }
+    }
+})
+async def refresh_token(request: Request) -> Response:
+    """
+    Realiza a atualização do token de acesso do atual usuário pelo seu refresh token:
+
+    **acesso**: `USER` \n
+    **parâmetro**:No Params \n
+    **retorno**: devolve: \n
+        `TokenResponseSchema`
+    """
+
+    return SessionService.refresh_access_token(request)

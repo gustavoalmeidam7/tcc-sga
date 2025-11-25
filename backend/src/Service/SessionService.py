@@ -26,6 +26,7 @@ from uuid import UUID
 
 from src.Error.User.UserRBACError import UserRBACError
 from src.Error.Resource.NotFoundResourceError import NotFoundResource
+from src.Error.User.UserInvalidCredentials import invalidCredentials
 
 from datetime import datetime, timezone, timedelta
 
@@ -76,6 +77,26 @@ def create_session(userEmail: str, plain_password: str, userIP: str, is_refresh:
 
     return sessionModel
 
+def get_refresh_session(refreshToken: str, userIP: str) -> Session:
+    """ Da refresh na sessão atual """
+    userModel = get_current_user(refreshToken)
+
+    if not userModel:
+        raise invalidCredentials()
+
+    valid_until = (datetime.now(timezone.utc) + timedelta(minutes=30)).isoformat()
+
+    sessionModel = Session(
+        usuario=userModel,
+        ip=userIP,
+        refresh=False,
+        valido_ate=valid_until
+    )
+
+    SessionRepository.insert_session(sessionModel)
+
+    return sessionModel
+
 def encode_jwt_token(id: str) -> str:
     """ Encoda em JWT uma sessão pelo ID da mesma """
     content = {"sub": id}
@@ -111,6 +132,29 @@ def generate_access_token(request: Request, formdata: OAuth2PasswordRequestForm)
     )
     response.set_cookie(key="Authorization", value=accessToken, expires=datetime_to_http_datetime(accessExpires), path="/", secure=False ,httponly=True, samesite="strict")
     response.set_cookie(key="refreshToken", value=refreshToken, expires=datetime_to_http_datetime(refreshExpires), path="/", secure=False ,httponly=True, samesite="strict")
+
+    return response
+
+def refresh_access_token(request: Request) -> Response:
+    userIP = get_ipaddr(request)
+    cookies = request.cookies
+
+    refreshToken = cookies.get("refreshToken")
+
+    if not refreshToken:
+        raise invalidCredentials()
+
+    accessSession = get_refresh_session(refreshToken, userIP)
+
+    accessToken = encode_jwt_token(accessSession.str_id)
+
+    accessExpires = datetime.fromisoformat(str(accessSession.valido_ate))
+
+    response = Response(
+        content=TokenResponseSchema.model_validate({"access_token": accessToken, "token_type": "bearer", "expires_at": accessExpires.isoformat()}).model_dump_json(),
+        media_type="application/json"
+    )
+    response.set_cookie(key="Authorization", value=accessToken, expires=datetime_to_http_datetime(accessExpires), path="/", secure=False ,httponly=True, samesite="strict")
 
     return response
 
@@ -165,6 +209,10 @@ def get_user_sessions(token: TOKEN_SCHEME) -> UserSessionListSchema:
     Atualizar
 """
 
+"""
+    Deletar
+"""
+
 def revoke_session(token: TOKEN_SCHEME, sessionSchema: RevokeSessionSchema) -> None:
     """ Revoga uma sessão pelo id da mesma """
 
@@ -183,6 +231,6 @@ def revoke_all_sessions_by_user_id(id: int) -> None:
 
     SessionRepository.delete_all_user_tokens_by_id(id)
 
-"""
-    Deletar
-"""
+def delete_invalid_sessions() -> None:
+    """ revoga """
+    SessionRepository.delete_expired_sessions()
