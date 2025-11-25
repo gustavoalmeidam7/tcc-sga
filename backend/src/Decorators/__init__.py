@@ -12,10 +12,16 @@ TOKEN_SCHEME = Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="token", aut
 from src.Model.User import User
 from src.Service import SessionService
 
-async def get_user_auth_user(request: Request, token: TOKEN_SCHEME) -> User:
+async def get_user_auth_user(request: Request, token: TOKEN_SCHEME | None = None) -> User:
     """ Pega o usuário autenticado """
 
     userIP = get_remote_address(request)
+
+    cookies = request.cookies
+    httpOnlyCookies = cookies.get("Authorization")
+
+    if httpOnlyCookies:
+        token = httpOnlyCookies
 
     if not token:
         raise invalidCredentials()

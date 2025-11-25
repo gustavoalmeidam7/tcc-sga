@@ -1,5 +1,6 @@
-from fastapi import HTTPException, status, Depends
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import HTTPException, status, Depends, Response, Request
+from slowapi.util import get_ipaddr
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from src.Utils.env import get_env_var
 
@@ -7,6 +8,8 @@ from src.Repository import UserRepository
 
 from src.Schema.Auth.RevokeSessionSchema import RevokeSessionSchema
 from src.Schema.Auth.UserSessionListSchema import UserSessionListSchema
+
+from src.Schema.Auth.TokenResponseSchema import TokenResponseSchema
 
 from src.Error.User.UserInvalidCredentials import invalidCredentials
 
@@ -23,6 +26,8 @@ from uuid import UUID
 
 from src.Error.User.UserRBACError import UserRBACError
 from src.Error.Resource.NotFoundResourceError import NotFoundResource
+
+from datetime import datetime, timezone, timedelta
 
 TOKEN_SCHEME = Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="token"))]
 
@@ -44,11 +49,7 @@ def verify_password(plain_password: str, hash_password: str) -> bool:
     com a armazenada no banco de dados """
     return PWD_CONTEXT.verify(plain_password, hash_password)
 
-"""
-    Criar
-"""
-
-def create_session(userEmail: str, plain_password: str, userIP: str) -> Session:
+def create_session(userEmail: str, plain_password: str, userIP: str, is_refresh: bool = False) -> Session:
     """ Cria uma nova sessão """
     userModel = UserRepository.find_by_email(userEmail)
     credentialsException = HTTPException(status.HTTP_401_UNAUTHORIZED, "Email ou senha incorretos")
@@ -60,25 +61,64 @@ def create_session(userEmail: str, plain_password: str, userIP: str) -> Session:
     if not verify_password(plain_password, userModel.senha):
         raise credentialsException
 
+    time = {"days" if is_refresh else "minutes": 7 if is_refresh else 30}
+
+    valid_until = (datetime.now(timezone.utc) + timedelta(**time)).isoformat()
+
     sessionModel = Session(
         usuario=userModel,
-        ip=userIP
+        ip=userIP,
+        refresh=is_refresh,
+        valido_ate=valid_until
     )
 
     SessionRepository.insert_session(sessionModel)
 
     return sessionModel
 
-def generate_jwt_token(id: str) -> dict:
+def encode_jwt_token(id: str) -> str:
     """ Encoda em JWT uma sessão pelo ID da mesma """
     content = {"sub": id}
     return jwt.encode(content, SECRET_KEY, algorithm=ALGORITHM)
+
+def datetime_to_http_datetime(date: datetime) -> str:
+    return date.strftime("%a, %d %b %Y %H:%M:%S GMT")
+
+"""
+    Criar
+"""
+
+def generate_access_token(request: Request, formdata: OAuth2PasswordRequestForm) -> Response:
+    userIP = get_ipaddr(request)
+
+    accessSession = create_session(
+        formdata.username, formdata.password, userIP
+    )
+
+    refreshSession = create_session(
+        formdata.username, formdata.password, userIP, is_refresh=True
+    )
+
+    accessToken = encode_jwt_token(accessSession.str_id)
+    refreshToken = encode_jwt_token(refreshSession.str_id)
+
+    accessExpires = datetime.fromisoformat(str(accessSession.valido_ate))
+    refreshExpires = datetime.fromisoformat(str(refreshSession.valido_ate))
+
+    response = Response(
+        content=TokenResponseSchema.model_validate({"access_token": accessToken, "token_type": "bearer", "expires_at": accessExpires.isoformat()}).model_dump_json(),
+        media_type="application/json"
+    )
+    response.set_cookie(key="Authorization", value=accessToken, expires=datetime_to_http_datetime(accessExpires), path="/", secure=False ,httponly=True, samesite="strict")
+    response.set_cookie(key="refreshToken", value=refreshToken, expires=datetime_to_http_datetime(refreshExpires), path="/", secure=False ,httponly=True, samesite="strict")
+
+    return response
 
 """
     Ler
 """
 
-def get_current_session_by_token(token: TOKEN_SCHEME) -> Session:
+def get_current_session_by_token(token: TOKEN_SCHEME | str) -> Session:
     """ Retorna a sessão pelo token """
 
     try:
@@ -95,7 +135,7 @@ def get_current_session_by_token(token: TOKEN_SCHEME) -> Session:
 
     return sessionModel
 
-def get_current_user(token: TOKEN_SCHEME) -> User:
+def get_current_user(token: TOKEN_SCHEME | str) -> User:
     """ Retorna o usuário pelo token """
 
     try:

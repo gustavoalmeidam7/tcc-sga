@@ -1,6 +1,5 @@
-from fastapi import APIRouter, status, Depends, Request
+from fastapi import APIRouter, status, Depends, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
-from slowapi.util import get_remote_address
 
 from typing import Annotated
 
@@ -21,6 +20,8 @@ AUTH_ROUTER = APIRouter(
         "Token"
     ]
 )
+
+OAUTH2_FORM = Annotated[OAuth2PasswordRequestForm, Depends()]
 
 @AUTH_ROUTER.post("/revoke", status_code=status.HTTP_204_NO_CONTENT)
 async def revoke_token(user: UserDecorators.GET_AUTHENTICATED_USER, token: TOKEN_SCHEME, token_to_revoke: RevokeSessionSchema) -> None:
@@ -46,8 +47,17 @@ async def retrieve_sessions(user: UserDecorators.GET_AUTHENTICATED_USER, token: 
     """
     return SessionService.get_user_sessions(token)
 
-@AUTH_ROUTER.post("/", status_code=status.HTTP_201_CREATED)
-async def generate_token(request: Request, formdata: Annotated[OAuth2PasswordRequestForm, Depends()]) -> TokenResponseSchema:
+@AUTH_ROUTER.post("/", responses={
+    status.HTTP_200_OK: {
+        "description": "Token criado com sucesso",
+        "content": {
+            "application/json": {
+                "example": TokenResponseSchema.model_json_schema()
+            }
+        }
+    }
+})
+async def generate_token(request: Request, formdata: OAUTH2_FORM) -> Response:
     """
     Cria uma nova sessão de autenticação de usuário:
 
@@ -58,12 +68,15 @@ async def generate_token(request: Request, formdata: Annotated[OAuth2PasswordReq
     **retorno**: devolve: \n
         `TokenResponseSchema`
     """
-    userIP = get_remote_address(request)
 
-    session = SessionService.create_session(
-        formdata.username, formdata.password, userIP
-    )
+    # userIP = get_remote_address(request)
 
-    token = SessionService.generate_jwt_token(session.id)
+    # session = SessionService.create_session(
+    #     formdata.username, formdata.password, userIP
+    # )
 
-    return TokenResponseSchema.model_validate({"access_token": token, "token_type": "bearer"})
+    # token = SessionService.encode_jwt_token(session.id)
+
+    # return TokenResponseSchema.model_validate({"access_token": token, "token_type": "bearer"})
+
+    return SessionService.generate_access_token(request, formdata)
