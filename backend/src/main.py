@@ -21,10 +21,10 @@ register_error_handlers(app)
 
 async def delete_expired_tokens() -> None:
     while True:
+        await asyncio.sleep(120)
+
         Logging.log("Deleting expired sessions", Level.DEBUG)
         delete_expired_sessions()
-        
-        await asyncio.sleep(60)
 
 def main() -> None:
     tokens = generate_manager_token_list(int(get_env_var("TOKENS", "5") or "5"))
