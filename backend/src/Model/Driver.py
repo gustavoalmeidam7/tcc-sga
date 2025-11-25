@@ -11,6 +11,18 @@ class Driver(BaseModel):
     em_viagem      : bool | BooleanField    = BooleanField(default=False, null=False)
     cnh            : str  | CharField       = CharField(max_length=11, null=False)
     vencimento     : date | DateField       = DateField(null=False)
+
+    @property
+    def str_id_ambulancia(self) -> str:
+        return str(self.id_ambulancia)
+    
+    @property
+    def fk_id_ambulancia(self) -> ForeignKeyField:
+        return ForeignKeyField(self.id_ambulancia)
+    
+    @property
+    def is_ambulancia_none(self) -> bool:
+        return bool(self.id_ambulancia_id == '')
     
     class Meta:
         table_name = "motorista"

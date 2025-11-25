@@ -13,3 +13,10 @@ class EquipmentResponseSchema(BaseModel):
     id_ambulancia : Annotated[UUID, Field(examples=[uuid4()]), BeforeValidator(mask_uuid)]
     equipamento   : Annotated[str , Field(examples=["Maca"])]
     descricao     : Annotated[str , Field(examples=["Maca retrátil funcional"])]
+
+EQUIPMENT_EXAMPLE = EquipmentResponseSchema.model_validate({
+    "id"            : uuid4(),
+    "id_ambulancia" : uuid4(),
+    "equipamento"   : "Maca",
+    "descricao"     : "Maca retrátil funcional",
+})

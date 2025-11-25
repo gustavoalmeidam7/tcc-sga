@@ -110,13 +110,13 @@ async def get_users(user: GET_AUTHENTICATED_DRIVER_OR_HIGHER, page: int = 1, pag
 })
 async def get_user_by_id(user: GET_AUTHENTICATED_DRIVER_OR_HIGHER, userId: UUID) -> UserResponseFullSchema:
     """
-    Cria uma nova ambulância:
+    Encontra um usuário pelo seu id:
 
     **acesso**: `DRIVER_OR_HIGHER` \n
-    **parâmetro**: Body: \n
-        `AmbulanceCreateSchema` \n
+    **parâmetro**: Route params: \n
+        `userId` \n
     **retorno**: devolve: \n
-        `AmbulanceResponseSchema`
+        `UserResponseFullSchema`
     """
     user = UserService.find_user_by_id(userId)
     if user is None:
