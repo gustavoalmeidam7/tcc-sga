@@ -35,7 +35,7 @@ async def revoke_token(user: UserDecorators.GET_AUTHENTICATED_USER, token: TOKEN
     SessionService.revoke_session(token, token_to_revoke)
 
 @AUTH_ROUTER.get("/sessions")
-async def retrive_sessions(user: UserDecorators.GET_AUTHENTICATED_USER, token: TOKEN_SCHEME) -> UserSessionListSchema:
+async def retrieve_sessions(user: UserDecorators.GET_AUTHENTICATED_USER, token: TOKEN_SCHEME) -> UserSessionListSchema:
     """
     Encontra todas sessões do usuário atual:
 
