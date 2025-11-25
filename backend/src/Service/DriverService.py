@@ -5,8 +5,6 @@ from src.Schema.Driver.DriverResponseFullSchema import DriverResponseFullSchema
 from src.Schema.Driver.DriverUpdateFieldsSchema import DriverUpdateFieldsSchema
 from src.Schema.Driver.DriverResponseGetById import DriverResponseGetById
 
-from src.Schema.Ambulance.AmbulanceFullResponseSchema import AmbulanceFullResponseSchema
-
 from src.Error.Server.InternalServerError import InternalServerError
 from src.Error.Resource.NotFoundResourceError import NotFoundError
 
@@ -23,7 +21,6 @@ from typing import Any
 from uuid import UUID
 
 
-NOT_FOUND_AMBULANCE = NotFoundError("ambulance", "Não foi possível encontrar a ambulância.")
 NOT_FOUND_DRIVER = NotFoundError("driver", "Não foi possível encontrar o motorista.")
 
 
@@ -113,16 +110,6 @@ def update_driver(user: User, driverFields: DriverUpdateFieldsSchema) -> DriverR
 
     return DriverResponseFullSchema.model_validate(driver)
 
-def assign_ambulance_to_driver(driver: User, ambulanceId: UUID) -> AmbulanceFullResponseSchema:
-    ambulance = AmbulanceRepository.find_ambulance_by_id(unmask_uuid(ambulanceId))
-    if not ambulance:
-        raise NOT_FOUND_AMBULANCE
-    
-    DriverRepository.update_driver_by_id(driver.str_id, id_ambulancia=ambulance.str_id)
-
-    ambulance = add_ambulance_atributes(ambulance)
-
-    return AmbulanceFullResponseSchema.model_validate(ambulance)
 
 """
     Deletar

@@ -4,6 +4,7 @@ from src.Decorators import ManagerDecorator
 
 from src.Schema.Travel.TravelResponseSchema import TravelResponseSchema
 from src.Schema.Manager.UpgradeTokenFullResponseSchema import UpgradeTokenFullResponseSchema
+from src.Schema.Ambulance.AmbulanceFullResponseSchema import AmbulanceFullResponseSchema
 
 from src.Service import ManagerService
 
@@ -39,3 +40,17 @@ async def create_driver_upgrade_token(manager: ManagerDecorator.GET_AUTHENTICATE
         `UpgradeTokenFullResponseSchema`
     """
     return ManagerService.generate_driver_token()
+
+@MANAGER_ROUTER.post("/assignambulance/{driver}/{ambulanceId}")
+async def assign_ambulance_to_driver(manager: ManagerDecorator.GET_AUTHENTICATED_MANAGER, driver: UUID, ambulanceId: UUID) -> AmbulanceFullResponseSchema:
+    """
+    Assina uma ambulância a um motorista pelo seu id: \n
+
+    **acesso**: `MANAGER` \n
+    **parâmetro**: Route parameters: \n
+        `driver` : ID do motorista que receberá a ambulância \n
+        `ambulanceId` : ID da ambulância que será atribuída \n
+    **retorno**: devolve: \n
+        `AmbulanceFullResponseSchema`
+    """
+    return ManagerService.assign_ambulance_to_driver(driver, ambulanceId)

@@ -1,4 +1,4 @@
-from src.Repository import ManagerRepository, UserRepository, DriverRepository, TravelRepository
+from src.Repository import ManagerRepository, UserRepository, DriverRepository, TravelRepository, AmbulanceRepository
 from typing import Optional
 
 from src.Model.UpgradeToken import UpgradeToken
@@ -19,6 +19,10 @@ from src.Schema.Manager.UpgradeTokenFullResponseSchema import UpgradeTokenFullRe
 from src.Schema.Driver.DriverCreateSchema import DriverCreateSchema
 from src.Schema.Travel.TravelResponseSchema import TravelResponseSchema
 
+from src.Schema.Ambulance.AmbulanceFullResponseSchema import AmbulanceFullResponseSchema
+from src.Error.Resource.NotFoundResourceError import NotFoundError
+from src.Service.DriverService import add_ambulance_atributes
+
 from src.Error.User.UserRBACError import UserRBACError
 from src.Error.Server.InternalServerError import InternalServerError
 from src.Error.Resource.NotFoundResourceError import NotFoundResource
@@ -28,6 +32,7 @@ from src.DB import db
 from datetime import datetime
 from uuid import UUID
 
+NOT_FOUND_AMBULANCE = NotFoundError("ambulance", "Não foi possível encontrar a ambulância.")
 USER_ALREADY_MANAGER = HTTPException(status.HTTP_400_BAD_REQUEST, "Usuário já é gerente")
 USER_ALREADY_DRIVER = HTTPException(status.HTTP_400_BAD_REQUEST, "Usuário já é motorista")
 INSUFFICIENT_TOKEN = HTTPException(status.HTTP_401_UNAUTHORIZED, "Impossível realizar ação com este token")
@@ -171,6 +176,19 @@ def assign_driver_to_travel_by_id(driverId: UUID, travelId: UUID) -> TravelRespo
         )
     
     return TravelResponseSchema.model_validate(assingedTravel)
+
+def assign_ambulance_to_driver(driverId: UUID, ambulanceId: UUID) -> AmbulanceFullResponseSchema:
+    driverId = unmask_uuid(driverId)
+    ambulance = AmbulanceRepository.find_ambulance_by_id(unmask_uuid(ambulanceId))
+    if not ambulance:
+        raise NOT_FOUND_AMBULANCE
+    
+    DriverRepository.update_driver_by_id(driverId, id_ambulancia=ambulance.str_id)
+
+    ambulance = add_ambulance_atributes(ambulance)
+
+    return AmbulanceFullResponseSchema.model_validate(ambulance)
+    
 
 """
     Deletar
