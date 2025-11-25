@@ -5,6 +5,8 @@ from src.Schema.Driver.DriverResponseFullSchema import DriverResponseFullSchema
 from src.Schema.Driver.DriverUpdateFieldsSchema import DriverUpdateFieldsSchema
 from src.Schema.Driver.DriverResponseGetById import DriverResponseGetById
 
+from src.Schema.Ambulance.AmbulanceFullResponseSchema import AmbulanceFullResponseSchema
+
 from src.Error.Server.InternalServerError import InternalServerError
 from src.Error.Resource.NotFoundResourceError import NotFoundError
 
@@ -19,6 +21,11 @@ from src.Model.Ambulance import Ambulance
 from typing import Any
 
 from uuid import UUID
+
+
+NOT_FOUND_AMBULANCE = NotFoundError("ambulance", "Não foi possível encontrar a ambulância.")
+NOT_FOUND_DRIVER = NotFoundError("driver", "Não foi possível encontrar o motorista.")
+
 
 """
     Helpers
@@ -72,7 +79,7 @@ def get_driver_by_user(user: User) -> DriverResponseSchema:
     driver = DriverRepository.find_driver_by_id(user.str_id)
     
     if not driver:
-        raise NotFoundError("driver", "O motorista não foi encontrado.")
+        raise NOT_FOUND_DRIVER
 
     return append_ambulanceid_to_driver(driver)
 
@@ -80,7 +87,7 @@ def get_driver_by_id(driverId: UUID) -> DriverResponseGetById:
     driver = DriverRepository.find_driver_by_id(unmask_uuid(driverId))
     
     if not driver:
-        raise NotFoundError("driver", "O motorista não foi encontrado.")
+        raise NOT_FOUND_DRIVER
 
     driverDict = model_to_dict(driver, recurse=False)
 
@@ -105,6 +112,17 @@ def update_driver(user: User, driverFields: DriverUpdateFieldsSchema) -> DriverR
     driver = DriverRepository.update_driver_by_id(user.str_id, **driverFields)
 
     return DriverResponseFullSchema.model_validate(driver)
+
+def assign_ambulance_to_driver(driver: User, ambulanceId: UUID) -> AmbulanceFullResponseSchema:
+    ambulance = AmbulanceRepository.find_ambulance_by_id(unmask_uuid(ambulanceId))
+    if not ambulance:
+        raise NOT_FOUND_AMBULANCE
+    
+    DriverRepository.update_driver_by_id(driver.str_id, id_ambulancia=ambulance.str_id)
+
+    ambulance = add_ambulance_atributes(ambulance)
+
+    return AmbulanceFullResponseSchema.model_validate(ambulance)
 
 """
     Deletar

@@ -9,7 +9,9 @@ from src.Schema.Equipment.EquipmentCreateSchema import EquipmentCreateSchema
 from src.Schema.Equipment.EquipmentResponseSchema import EquipmentResponseSchema
 from src.Schema.Equipment.EquipmentUpdateSchema import EquipmentUpdateSchema
 
-from src.Service import AmbulanceService
+from src.Service import AmbulanceService, DriverService
+
+from src.Service.AmbulanceService import AMBULANCE_NOT_FOUND
 
 from src.Decorators import DriverDecorator
 
@@ -35,6 +37,22 @@ async def create_ambulance(user: DriverDecorator.GET_AUTHENTICATED_DRIVER_OR_HIG
     """
 
     return AmbulanceService.create_ambulance(ambulance)
+
+@AMBULANCE_ROUTER.post("/assign/{ambulanceId}")
+async def self_assign_ambulance(
+    driver: DriverDecorator.GET_AUTHENTICATED_DRIVER,
+    ambulanceId: UUID,
+) -> AmbulanceFullResponseSchema:
+    """
+    Assina a ambulância fornecida no ambulanceId a o motorista autenticado : \n
+
+    **acesso**: `DRIVER` \n
+    **parâmetro**: Route parameter: \n
+        `ambulanceId` : ID da ambulância que será assinada \n
+    **retorno**: AmbulanceFullResponseSchema
+    """
+
+    return DriverService.assign_ambulance_to_driver(driver, ambulanceId)
 
 @AMBULANCE_ROUTER.get("/")
 async def get_ambulances(user: DriverDecorator.GET_AUTHENTICATED_DRIVER_OR_HIGHER, page: int = 0, pageSize: int = 30) -> list[AmbulanceFullResponseSchema]:
@@ -132,19 +150,3 @@ async def delete_equipment_by_id(
     """
 
     return AmbulanceService.delete_equipment_by_id(equipmentId)
-
-@AMBULANCE_ROUTER.delete("/{equipmentId}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_equipment_by_id(
-    user: DriverDecorator.GET_AUTHENTICATED_DRIVER_OR_HIGHER,
-    ambulanceId: UUID,
-) -> None:
-    """
-    Deleta uma ambulância pelo seu id :
-
-    **acesso**: `DRIVER_OR_HIGHER` \n
-    **parâmetro**: Route parameter: \n
-        `id` : ID da ambulância que será atualizado \n
-    **retorno**: 204 NO CONTENT
-    """
-
-    return AmbulanceService.delete_ambulance_by_id(ambulanceId)
