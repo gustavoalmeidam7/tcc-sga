@@ -33,10 +33,20 @@ export const assignSelfToTravel = async (travelId) => {
   }
 };
 
+export const getDriverById = async (driverId) => {
+  try {
+    const response = await API.get(`/driver/${driverId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 const driverService = {
   getDriverInfo,
   getDriverTravels,
   assignSelfToTravel,
+  getDriverById,
 };
 
 export default driverService;

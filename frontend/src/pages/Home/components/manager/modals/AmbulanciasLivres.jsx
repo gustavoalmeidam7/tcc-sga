@@ -1,7 +1,9 @@
-import { useQuery, useQueries } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useQueries, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { getAmbulances } from "@/services/ambulanceService";
 import authService from "@/services/authService";
+import { assignAmbulanceToDriver } from "@/services/managerService";
 import {
   getAmbulanceStatusLabel,
   getAmbulanceTypeLabel,
@@ -17,8 +19,22 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { User, MoreHorizontal } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { AssignDriverModal } from "@/pages/Gerenciar_ambulancias/components/modals/AssignDriverModal";
+import { toast } from "sonner";
 
 export function AmbulanciasLivresModal() {
+  const queryClient = useQueryClient();
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [ambulanceToAssign, setAmbulanceToAssign] = useState(null);
+
   const { data: ambulancesResponse, isLoading: isLoadingAmbulances } = useQuery(
     {
       queryKey: ["ambulances"],
@@ -56,6 +72,40 @@ export function AmbulanciasLivresModal() {
     return mapa;
   }, [ambulances, motoristaQueries]);
 
+  const assignAmbulanceMutation = useMutation({
+    mutationFn: ({ driverId, ambulanceId }) =>
+      assignAmbulanceToDriver(driverId, ambulanceId),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["ambulances"]);
+      queryClient.invalidateQueries(["driver"]);
+      toast.success("Motorista atribuído!", {
+        description: "A ambulância foi atribuída ao motorista com sucesso.",
+        duration: 3000,
+      });
+      setIsAssignModalOpen(false);
+      setAmbulanceToAssign(null);
+    },
+    onError: (error) => {
+      console.error("Erro ao atribuir motorista:", error);
+      toast.error("Erro ao atribuir motorista", {
+        description:
+          error.response?.data?.detail ||
+          error.response?.data?.mensagem ||
+          "Não foi possível atribuir o motorista. Tente novamente.",
+        duration: 5000,
+      });
+    },
+  });
+
+  const handleAssignDriver = (ambulance) => {
+    setAmbulanceToAssign(ambulance);
+    setIsAssignModalOpen(true);
+  };
+
+  const handleConfirmAssign = (ambulanceId, driverId) => {
+    assignAmbulanceMutation.mutate({ driverId, ambulanceId });
+  };
+
   const isLoading =
     isLoadingAmbulances || motoristaQueries.some((q) => q.isLoading);
 
@@ -88,6 +138,7 @@ export function AmbulanciasLivresModal() {
             <TableHead className="text-foreground text-xs">Tipo</TableHead>
             <TableHead className="text-foreground text-xs">Status</TableHead>
             <TableHead className="text-foreground text-xs">Motorista</TableHead>
+            <TableHead className="text-foreground text-xs">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -111,11 +162,36 @@ export function AmbulanciasLivresModal() {
                 <TableCell className="text-foreground text-sm">
                   {motoristaNome}
                 </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0">
+                        <span className="sr-only">Abrir menu</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() => handleAssignDriver(ambulancia)}
+                      >
+                        <User className="mr-2 h-4 w-4" />
+                        Atribuir Motorista
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
               </TableRow>
             );
           })}
         </TableBody>
       </Table>
+
+      <AssignDriverModal
+        open={isAssignModalOpen}
+        onOpenChange={setIsAssignModalOpen}
+        ambulance={ambulanceToAssign}
+        onAssigned={handleConfirmAssign}
+      />
     </div>
   );
 }

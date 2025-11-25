@@ -11,6 +11,12 @@ import {
   Hash,
   Truck,
   Package,
+  User,
+  Mail,
+  Phone,
+  Navigation,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
 import {
   getAmbulanceStatusLabel,
@@ -18,6 +24,8 @@ import {
   getAmbulanceStatusColors,
 } from "@/lib/ambulance";
 import { getAmbulanceById } from "@/services/ambulanceService";
+import { getDriverById } from "@/services/driverService";
+import authService from "@/services/authService";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -46,6 +54,20 @@ export default function ManagerDetalhesAmbulanciaView() {
       }
       return failureCount < 2;
     },
+  });
+
+  const { data: driverInfo, isLoading: loadingDriverInfo } = useQuery({
+    queryKey: ["driver", ambulancia?.motorista_id],
+    queryFn: () => getDriverById(ambulancia.motorista_id),
+    enabled: !!ambulancia?.motorista_id,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const { data: motorista, isLoading: loadingMotorista } = useQuery({
+    queryKey: ["user", ambulancia?.motorista_id],
+    queryFn: () => authService.getUserById(ambulancia.motorista_id),
+    enabled: !!ambulancia?.motorista_id && !!driverInfo,
+    staleTime: 1000 * 60 * 5,
   });
 
   useEffect(() => {
@@ -126,13 +148,6 @@ export default function ManagerDetalhesAmbulanciaView() {
         >
           <Settings className="h-5 w-5" />
         </Button>
-        <Badge
-          className={`${getStatusBadgeColor(
-            ambulancia.status
-          )} text-base px-4 py-2`}
-        >
-          {getAmbulanceStatusLabel(ambulancia.status)}
-        </Badge>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -149,7 +164,7 @@ export default function ManagerDetalhesAmbulanciaView() {
                 <label className="text-sm font-medium text-muted-foreground">
                   Placa
                 </label>
-                <p className="text-lg font-mono font-semibold">
+                <p className="text-lg font-mono font-semibold text-foreground">
                   {ambulancia.placa}
                 </p>
               </div>
@@ -158,7 +173,7 @@ export default function ManagerDetalhesAmbulanciaView() {
                 <label className="text-sm font-medium text-muted-foreground">
                   Tipo
                 </label>
-                <p className="text-base">
+                <p className="text-base text-foreground">
                   {getAmbulanceTypeLabel(ambulancia.tipo)}
                 </p>
               </div>
@@ -174,66 +189,105 @@ export default function ManagerDetalhesAmbulanciaView() {
                 </Badge>
               </div>
             </div>
-
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">
-                ID do Sistema
-              </label>
-              <p className="text-sm font-mono text-muted-foreground">
-                {ambulancia.id}
-              </p>
-            </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <Settings className="h-5 w-5" />
-              Status Operacional
+              <User className="h-5 w-5" />
+              Motorista Atribuído
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="p-4 rounded-lg border">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Disponibilidade</span>
-                <Badge
-                  variant={ambulancia.status === 1 ? "default" : "secondary"}
-                  className={getStatusBadgeColor(ambulancia.status)}
-                >
-                  {ambulancia.status === 1
-                    ? "Disponível"
-                    : ambulancia.status === 0
-                    ? "Em Uso"
-                    : ambulancia.status === 3
-                    ? "Em Manutenção"
-                    : "Inativa"}
-                </Badge>
-              </div>
-            </div>
+            {ambulancia.motorista_id ? (
+              loadingDriverInfo || loadingMotorista ? (
+                <div className="text-center py-4 text-muted-foreground">
+                  <p>Carregando informações do motorista...</p>
+                </div>
+              ) : motorista ? (
+                <>
+                  <div className="p-4 rounded-lg border space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-muted-foreground">
+                        Nome
+                      </span>
+                      <span className="text-sm font-semibold text-foreground">
+                        {motorista.nome || "N/A"}
+                      </span>
+                    </div>
 
-            <div className="p-4 rounded-lg border">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Condição</span>
-                <span
-                  className={`text-sm font-medium ${
-                    ambulancia.status === 3
-                      ? "text-orange-600"
-                      : ambulancia.status === 1
-                      ? "text-green-600"
-                      : "text-gray-600"
-                  }`}
-                >
-                  {ambulancia.status === 3
-                    ? "Manutenção"
-                    : ambulancia.status === 1
-                    ? "Operacional"
-                    : ambulancia.status === 0
-                    ? "Em Trânsito"
-                    : "Inativa"}
-                </span>
+                    {motorista.email && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                          <Mail className="h-4 w-4" />
+                          Email
+                        </span>
+                        <span className="text-sm text-foreground">
+                          {motorista.email}
+                        </span>
+                      </div>
+                    )}
+
+                    {motorista.telefone && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                          <Phone className="h-4 w-4" />
+                          Telefone
+                        </span>
+                        <span className="text-sm text-foreground">
+                          {motorista.telefone}
+                        </span>
+                      </div>
+                    )}
+
+                    {driverInfo && (
+                      <div className="flex items-center justify-between pt-2 border-t">
+                          <span className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                            Status
+                          </span>
+                          <Badge
+                            className={
+                              driverInfo.em_viagem
+                                ? "bg-amber-500 hover:bg-amber-600"
+                                : "bg-green-500 hover:bg-green-600"
+                            }
+                          >
+                            <div className="flex items-center gap-1">
+                              {driverInfo.em_viagem ? (
+                                <>
+                                  <Navigation className="h-3 w-3" />
+                                  Em Viagem
+                                </>
+                              ) : (
+                                <>
+                                  <CheckCircle2 className="h-3 w-3" />
+                                  Disponível
+                                </>
+                              )}
+                            </div>
+                          </Badge>
+                        </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-4 text-muted-foreground">
+                  <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p>Não foi possível carregar as informações do motorista.</p>
+                </div>
+              )
+            ) : (
+              <div className="text-center py-4 text-muted-foreground">
+                <User className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p className="text-lg font-medium mb-2">
+                  Nenhum motorista atribuído
+                </p>
+                <p className="text-sm">
+                  Esta ambulância ainda não possui um motorista atribuído.
+                </p>
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
       </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
@@ -47,7 +47,11 @@ import { toast } from "sonner";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { CreateAmbulanceModal } from "../components/modals/CreateAmbulanceModal";
 import { EditAmbulanceModal } from "../components/modals/EditAmbulanceModal";
+import { AssignDriverModal } from "../components/modals/AssignDriverModal";
 import { TextAnimate } from "@/components/ui/text-animate";
+import { assignAmbulanceToDriver } from "@/services/managerService";
+import { User } from "lucide-react";
+import authService from "@/services/authService";
 
 export default function ManagerAmbulanciasView() {
   const navigate = useNavigate();
@@ -58,6 +62,8 @@ export default function ManagerAmbulanciasView() {
   const [selectedAmbulance, setSelectedAmbulance] = useState(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [ambulanceToDelete, setAmbulanceToDelete] = useState(null);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [ambulanceToAssign, setAmbulanceToAssign] = useState(null);
 
   const {
     data: ambulanciasResponse,
@@ -79,6 +85,22 @@ export default function ManagerAmbulanciasView() {
   const ambulancias = Array.isArray(ambulanciasResponse)
     ? ambulanciasResponse
     : ambulanciasResponse?.ambulancias || [];
+
+  const { data: users = [] } = useQuery({
+    queryKey: ["users"],
+    queryFn: () => authService.getAllUsers(),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const motoristaPorId = useMemo(() => {
+    const mapa = {};
+    users.forEach((user) => {
+      if (user.cargo === 1) {
+        mapa[user.id] = user;
+      }
+    });
+    return mapa;
+  }, [users]);
 
   const getStatusBadgeColor = (status) => {
     const colors = getAmbulanceStatusColors(status);
@@ -174,6 +196,40 @@ export default function ManagerAmbulanciasView() {
     }
   };
 
+  const assignAmbulanceMutation = useMutation({
+    mutationFn: ({ driverId, ambulanceId }) =>
+      assignAmbulanceToDriver(driverId, ambulanceId),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["ambulances"]);
+      queryClient.invalidateQueries(["driver"]);
+      toast.success("Motorista atribuído!", {
+        description: "A ambulância foi atribuída ao motorista com sucesso.",
+        duration: 3000,
+      });
+      setIsAssignModalOpen(false);
+      setAmbulanceToAssign(null);
+    },
+    onError: (error) => {
+      console.error("Erro ao atribuir motorista:", error);
+      toast.error("Erro ao atribuir motorista", {
+        description:
+          error.response?.data?.detail ||
+          error.response?.data?.mensagem ||
+          "Não foi possível atribuir o motorista. Tente novamente.",
+        duration: 5000,
+      });
+    },
+  });
+
+  const handleAssignDriver = (ambulance) => {
+    setAmbulanceToAssign(ambulance);
+    setIsAssignModalOpen(true);
+  };
+
+  const handleConfirmAssign = (ambulanceId, driverId) => {
+    assignAmbulanceMutation.mutate({ driverId, ambulanceId });
+  };
+
   const columns = [
     {
       accessorKey: "placa",
@@ -237,6 +293,19 @@ export default function ManagerAmbulanciasView() {
       enableColumnFilter: false,
     },
     {
+      accessorKey: "motorista",
+      header: "Motorista",
+      cell: ({ row }) => {
+        const motoristaId = row.original.motorista_id;
+        const motorista = motoristaPorId[motoristaId];
+
+        return (
+          <div className="text-sm font-medium">{motorista?.nome || "N/A"}</div>
+        );
+      },
+      enableColumnFilter: false,
+    },
+    {
       id: "actions",
       header: "Ações",
       cell: ({ row }) => (
@@ -255,6 +324,10 @@ export default function ManagerAmbulanciasView() {
             >
               <Eye className="mr-2 h-4 w-4" />
               Ver Detalhes
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleAssignDriver(row.original)}>
+              <User className="mr-2 h-4 w-4" />
+              Atribuir Motorista
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => handleDeleteAmbulance(row.original)}
@@ -373,6 +446,13 @@ export default function ManagerAmbulanciasView() {
         onOpenChange={setIsEditModalOpen}
         ambulance={selectedAmbulance}
         onAmbulanceUpdated={handleUpdateAmbulance}
+      />
+
+      <AssignDriverModal
+        open={isAssignModalOpen}
+        onOpenChange={setIsAssignModalOpen}
+        ambulance={ambulanceToAssign}
+        onAssigned={handleConfirmAssign}
       />
 
       <AlertDialog
