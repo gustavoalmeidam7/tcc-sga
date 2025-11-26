@@ -16,22 +16,14 @@ from src.Schema.Travel.TravelRealizedEnum import TravelRealized
 
 from src.Validator.TravelValidator import TravelValidator
 
-from src.Error.User.UserRBACError import UserRBACError
+from src.Error.User.NotUserResourceError import NotUserResource
 from src.Error.Base.NotFoundError import NotFoundError
 
+NOT_USER_RESOURCE = NotUserResource()
 
-def update_travel_by_id_ignore_none(travelId: UUID, **fields) -> TravelResponseSchema:
-    """ Atualiza uma viagem com os campos (fields) fornecidos ignorando campos nulos """
-
-    filteredArgs = {k: v for k,v in fields.items() if v is not None}
-
-    updatedTravel = TravelRepository.update_travel(unmask_uuid(travelId), **filteredArgs)
-
-    if updatedTravel is None:
-        raise NotFoundError("transporte")
-
-    return TravelResponseSchema.model_validate(updatedTravel)
-
+"""
+    Criar
+"""
 
 def create_travel(travel: TravelCreateSchema, user: User) -> TravelResponseSchema:
     """ Cria uma nova viagem """
@@ -39,13 +31,17 @@ def create_travel(travel: TravelCreateSchema, user: User) -> TravelResponseSchem
     travelDict = travel.model_dump()
     
     travelModel = Travel(**travelDict)
-    travelModel.id_paciente = str(user.id)
+    travelModel.id_paciente = user.str_id
     travelModel.criado_em = datetime.now(timezone.utc)
     travelModel.realizado = TravelRealized.NAO_REALIZADO
 
     TravelRepository.insert_travel(travelModel)
 
     return TravelResponseSchema.model_validate(travelModel)
+
+"""
+    Ler
+"""
 
 def find_travel_by_id(travelId: UUID | str) -> TravelResponseSchema:
     """ Encontra uma travel pelo seu ID """
@@ -78,13 +74,29 @@ def find_assigned_travels(user: User, page: int, pageSize: int, canceled: bool =
 
     return list(map(lambda t: TravelResponseSchema.model_validate(t), travels))
 
+"""
+    Atualizar
+"""
+
+def update_travel_by_id_ignore_none(travelId: UUID, **fields) -> TravelResponseSchema:
+    """ Atualiza uma viagem com os campos (fields) fornecidos ignorando campos nulos """
+
+    filteredArgs = {k: v for k,v in fields.items() if v is not None}
+
+    updatedTravel = TravelRepository.update_travel(unmask_uuid(travelId), **filteredArgs)
+
+    if updatedTravel is None:
+        raise NotFoundError("transporte")
+
+    return TravelResponseSchema.model_validate(updatedTravel)
+
 def cancel_travel_by_id(user: User, travelId: UUID) -> TravelResponseSchema:
     """ Atualiza o estado de uma viagem para cancelada pelo seu id """
 
     travel = find_travel_by_id(travelId)
 
-    if travel.id_paciente != mask_uuid(user.id):
-        raise UserRBACError("O usuário não pode modificar este recurso.")
+    if travel.id_paciente != user.uuid_id:
+        raise NOT_USER_RESOURCE
 
     if not travel.cancelada:
         travel = update_travel_by_id_ignore_none(travel.id, cancelada=True)
@@ -115,3 +127,7 @@ def end_travel_by_id(driver: User, travelId: UUID) -> TravelResponseSchema:
     travel = update_travel_by_id_ignore_none(travel.id, realizado=TravelRealized.REALIZADO)
     travel = TravelResponseSchema.model_validate(travel)
     return travel
+
+"""
+    Deletar
+"""

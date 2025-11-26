@@ -1,12 +1,25 @@
 from uuid import UUID
 
-from src.Validator.GenericValidator import validate_uuid
+from src.Validator.GenericValidator import validate_uuid, unmask_uuid
 from src.Model.User import User
 
 from src.Model.UserSession import Session
 
 from typing import List
 from uuid import UUID
+
+
+"""
+    Criar
+"""
+
+def insert_session(session: Session) -> None:
+    """ Insere uma sessão no banco de dados """
+    session.save(force_insert=True)
+
+"""
+    Ler
+"""
 
 def find_all() -> List[Session]:
     """ Retorna todas as sessões """
@@ -33,8 +46,7 @@ def find_session_by_session_id(id: str | UUID) -> Session | None:
 
 def find_user_by_session_id(id: str | UUID) -> User | None:
     """ Retorna o usuário pela sessão do mesmo """
-    if type(id) == UUID:
-        id = validate_uuid(id)
+    id = unmask_uuid(id)
     
     userModel = Session.select().where(Session.id == id).first()
     if userModel is None:
@@ -44,14 +56,22 @@ def find_user_by_session_id(id: str | UUID) -> User | None:
     
     return userModel
 
-def insert_session(session: Session) -> None:
-    """ Insere uma sessão no banco de dados """
-    session.save(force_insert=True)
+"""
+    Atualizar
+"""
 
-def delete_token_by_id(token: UUID) -> None:
+"""
+    Deletar
+"""
+
+def delete_token_by_id(token: str) -> None:
     """ Deleta uma sessão pelo seu ID """
     Session.delete_by_id(validate_uuid(token))
 
 def delete_all_user_tokens_by_id(id: int) -> None:
     """ Deleta todas sessões associadas a um usuário pelo seu ID """
     Session.delete().where(Session.usuario == id).execute()
+
+def delete_expired_sessions() -> None:
+    """ Deleta todas sessões expiradas """
+    Session.delete().where(Session.is_expired == True).execute()
