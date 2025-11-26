@@ -3,7 +3,7 @@
 ## Tecnologias utilizadas
 
 ### Backend
-- Python 3.12
+- Python 3.13
 - FastAPI
 - Peewee
 - Dotenv
@@ -17,8 +17,8 @@
 # Pré-requisitos
 
 ## Backend:
-- Interpretador [Python](https://www.python.org/downloads/) versão 3.12 ou superior
-- Gerenciador de pacotes pip
+- Interpretador [Python](https://www.python.org/downloads/) versão 3.13 ou superior
+- Gerenciador de pacotes pip ou [UV](https://docs.astral.sh/uv/getting-started/installation/)
 - Um [ambiente virtual](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) pip
 
 ### Como executar:
@@ -44,7 +44,7 @@ pip install -r requirements.txt
 Copie o arquivo ``` example.env ``` e renomeie o mesmo para ``` .env ``` na raiz da pasta backend e troque as chaves necessárias, exemplo:
 ```js
 secret_key_jwt = changeme  (Troque para uma secret key segura)
-algorithm_jwt= HS256 (Compatível com o algotirimo HS256)
+algorithm_jwt= HS256 (Compatível com o algorítimo HS256)
 
 environment = DEV
 ```
