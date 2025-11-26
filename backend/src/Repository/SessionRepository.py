@@ -64,7 +64,7 @@ def find_user_by_session_id(id: str | UUID) -> User | None:
     Deletar
 """
 
-def delete_token_by_id(token: UUID) -> None:
+def delete_token_by_id(token: str) -> None:
     """ Deleta uma sessão pelo seu ID """
     Session.delete_by_id(validate_uuid(token))
 

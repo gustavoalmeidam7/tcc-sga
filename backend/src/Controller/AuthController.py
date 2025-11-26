@@ -96,9 +96,22 @@ async def refresh_token(request: Request) -> Response:
     Realiza a atualização do token de acesso do atual usuário pelo seu refresh token:
 
     **acesso**: `USER` \n
-    **parâmetro**:No Params \n
+    **parâmetro**:Sem parâmetros \n
     **retorno**: devolve: \n
         `TokenResponseSchema`
     """
 
     return SessionService.refresh_access_token(request)
+
+@AUTH_ROUTER.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+async def logout(session: UserDecorators.GET_AUTHENTICATED_SESSION) -> Response:
+    """
+    Faz o logout do usuário revogando a sessão atual e removendo a mesma dos cookies:
+
+    **acesso**: `USER` \n
+    **parâmetro**:Sem parâmetros \n
+    **retorno**: Sem retorno \n
+    """
+
+    return SessionService.logout(session)
+

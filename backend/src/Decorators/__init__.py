@@ -10,9 +10,10 @@ from typing import Annotated
 TOKEN_SCHEME = Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="token", auto_error=False))]
 
 from src.Model.User import User
+from src.Model.UserSession import Session
 from src.Service import SessionService
 
-async def get_user_auth_user(request: Request, token: TOKEN_SCHEME | None = None) -> User:
+async def __get_auth__(request: Request, token: TOKEN_SCHEME | None = None) -> tuple[User, Session]:
     """ Pega o usuário autenticado """
 
     userIP = get_remote_address(request)
@@ -38,4 +39,18 @@ async def get_user_auth_user(request: Request, token: TOKEN_SCHEME | None = None
     if currentUser is None:
         raise invalidCredentials()
     
-    return currentUser
+    return (currentUser, currentSession)
+
+async def get_user_auth_user(request: Request, token: TOKEN_SCHEME | None = None) -> User:
+    """ Pega a sessão atual do usuário autenticado """
+
+    (user, session) = await __get_auth__(request, token)
+
+    return user
+
+async def get_user_auth_session(request: Request, token: TOKEN_SCHEME | None = None) -> Session:
+    """ Pega a sessão atual do usuário autenticado """
+
+    (user, session) = await __get_auth__(request, token)
+
+    return session

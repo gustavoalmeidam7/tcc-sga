@@ -209,6 +209,15 @@ def get_user_sessions(token: TOKEN_SCHEME) -> UserSessionListSchema:
     Atualizar
 """
 
+def logout(session: Session) -> Response:
+    response = Response()
+    response.delete_cookie("Authorization")
+    response.delete_cookie("refreshToken")
+
+    SessionRepository.delete_token_by_id(session.str_id)
+
+    return response
+
 """
     Deletar
 """
