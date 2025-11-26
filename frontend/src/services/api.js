@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getAuthToken, clearAuthToken } from "./tokenStore";
+import authService from "./authService";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -8,21 +8,27 @@ const API = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true,
 });
 
 API.interceptors.request.use(
-  (config) => {
-    const isLoginRequest = config.url?.includes("/token");
-    if (!isLoginRequest) {
-      const token = getAuthToken();
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    }
-    return config;
-  },
+  (config) => config,
   (error) => Promise.reject(error)
 );
+
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
 
 API.interceptors.response.use(
   (response) => response,
@@ -36,6 +42,7 @@ API.interceptors.response.use(
     }
 
     const { status, data } = error.response;
+    const originalRequest = error.config;
 
     const backendErrors = data?.Erros;
     let errorMessage = "Erro desconhecido";
@@ -51,22 +58,72 @@ API.interceptors.response.use(
     }
 
     if (status === 401) {
-      const isLoginRequest = error.config?.url?.includes("/token");
+      const isLoginRequest = originalRequest?.url?.includes("/token");
+      const isRefreshRequest = originalRequest?.url?.includes("/refresh-token");
+      const isLoginPage = window.location.pathname.includes("/login");
 
       if (isLoginRequest) {
         return Promise.reject(error);
       }
 
-      clearAuthToken();
-      const isLoginPage = window.location.pathname.includes("/login");
-      if (!isLoginPage) {
-        window.dispatchEvent(new CustomEvent("auth:unauthorized"));
+      if (isLoginPage) {
+        return Promise.reject({
+          ...error,
+          message: "Não autenticado",
+          silent: true,
+        });
       }
 
-      return Promise.reject({
-        ...error,
-        message: "Sua sessão expirou. Faça login novamente.",
-      });
+      if (isRefreshRequest) {
+        isRefreshing = false;
+        processQueue(error, null);
+        await authService.logout();
+        window.dispatchEvent(new CustomEvent("auth:unauthorized"));
+        return Promise.reject({
+          ...error,
+          message: "Sua sessão expirou. Faça login novamente.",
+        });
+      }
+
+      if (originalRequest._retry) {
+        return Promise.reject({
+          ...error,
+          message: "Sua sessão expirou. Faça login novamente.",
+        });
+      }
+
+      originalRequest._retry = true;
+
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then(() => {
+            return API(originalRequest);
+          })
+          .catch((err) => {
+            return Promise.reject(err);
+          });
+      }
+
+      isRefreshing = true;
+
+      try {
+        await authService.refreshToken();
+        processQueue(null);
+        isRefreshing = false;
+        return API(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        isRefreshing = false;
+        await authService.logout();
+        window.dispatchEvent(new CustomEvent("auth:unauthorized"));
+
+        return Promise.reject({
+          ...error,
+          message: "Sua sessão expirou. Faça login novamente.",
+        });
+      }
     }
 
     if (status === 403) {
