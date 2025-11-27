@@ -154,7 +154,7 @@ def refresh_access_token(request: Request) -> Response:
         content=TokenResponseSchema.model_validate({"access_token": accessToken, "token_type": "bearer", "expires_at": accessExpires.isoformat()}).model_dump_json(),
         media_type="application/json"
     )
-    response.set_cookie(key="Authorization", value=accessToken, expires=datetime_to_http_datetime(accessExpires), path="/", secure=False ,httponly=True, samesite="strict")
+    response.set_cookie(key="Authorization", value=accessToken, expires=datetime_to_http_datetime(accessExpires), domain=get_env_var("FRONTEND_DOMAIN", "https://dev.tcc-sga.pages.dev/"), path="/", secure=False ,httponly=True, samesite="strict")
 
     return response
 
