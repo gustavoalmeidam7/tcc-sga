@@ -1,10 +1,4 @@
 from src.Model.Ambulance import Ambulance
-from src.Model.Equipment import Equipment
-from src.Model.Driver import Driver
-
-from typing import Any
-
-from src.Error.Server.InternalServerError import InternalServerError
 
 """
     Criar
@@ -16,12 +10,6 @@ def create_ambulance(ambulance: Ambulance) -> Ambulance:
     ambulance.save(force_insert=True)
     return Ambulance.select().where(Ambulance.id == ambulance.id).first()
 
-def create_equipment(equipment: Equipment) -> Equipment:
-    """ Cria um novo equipamento """
-
-    equipment.save(force_insert=True)
-    return Equipment.select().where(Equipment.id == equipment.id).first()
-
 
 """
     Ler
@@ -30,37 +18,17 @@ def create_equipment(equipment: Equipment) -> Equipment:
 def find_ambulances_by_page(page: int, pageSize: int) -> list[Ambulance]:
     """ Encontra todas as ambulâncias presentes na página x de tamanho x """
 
-    return Ambulance.select().order_by(Ambulance.id.asc()).paginate(page, pageSize) # type: ignore
+    return Ambulance.select().order_by(Ambulance.id.asc()).paginate(page, pageSize)
+
+def find_ambulances_by_page_(page: int, pageSize: int) -> list[Ambulance]:
+    """ Encontra todas as ambulâncias presentes na página x de tamanho x """
+
+    return Ambulance.select().order_by(Ambulance.id.asc()).paginate(page, pageSize)
 
 def find_ambulance_by_id(id: str) -> Ambulance | None:
     """ Encontra uma ambulância pelo seu ID """
 
     return Ambulance.select().where(Ambulance.id == id).first()
-
-def find_ambulance_joined_by_id(id: str) -> Ambulance | None:
-    """ Encontra uma ambulância e faz join pelo seu ID """
-
-    return Ambulance.select().where(Ambulance.id == id).join(Equipment, on=(Ambulance.id == Equipment.id_ambulancia)).join(Driver, on=(Ambulance.id == Driver.id_ambulancia)).first()
-
-def find_driver_by_ambulance_id(id: str) -> Driver | None:
-    """ Encontra motoristas atrelados a uma ambulância pelo seu id """
-
-    return Driver.select().where(Driver.id_ambulancia == id).first()
-
-def find_ambulance_equipments_by_id(id: str) -> list[Equipment]:
-    """ Encontra todos equipamentos de uma ambulância pelo seu id """
-    
-    return Equipment.select().where(Equipment.id_ambulancia == id)
-
-def ambulance_exits_by_id(id: str) -> bool:
-    """ Verifica se uma ambulância existe pelo seu id """
-    
-    return Ambulance.select().where(Ambulance.id == id).exists()
-
-def equipment_exits_by_id(id: str) -> bool:
-    """ Verifica se um equipamento existe pelo seu id """
-    
-    return Equipment.select().where(Equipment.id == id).exists()
 
 """
     Atualizar
@@ -69,7 +37,7 @@ def equipment_exits_by_id(id: str) -> bool:
 def update_ambulance_ignore_none(travelId: str, **args) -> Ambulance | None:
     """ Atualiza uma ambulância ignorando valores nulos """
 
-    filteredArgs = {k: v for k, v in args.items() if v is not None}
+    filteredArgs = [x for x in args if x is not None]
 
     query = Ambulance.update(filteredArgs).where(Ambulance.id == travelId)
     query.execute()
@@ -84,32 +52,6 @@ def update_ambulance(travelId: str, **args) -> Ambulance | None:
 
     return Ambulance.select().where(Ambulance.id == travelId).first()
 
-def update_equipment_ignore_none(equipmentId: str, **args) -> Equipment | None:
-    """ Atualiza um equipamento ignorando valores nulos """
-
-    filteredArgs = {k: v for k, v in args.items() if v is not None}
-
-    query = Equipment.update(filteredArgs).where(Equipment.id == equipmentId)
-    query.execute()
-
-    return Equipment.select().where(Equipment.id == equipmentId).first()
-
 """
     Deletar
 """
-
-def delete_equipment(equipmentId: str) -> None:
-    """ Excluí um equipamento pelo seu id """
-
-    Equipment.delete().where(Equipment.id == equipmentId).execute()
-
-    if equipment_exits_by_id(equipmentId):
-        raise InternalServerError()
-    
-def delete_ambulance(ambulanceId: str) -> None:
-    """ Excluí um equipamento pelo seu id """
-
-    Ambulance.delete().where(Ambulance.id == ambulanceId).execute()
-
-    if ambulance_exits_by_id(ambulanceId):
-        raise InternalServerError()

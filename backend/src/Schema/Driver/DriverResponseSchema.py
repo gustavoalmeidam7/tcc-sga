@@ -21,16 +21,3 @@ class DriverResponseSchema(BaseModel):
     em_viagem     : Annotated[bool,           Field(example=False)]
     cnh           : Annotated[str,            Field(example="123456789")]
     vencimento    : Annotated[datetime,       Field(example=datetime.now(timezone.utc) + timedelta(days=365 * 2))]
-
-DRIVER_EXAMPLE = DriverResponseSchema.model_validate({
-    "id"            : uuid4(),
-    "email"         : "vinijr@mail.com",
-    "nome"          : "Vinícius José Paixão de Oliveira Júnior",
-    "nascimento"    : datetime(2000, 7, 12),
-    "telefone"      : "9821234567",
-    "cargo"         : UserRole.DRIVER,
-    "id_ambulancia" : uuid4(),
-    "em_viagem"     : False,
-    "cnh"           : "123456789",
-    "vencimento"    : datetime.now(timezone.utc) + timedelta(days=365 * 2)
-})

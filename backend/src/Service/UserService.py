@@ -20,11 +20,8 @@ from src.Repository import UserRepository
 
 from src.Service import SessionService
 
-"""
-    Criar
-"""
-
 def create(userSchema: UserCreateSchema) -> UserResponseFullSchema:
+    ## TODO VALIDAR MELHOR CPF E TELEFONE
     userModel = User(**userSchema.model_dump())
     userModel.senha = SessionService.get_password_hash(str(userModel.senha))
 
@@ -37,9 +34,14 @@ def create(userSchema: UserCreateSchema) -> UserResponseFullSchema:
 
     return UserResponseFullSchema.model_validate(createdUser)
 
-"""
-    Ler
-"""
+def delete_by_id(id: int) -> None:
+    """ Deleta um usuário pelo seu id """
+    SessionService.revoke_all_sessions_by_user_id(id)
+    UserRepository.delete_by_id(id)
+
+def delete_all() -> None:
+    """ Deleta todos usuários (usado apenas em testes) """
+    UserRepository.delete_all()
 
 def find_all_page_dict(page: int = 0, pageSize: int = 25) -> list[UserResponseSchema]:
     """ Busca todos usuários usando sistema de páginação """
@@ -60,10 +62,6 @@ def find_user_by_id(userId: UUID) -> UserResponseFullSchema | None:
     
     return UserResponseFullSchema.model_validate(user)
 
-"""
-    Atualizar
-"""
-
 def update_user(user: User, updateFields: UserUpdateSchema) -> UserUpdateResponseSchema:
     """ Atualiza um usuário do banco de dados """
     userId = str(user.id)
@@ -72,16 +70,3 @@ def update_user(user: User, updateFields: UserUpdateSchema) -> UserUpdateRespons
     UserRepository.create_role_by_user_id(userId, user.cargo)
     UserUpdateResponseSchema.model_validate(user)
     return UserUpdateResponseSchema.model_validate(user)
-
-"""
-    Deletar
-"""
-
-def delete_by_id(id: int) -> None:
-    """ Deleta um usuário pelo seu id """
-    SessionService.revoke_all_sessions_by_user_id(id)
-    UserRepository.delete_by_id(id)
-
-def delete_all() -> None:
-    """ Deleta todos usuários (usado apenas em testes) """
-    UserRepository.delete_all()

@@ -1,37 +1,29 @@
 from fastapi.testclient import TestClient
 from faker import Faker
 
-from typing import Annotated
-from pydantic import Field
-
-from datetime import datetime
-
 faker = Faker("pt_br")
 
-def authenticate_user(client: TestClient, email: str, password: str) -> dict[str, str]:
-    authenticate_data = {
+def autenticate_user(client: TestClient, email: str, password: str) -> str:
+    autenticate_data = {
         "username": email,
         "password": password
     }
 
-    authenticate_request = client.post("/token/", data=authenticate_data)
+    autenticate_request = client.post("/token/", data=autenticate_data)
     
-    assert authenticate_request.status_code == 201
-    assert authenticate_request.json()["access_token"] != None
+    assert autenticate_request.status_code == 201
+    assert autenticate_request.json()["access_token"] != None
     
-    return {"Authorization": f"Bearer {authenticate_request.json()["access_token"]}"}
+    return {"Authorization": f"Bearer {autenticate_request.json()["access_token"]}"}
 
-def generate_user(email: str | None = None, password: str | None = None) -> dict:
-    email = email       or faker.free_email()
-    password = password or faker.password()
-
+def generate_user() -> dict:
     return {
-        "email": email,
+        "email": faker.free_email(),
         "cpf": "".join(filter(lambda c: c != '-' and c != '.', list(faker.cpf()))),
-        "telefone": faker.numerify("%%#########"),
+        "telefone": "".join(filter(lambda c: c.isnumeric(), list(faker.phone_number())))[1:],
         "nome": faker.name(),
-        "nascimento": datetime.combine(faker.date_of_birth(minimum_age=1, maximum_age=100), datetime.min.time()).isoformat(),
-        "senha": password
+        "nascimento": str(faker.date_of_birth(minimum_age=1, maximum_age=100)),
+        "senha": faker.password()
     }
 
 def register_user(client: TestClient, userData: dict) -> dict:

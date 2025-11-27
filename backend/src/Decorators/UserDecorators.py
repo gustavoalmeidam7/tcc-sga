@@ -1,4 +1,4 @@
-from fastapi import Depends, Request
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
 from typing import Annotated
@@ -6,14 +6,16 @@ from typing import Annotated
 TOKEN_SCHEME = Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="token", auto_error=False))]
 
 from src.Model.User import User
-from src.Model.UserSession import Session
-from src.Decorators import get_user_auth_user, get_user_auth_session
+from src.Service.SessionService import get_current_user
 
-async def token_get_user(request: Request, token: TOKEN_SCHEME) -> User:
-    return await get_user_auth_user(request, token)
+async def token_get_user(token: TOKEN_SCHEME) -> 'User':
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Não foi possível validar as credenciais de usuário, tente entrar novamente",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    
+    return get_current_user(token)
 
-async def get_user_session(request: Request, token: TOKEN_SCHEME) -> Session:
-    return await get_user_auth_session(request, token)
-
-GET_AUTHENTICATED_USER = Annotated[User, Depends(token_get_user)]
-GET_AUTHENTICATED_SESSION = Annotated[Session, Depends(get_user_session)]
+GET_AUTENTHICATED_USER = Annotated[User, Depends(token_get_user)]

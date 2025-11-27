@@ -11,7 +11,6 @@ def test_post_travel(client: TestClient):
 
     travelData["inicio"] = TestTravelHelper.convert_str_to_iso(travelData["inicio"])
     travelData["fim"] = TestTravelHelper.convert_str_to_iso(travelData["fim"])
-    travelData["estado_paciente"] = str(travelData["estado_paciente"])
 
     requestDictCmp = {k: str(request.json()[k]) for k in travelData.keys()}
 
@@ -23,7 +22,7 @@ def test_get_travels(client: TestClient):
     postRequest = client.post("/travel/", headers=userToken, json=travelData)
     assert postRequest.status_code == 200
 
-    getRequest = client.get("/travel/assigned/", headers=userToken)
+    getRequest = client.get("/travel/", headers=userToken)
     assert getRequest.status_code == 200
     assert len(getRequest.json()) > 0
 
@@ -35,14 +34,7 @@ def test_delete_travel_by_id(client: TestClient):
 
     travelId = postRequest.json()["id"]
 
-    travelData = client.get(f"/travel/{travelId}", headers=userToken)
-    assert travelData.status_code == 200
-
-    travelCanceledData = dict(travelData.json())
-    travelCanceledData["cancelada"] = True
-
-    deleteRequest = client.post(f"/travel/cancel/{travelId}", headers=userToken)
-
+    deleteRequest = client.delete(f"/travel/{travelId}", headers=userToken)
     assert deleteRequest.status_code == 200
-
-    assert dict(deleteRequest.json()) == travelCanceledData
+    assert deleteRequest.json()["id"] == travelId
+    assert deleteRequest.json()["deletado"] is True

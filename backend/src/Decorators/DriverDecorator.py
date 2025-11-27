@@ -7,13 +7,15 @@ TOKEN_SCHEME = Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="token", aut
 
 from src.Model.User import User
 
+from src.Schema.User.UserRoleEnum import UserRole
+
 from src.Decorators import get_user_auth_user
 from src.Error.User.UserRBACError import UserRBACError
 
 async def token_get_driver(request: Request, token: TOKEN_SCHEME) -> User:
     currentUser = await get_user_auth_user(request, token)
 
-    if not currentUser.is_driver:
+    if currentUser.cargo != UserRole.DRIVER:
         raise UserRBACError()
     
     return currentUser
@@ -21,7 +23,7 @@ async def token_get_driver(request: Request, token: TOKEN_SCHEME) -> User:
 async def token_get_driver_or_higher(request: Request, token: TOKEN_SCHEME) -> User:
     currentUser = await get_user_auth_user(request, token)
 
-    if not currentUser.is_driver_or_higher:
+    if currentUser.cargo < UserRole.DRIVER:
         raise UserRBACError()
     
     return currentUser

@@ -1,6 +1,9 @@
 from peewee import ForeignKeyField, BooleanField, CharField, DateField
 from src.Model.BaseModel import BaseModel
 
+from src.Validator.GenericValidator import mask_uuid, unmask_uuid
+from uuid import UUID
+
 from src.Model import User, Ambulance
 
 from datetime import date
@@ -13,16 +16,15 @@ class Driver(BaseModel):
     vencimento     : date | DateField       = DateField(null=False)
 
     @property
-    def str_id_ambulancia(self) -> str:
-        return str(self.id_ambulancia)
+    def str_id(self) -> str:
+        return str(self.id)
     
     @property
-    def fk_id_ambulancia(self) -> ForeignKeyField:
-        return ForeignKeyField(self.id_ambulancia)
+    def uuid_id(self) -> UUID | None:
+        return mask_uuid(str(self.id))
     
-    @property
-    def is_ambulancia_none(self) -> bool:
-        return bool(self.id_ambulancia_id == '')
+    def compare_uuid(self, compared_uuid: UUID | str) -> bool:
+        return self.str_id == unmask_uuid(compared_uuid)
     
     class Meta:
         table_name = "motorista"

@@ -3,7 +3,7 @@
 ## Convenções:
 Funções: usar Snake Case ( minha_funcao() )
 
-Variáveis ou parâmetros privados: usar Camel Case ( meuParametro )
+Variaveis ou parametros privados: usar Camel Case ( meuParametro )
 
 Constantes globais: Usar Screaming Snake Case ( MINHA_CONSTANTE )
 

@@ -1,4 +1,4 @@
-from src.Repository import ManagerRepository, UserRepository, DriverRepository, TravelRepository, AmbulanceRepository
+from src.Repository import ManagerRepository, UserRepository, DriverRepository, TravelRepository
 from typing import Optional
 
 from src.Model.UpgradeToken import UpgradeToken
@@ -19,28 +19,35 @@ from src.Schema.Manager.UpgradeTokenFullResponseSchema import UpgradeTokenFullRe
 from src.Schema.Driver.DriverCreateSchema import DriverCreateSchema
 from src.Schema.Travel.TravelResponseSchema import TravelResponseSchema
 
-from src.Schema.Ambulance.AmbulanceFullResponseSchema import AmbulanceFullResponseSchema
-from src.Error.Resource.NotFoundResourceError import NotFoundError
-from src.Service.DriverService import add_ambulance_atributes
-
 from src.Error.User.UserRBACError import UserRBACError
 from src.Error.Server.InternalServerError import InternalServerError
-from src.Error.Resource.NotFoundResourceError import NotFoundResource
 
 from src.DB import db
 
 from datetime import datetime
 from uuid import UUID
 
-NOT_FOUND_AMBULANCE = NotFoundError("ambulance", "Não foi possível encontrar a ambulância.")
-USER_ALREADY_MANAGER = HTTPException(status.HTTP_400_BAD_REQUEST, "Usuário já é gerente")
-USER_ALREADY_DRIVER = HTTPException(status.HTTP_400_BAD_REQUEST, "Usuário já é motorista")
-INSUFFICIENT_TOKEN = HTTPException(status.HTTP_401_UNAUTHORIZED, "Impossível realizar ação com este token")
+def get_token_info(upgradeTokenId: UUID) -> UpgradeTokenFullResponseSchema:
+    token = ManagerRepository.find_token_by_id(unmask_uuid(upgradeTokenId))
+    if token is None:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token não existe")
+    
+    return UpgradeTokenFullResponseSchema.model_validate(token)
 
+def assign_driver_to_travel_by_id(driverId: UUID, travelId: UUID) -> TravelResponseSchema:
+    travelId = unmask_uuid(travelId)
+    driverId = unmask_uuid(driverId)
+    ambulanceId = DriverRepository.find_driver_by_id(driverId).id_ambulancia_id
 
-"""
-    Criar
-"""
+    assingedTravel = TravelRepository.update_travel(travelId=travelId, id_motorista=driverId, id_ambulancia=ambulanceId)
+
+    if not assingedTravel:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Viagem não encontrada"
+        )
+    
+    return TravelResponseSchema.model_validate(assingedTravel)
 
 def generate_manager_token_list(tokenNumber: int) -> list[UpgradeToken]:
     """ Gera uma lista de tokens para atualizar para gerente """
@@ -64,21 +71,6 @@ def generate_driver_token() -> UpgradeTokenFullResponseSchema:
     
     return UpgradeTokenFullResponseSchema.model_validate(driverToken)
 
-"""
-    Ler
-"""
-
-def get_token_info(upgradeTokenId: UUID) -> UpgradeTokenFullResponseSchema:
-    token = ManagerRepository.find_token_by_id(unmask_uuid(upgradeTokenId))
-    if token is None:
-        raise NotFoundResource("token", "Token não encontrado")
-    
-    return UpgradeTokenFullResponseSchema.model_validate(token)
-
-"""
-    Atualizar
-"""
-
 def upgrade_user_with_token_id(user: User, tokenId: UUID, driverFields: Optional[DriverCreateSchema]) -> UserResponseFullSchema:
     """ Atualiza um usuário para o fator do respectivo UpgradeToken id """
 
@@ -96,17 +88,17 @@ def upgrade_user_with_token_id(user: User, tokenId: UUID, driverFields: Optional
 def upgrade_user_to_manager(user: User, token: UpgradeToken, driverFields: DriverCreateSchema) -> UserResponseFullSchema:
     """ Atualiza um usuário para gerente usando token """
 
-    if user.is_manager:
-        raise USER_ALREADY_MANAGER
+    if user.is_manager():
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Usuário já é gerente")
     
     if token.fator_cargo != UserRole.MANAGER:
-        raise INSUFFICIENT_TOKEN
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Impossível realizar ação com este token")
     
     userUpdated = None
 
     with db.atomic():
-        userUpdated = UserRepository.update_user_by_id(user.str_id, cargo=UserRole.MANAGER)
-        manager = ManagerRepository.find_manager_by_id(user.str_id)
+        userUpdated = UserRepository.update_user_by_id(unmask_uuid(user.id), cargo=UserRole.MANAGER)
+        manager = ManagerRepository.find_manager_by_id(unmask_uuid(user.id))
 
         if manager is None:
             ManagerRepository.create_manager(Manager(id=user.id))
@@ -126,11 +118,11 @@ def upgrade_user_to_manager(user: User, token: UpgradeToken, driverFields: Drive
 def upgrade_user_to_driver(user: User, token: UpgradeToken, driverFields: DriverCreateSchema) -> UserResponseFullSchema:
     """ Atualiza um usuário para motorista usando token """
 
-    if user.is_driver:
-        raise USER_ALREADY_DRIVER
+    if user.is_driver():
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Usuário já é motorista")
     
     if token.fator_cargo != UserRole.DRIVER:
-        raise INSUFFICIENT_TOKEN
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Impossível realizar ação com este token")
     
     userUpdated = None
 
@@ -161,35 +153,3 @@ def upgrade_user_to_driver(user: User, token: UpgradeToken, driverFields: Driver
         raise InternalServerError()
 
     return UserResponseFullSchema.model_validate(userUpdated)
-
-def assign_driver_to_travel_by_id(driverId: UUID, travelId: UUID) -> TravelResponseSchema:
-    travelId = unmask_uuid(travelId)
-    driverId = unmask_uuid(driverId)
-    ambulanceId = DriverRepository.find_driver_by_id(driverId).id_ambulancia_id
-
-    assingedTravel = TravelRepository.update_travel(travelId=travelId, id_motorista=driverId, id_ambulancia=ambulanceId)
-
-    if not assingedTravel:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Viagem não encontrada"
-        )
-    
-    return TravelResponseSchema.model_validate(assingedTravel)
-
-def assign_ambulance_to_driver(driverId: UUID, ambulanceId: UUID) -> AmbulanceFullResponseSchema:
-    driverId = unmask_uuid(driverId)
-    ambulance = AmbulanceRepository.find_ambulance_by_id(unmask_uuid(ambulanceId))
-    if not ambulance:
-        raise NOT_FOUND_AMBULANCE
-    
-    DriverRepository.update_driver_by_id(driverId, id_ambulancia=ambulance.str_id)
-
-    ambulance = add_ambulance_atributes(ambulance)
-
-    return AmbulanceFullResponseSchema.model_validate(ambulance)
-    
-
-"""
-    Deletar
-"""
