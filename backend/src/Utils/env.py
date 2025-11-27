@@ -12,3 +12,10 @@ def get_env_var(key: str | None = None, default: str | None = None) -> str | Non
         Logging.log(f"Chave {key} não encontrada no .env file", Level.WARN)
     
     return value
+
+def get_env_var_not_none(key: str, default: str) -> str:
+    value = os.environ.get(key, default)
+    if value == default:
+        Logging.log(f"Chave {key} não encontrada no .env file", Level.WARN)
+
+    return value
