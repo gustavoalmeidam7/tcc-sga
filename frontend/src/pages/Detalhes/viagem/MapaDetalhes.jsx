@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import { MapaRota } from "@/pages/Viagens/components/MapaRota";
 import { useRotaCalculation } from "@/pages/Viagens/hooks/useRotaCalculation";
 import { fetchReverseGeocode } from "@/hooks/useReverseGeocode";
-import { formatarEndereco } from "@/lib/format-utils";
 
 export function MapaDetalhes({
   lat_inicio,
@@ -32,8 +31,8 @@ export function MapaDetalhes({
     if (onEnderecosCarregados) {
       if (end_inicio && end_fim) {
         onEnderecosCarregados({
-          origem: formatarEndereco(end_inicio),
-          destino: formatarEndereco(end_fim),
+          origem: end_inicio,
+          destino: end_fim,
         });
       } else {
         Promise.all([
@@ -43,8 +42,8 @@ export function MapaDetalhes({
           fetchReverseGeocode({ queryKey: ["geocode", lat_fim, long_fim] }),
         ]).then(([enderecoOrigem, enderecoDestino]) => {
           onEnderecosCarregados({
-            origem: formatarEndereco(enderecoOrigem),
-            destino: formatarEndereco(enderecoDestino),
+            origem: enderecoOrigem,
+            destino: enderecoDestino,
           });
         });
       }

@@ -322,8 +322,8 @@ export default function UserProfileView() {
                 Zona de Perigo
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-3">
-              <div>
+            <CardContent className="p-3 relative">
+              <div className="h-[140px]">
                 <h3 className="font-semibold text-sm mb-1">Deletar Conta</h3>
                 <p className="text-xs text-muted-foreground mb-3">
                   Todos os seus dados serão removidos permanentemente.

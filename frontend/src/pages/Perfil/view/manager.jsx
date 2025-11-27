@@ -24,8 +24,6 @@ import {
 } from "lucide-react";
 import { ROLE_LABELS } from "@/lib/roles";
 import authService from "@/services/authService";
-import { getAmbulances } from "@/services/ambulanceService";
-import { getTravels } from "@/services/travelService";
 import { formatarData } from "@/lib/date-utils";
 import LoadingSpinner from "@/components/layout/loading";
 import { toast } from "sonner";
@@ -83,45 +81,7 @@ export default function ManagerProfileView() {
     staleTime: 1000 * 60 * 5,
   });
 
-  const { data: ambulancesResponse } = useQuery({
-    queryKey: ["ambulances"],
-    queryFn: () => getAmbulances(0, 100),
-    staleTime: 1000 * 60 * 5,
-  });
-
-  const ambulances = useMemo(() => {
-    if (Array.isArray(ambulancesResponse)) {
-      return ambulancesResponse;
-    }
-    return ambulancesResponse?.ambulancias || [];
-  }, [ambulancesResponse]);
-
-  const { data: travelsResponse } = useQuery({
-    queryKey: ["travels"],
-    queryFn: () => getTravels(100, 0),
-    staleTime: 1000 * 60 * 2,
-  });
-
   const motoristas = useMemo(() => users.filter((u) => u.cargo === 1), [users]);
-
-  const travels = useMemo(() => {
-    if (Array.isArray(travelsResponse)) {
-      return travelsResponse;
-    }
-    return travelsResponse?.viagens || [];
-  }, [travelsResponse]);
-
-  const viagensHoje = useMemo(() => {
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-
-    return travels.filter((t) => {
-      if (t.cancelada) return false;
-      const dataViagem = new Date(t.inicio);
-      dataViagem.setHours(0, 0, 0, 0);
-      return dataViagem.getTime() === hoje.getTime();
-    });
-  }, [travels]);
 
   const handleSalvar = async () => {
     setLoading(true);
@@ -209,6 +169,7 @@ export default function ManagerProfileView() {
                 </div>
               </div>
 
+              {/* Info e Ações */}
               <div className="flex-1 text-center md:text-left">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
                   <div>
@@ -370,7 +331,7 @@ export default function ManagerProfileView() {
                   </span>
                 </div>
                 <span className="text-3xl font-bold">
-                  {ambulances.length || 0}
+                  {user?.totalAmbulancia || 0}
                 </span>
               </div>
               <div className="p-4 rounded-lg bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20">
@@ -383,7 +344,7 @@ export default function ManagerProfileView() {
                   </span>
                 </div>
                 <span className="text-3xl font-bold text-green-500">
-                  {viagensHoje.length || 0}
+                  {user?.viagensHoje || 0}
                 </span>
               </div>
             </div>

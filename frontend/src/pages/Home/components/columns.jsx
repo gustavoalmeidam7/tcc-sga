@@ -182,12 +182,14 @@ export const columns_motoristas = [
     },
   },
   {
-    accessorKey: "ambulancia",
+    accessorKey: "driverInfo.id_ambulancia",
     header: "Ambulância",
     cell: ({ row }) => {
-      const ambulancia = row.original.ambulancia;
+      const ambulanciaId = row.original.driverInfo?.id_ambulancia;
       return (
-        <div className="text-sm font-medium">{ambulancia?.placa || "N/A"}</div>
+        <div className="text-sm font-mono max-w-[100px] truncate">
+          {ambulanciaId ? `#${ambulanciaId.slice(0, 8)}...` : "N/A"}
+        </div>
       );
     },
   },
