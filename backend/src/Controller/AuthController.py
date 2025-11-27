@@ -104,7 +104,7 @@ async def refresh_token(request: Request) -> Response:
     return SessionService.refresh_access_token(request)
 
 @AUTH_ROUTER.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
-async def logout(session: UserDecorators.GET_AUTHENTICATED_SESSION_OR_NONE) -> Response:
+async def logout(session: UserDecorators.GET_AUTHENTICATED_SESSION) -> Response:
     """
     Faz o logout do usuário revogando a sessão atual e removendo a mesma dos cookies:
 

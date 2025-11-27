@@ -18,12 +18,9 @@ import {
   AlertTriangle,
   CreditCard,
   CalendarClock,
-  CheckCircle2,
-  Navigation,
 } from "lucide-react";
 import authService from "@/services/authService";
 import driverService from "@/services/driverService";
-import { getAmbulanceById } from "@/services/ambulanceService";
 import { formatarData } from "@/lib/date-utils";
 import LoadingSpinner from "@/components/layout/loading";
 import { toast } from "sonner";
@@ -84,14 +81,6 @@ export default function DriverProfileView() {
   } = useQuery({
     queryKey: ["driver", "info"],
     queryFn: driverService.getDriverInfo,
-    staleTime: 1000 * 60 * 5,
-    retry: 1,
-  });
-
-  const { data: ambulancia, isLoading: isLoadingAmbulance } = useQuery({
-    queryKey: ["ambulance", driverInfo?.id_ambulancia],
-    queryFn: () => getAmbulanceById(driverInfo.id_ambulancia),
-    enabled: !!driverInfo?.id_ambulancia,
     staleTime: 1000 * 60 * 5,
     retry: 1,
   });
@@ -334,44 +323,22 @@ export default function DriverProfileView() {
                     icon={Truck}
                     label="Ambulância Atribuída"
                     value={
-                      isLoadingAmbulance
-                        ? "Carregando..."
-                        : ambulancia?.placa
-                        ? ambulancia.placa
-                        : driverInfo?.id_ambulancia
-                        ? "Aguardando atribuição"
+                      driverInfo?.id_ambulancia
+                        ? `Ambulância #${driverInfo.id_ambulancia}`
                         : "Aguardando atribuição"
                     }
                     editable={false}
                     editMode={false}
                   />
-                  <div className="group relative">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2 mb-2">
-                      <div className="p-1.5 rounded-md bg-green-500/20 text-green-600">
-                        {driverInfo?.em_viagem ? (
-                          <Navigation className="h-3.5 w-3.5" />
-                        ) : (
-                          <CheckCircle2 className="h-3.5 w-3.5" />
-                        )}
-                      </div>
-                      Status
-                    </label>
-                    <div className="relative">
-                      <p className="text-sm font-medium px-4 py-3 bg-gradient-to-br from-muted/50 to-muted/30 rounded-lg border border-border/50 group-hover:border-border transition-all flex items-center gap-2">
-                        {driverInfo?.em_viagem ? (
-                          <>
-                            <Navigation className="h-4 w-4 text-orange-600" />
-                            <span>Em viagem</span>
-                          </>
-                        ) : (
-                          <>
-                            <CheckCircle2 className="h-4 w-4 text-green-600" />
-                            <span>Disponível</span>
-                          </>
-                        )}
-                      </p>
-                    </div>
-                  </div>
+                  <InfoItem
+                    icon={MapPin}
+                    label="Status"
+                    value={
+                      driverInfo?.em_viagem ? "🚨 Em viagem" : "✅ Disponível"
+                    }
+                    editable={false}
+                    editMode={false}
+                  />
                 </>
               )}
             </CardContent>

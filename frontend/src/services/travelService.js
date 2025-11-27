@@ -77,21 +77,3 @@ export const assignDriverToTravel = async (driverId, travelId) => {
     throw error;
   }
 };
-
-export const startTravel = async (travelId) => {
-  try {
-    const response = await API.post(`/travel/start/${travelId}`);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const endTravel = async (travelId) => {
-  try {
-    const response = await API.post(`/travel/end/${travelId}`);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};

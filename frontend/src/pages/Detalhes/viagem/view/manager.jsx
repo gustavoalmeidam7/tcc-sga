@@ -53,7 +53,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useCallback, useEffect } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import {
@@ -70,9 +69,6 @@ import { PersonCard } from "../components/PersonCard";
 import { PatientCard } from "../components/PatientCard";
 import { StatusCard } from "../components/StatusCard";
 import { generateTravelReportPDF } from "@/lib/pdf-utils";
-import { getAmbulanceById } from "@/services/ambulanceService";
-import { getAmbulanceTypeLabel } from "@/lib/ambulance";
-import { getDriverById } from "@/services/driverService";
 
 export default function ManagerDetalhesView() {
   const { id } = useParams();
@@ -105,24 +101,10 @@ export default function ManagerDetalhesView() {
     staleTime: 1000 * 60 * 5,
   });
 
-  const { data: driverInfo, isLoading: loadingDriverInfo } = useQuery({
-    queryKey: ["driver", viagem?.id_motorista],
-    queryFn: () => getDriverById(viagem.id_motorista),
-    enabled: !!viagem?.id_motorista,
-    staleTime: 1000 * 60 * 5,
-  });
-
   const { data: motorista, isLoading: loadingMotorista } = useQuery({
     queryKey: ["user", viagem?.id_motorista],
     queryFn: () => authService.getUserById(viagem.id_motorista),
-    enabled: !!viagem?.id_motorista && !!driverInfo,
-    staleTime: 1000 * 60 * 5,
-  });
-
-  const { data: ambulancia, isLoading: loadingAmbulancia } = useQuery({
-    queryKey: ["ambulance", viagem?.id_ambulancia],
-    queryFn: () => getAmbulanceById(viagem.id_ambulancia),
-    enabled: !!viagem?.id_ambulancia,
+    enabled: !!viagem?.id_motorista,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -156,7 +138,7 @@ export default function ManagerDetalhesView() {
     });
 
     try {
-      await generateTravelReportPDF(viagem, enderecos, solicitante, motorista);
+      await generateTravelReportPDF(viagem, enderecos, solicitante);
       toast.success("PDF gerado com sucesso!", {
         id: toastId,
         description: "Seu download deve começar em breve.",
@@ -361,11 +343,7 @@ export default function ManagerDetalhesView() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <PatientCard
-              viagem={viagem}
-              loading={loadingSolicitante}
-              solicitante={solicitante}
-            />
+            <PatientCard viagem={viagem} loading={loadingSolicitante} />
           </CardContent>
         </Card>
       </div>
@@ -450,27 +428,35 @@ export default function ManagerDetalhesView() {
                         Atribuir Motorista
                       </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="sm:max-w-[500px]">
                       <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 text-foreground">
-                          <UserCheck className="h-5 w-5" />
-                          Atribuir Motorista à Viagem
+                        <DialogTitle className="text-xl text-foreground">
+                          Atribuir Motorista
                         </DialogTitle>
-                        <DialogDescription className="text-foreground/70">
-                          Selecione o motorista que será atribuído à viagem.
+                        <DialogDescription>
+                          Selecione um motorista disponível para realizar esta
+                          viagem.
                         </DialogDescription>
                       </DialogHeader>
-
-                      <div className="space-y-4 py-4">
-                        <div className="space-y-2">
+                      <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
                           <Label
                             htmlFor="motorista"
-                            className="text-foreground"
+                            className="text-sm font-semibold text-foreground"
                           >
                             Motorista
                           </Label>
                           {loadingDrivers ? (
-                            <Skeleton className="h-10 w-full" />
+                            <p className="text-sm text-muted-foreground">
+                              Carregando motoristas...
+                            </p>
+                          ) : motoristas.length === 0 ? (
+                            <div className="rounded-lg border border-border bg-muted/30 p-4 text-center">
+                              <AlertCircle className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                              <p className="text-sm text-muted-foreground">
+                                Nenhum motorista disponível no momento
+                              </p>
+                            </div>
                           ) : (
                             <Select
                               value={selectedDriver}
@@ -478,41 +464,62 @@ export default function ManagerDetalhesView() {
                             >
                               <SelectTrigger
                                 id="motorista"
-                                className="text-foreground"
+                                className="h-16 min-h-16 text-sm"
                               >
-                                <SelectValue
-                                  placeholder="Selecione um motorista"
-                                  className="text-foreground"
-                                />
+                                <SelectValue placeholder="Selecione um motorista">
+                                  {selectedDriver &&
+                                    (() => {
+                                      const motorista = motoristas.find(
+                                        (m) => m.id === selectedDriver
+                                      );
+                                      return (
+                                        <div className="flex flex-col items-start gap-0.5">
+                                          <span className="text-base font-semibold text-foreground">
+                                            {motorista?.nome}
+                                          </span>
+                                          <span className="text-sm text-muted-foreground">
+                                            {motorista?.email}
+                                          </span>
+                                        </div>
+                                      );
+                                    })()}
+                                </SelectValue>
                               </SelectTrigger>
                               <SelectContent>
-                                {motoristas.length === 0 ? (
+                                {motoristas.map((motorista) => (
                                   <SelectItem
-                                    value="none"
-                                    disabled
-                                    className="text-foreground"
+                                    key={motorista.id}
+                                    value={motorista.id}
+                                    className="py-3"
                                   >
-                                    Nenhum motorista disponível
+                                    <div className="flex flex-col">
+                                      <span className="font-medium text-foreground">
+                                        {motorista.nome}
+                                      </span>
+                                      <span className="text-xs text-muted-foreground">
+                                        {motorista.email}
+                                      </span>
+                                    </div>
                                   </SelectItem>
-                                ) : (
-                                  motoristas.map((motorista) => (
-                                    <SelectItem
-                                      key={motorista.id}
-                                      value={motorista.id}
-                                      className="text-foreground"
-                                    >
-                                      {motorista.nome}{" "}
-                                      {motorista.email &&
-                                        `(${motorista.email})`}
-                                    </SelectItem>
-                                  ))
-                                )}
+                                ))}
                               </SelectContent>
                             </Select>
                           )}
                         </div>
+                        {selectedDriver && (
+                          <StatusCard
+                            icon={Info}
+                            title="Informação Importante"
+                            status="Atribuição automática de ambulância"
+                            statusType="info"
+                          >
+                            <p className="text-xs text-muted-foreground mt-2">
+                              A ambulância será automaticamente vinculada com
+                              base no motorista selecionado.
+                            </p>
+                          </StatusCard>
+                        )}
                       </div>
-
                       <DialogFooter>
                         <Button
                           variant="outline"
@@ -520,6 +527,7 @@ export default function ManagerDetalhesView() {
                             setIsAssignDialogOpen(false);
                             setSelectedDriver("");
                           }}
+                          className="text-foreground"
                         >
                           Cancelar
                         </Button>
@@ -531,7 +539,7 @@ export default function ManagerDetalhesView() {
                         >
                           {assignDriverMutation.isPending
                             ? "Atribuindo..."
-                            : "Atribuir"}
+                            : "Confirmar Atribuição"}
                         </Button>
                       </DialogFooter>
                     </DialogContent>
@@ -557,31 +565,12 @@ export default function ManagerDetalhesView() {
                 status="Veículo alocado para a viagem"
                 statusType="success"
               >
-                <div className="mt-3 pt-3 border-t border-green-500/20 space-y-2">
-                  {loadingAmbulancia ? (
-                    <div className="text-sm text-muted-foreground">
-                      Carregando informações da ambulância...
-                    </div>
-                  ) : ambulancia ? (
-                    <>
-                      <InfoRow
-                        icon={Ambulance}
-                        label="Placa"
-                        value={ambulancia.placa || "N/A"}
-                      />
-                      <InfoRow
-                        icon={Info}
-                        label="Tipo"
-                        value={getAmbulanceTypeLabel(ambulancia.tipo)}
-                      />
-                    </>
-                  ) : (
-                    <InfoRow
-                      icon={Hash}
-                      label="ID da Ambulância"
-                      value={viagem.id_ambulancia}
-                    />
-                  )}
+                <div className="mt-3 pt-3 border-t border-green-500/20">
+                  <InfoRow
+                    icon={Hash}
+                    label="ID da Ambulância"
+                    value={viagem.id_ambulancia}
+                  />
                 </div>
               </StatusCard>
             ) : (

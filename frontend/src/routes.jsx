@@ -18,7 +18,6 @@ const DetalhesViagem = lazy(() =>
 const DetalhesUsuario = lazy(() =>
   import("./pages/Detalhes/user/DetalhesUsuario")
 );
-const DetalhesAmbulancia = lazy(() => import("./pages/Detalhes/ambulancias"));
 const Agendamentos = lazy(() => import("./pages/Agendamentos"));
 const Historico = lazy(() => import("./pages/Historico"));
 const Perfil = lazy(() => import("./pages/Perfil"));
@@ -164,17 +163,6 @@ export const appRoutes = [
       </RoleBasedRoute>
     ),
     label: "Detalhes do Usuário",
-  },
-  {
-    path: "/detalhes/ambulancias/:id",
-    element: (
-      <RoleBasedRoute requiredRole={ROLES.MANAGER}>
-        <AnimatedPage>
-          <DetalhesAmbulancia />
-        </AnimatedPage>
-      </RoleBasedRoute>
-    ),
-    label: "Detalhes da Ambulância",
   },
   {
     path: "/agendamentos",

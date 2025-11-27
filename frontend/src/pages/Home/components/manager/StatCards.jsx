@@ -19,7 +19,7 @@ function StatCards({
                 2
               </div>
               <div className="text-xs md:text-sm leading-tight break-words">
-                Ambulâncias
+                Ambulâncias Livres
               </div>
             </div>
           </CardContent>

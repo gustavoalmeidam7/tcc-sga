@@ -12,6 +12,9 @@ from src.Error.User.UserInvalidCredentials import invalidCredentials
 from src.Error.User.UserRBACError import UserRBACError
 
 async def token_get_manager(request: Request, token: TOKEN_SCHEME) -> User:
+    if not token:
+        raise invalidCredentials()
+    
     currentUser = await get_user_auth_user(request, token)
 
     if not currentUser.is_manager:

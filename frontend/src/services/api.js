@@ -1,5 +1,5 @@
 import axios from "axios";
-import authService from "./authService";
+import { getAuthToken, clearAuthToken } from "./tokenStore";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -8,27 +8,20 @@ const API = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true,
 });
 
 API.interceptors.request.use(
-  (config) => config,
-  (error) => Promise.reject(error)
-);
-
-let isRefreshing = false;
-let failedQueue = [];
-
-const processQueue = (error, token = null) => {
-  failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
+  (config) => {
+    const token = getAuthToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-  });
-  failedQueue = [];
-};
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 API.interceptors.response.use(
   (response) => response,
@@ -42,7 +35,6 @@ API.interceptors.response.use(
     }
 
     const { status, data } = error.response;
-    const originalRequest = error.config;
 
     const backendErrors = data?.Erros;
     let errorMessage = "Erro desconhecido";
@@ -58,72 +50,16 @@ API.interceptors.response.use(
     }
 
     if (status === 401) {
-      const isLoginRequest = originalRequest?.url?.includes("/token");
-      const isRefreshRequest = originalRequest?.url?.includes("/refresh-token");
-      const isLoginPage = window.location.pathname.includes("/login");
+      clearAuthToken();
 
-      if (isLoginRequest) {
-        return Promise.reject(error);
-      }
-
-      if (isLoginPage) {
-        return Promise.reject({
-          ...error,
-          message: "Não autenticado",
-          silent: true,
-        });
-      }
-
-      if (isRefreshRequest) {
-        isRefreshing = false;
-        processQueue(error, null);
-        await authService.logout();
+      if (!window.location.pathname.includes("/login")) {
         window.dispatchEvent(new CustomEvent("auth:unauthorized"));
-        return Promise.reject({
-          ...error,
-          message: "Sua sessão expirou. Faça login novamente.",
-        });
       }
 
-      if (originalRequest._retry) {
-        return Promise.reject({
-          ...error,
-          message: "Sua sessão expirou. Faça login novamente.",
-        });
-      }
-
-      originalRequest._retry = true;
-
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then(() => {
-            return API(originalRequest);
-          })
-          .catch((err) => {
-            return Promise.reject(err);
-          });
-      }
-
-      isRefreshing = true;
-
-      try {
-        await authService.refreshToken();
-        processQueue(null);
-        isRefreshing = false;
-        return API(originalRequest);
-      } catch (refreshError) {
-        processQueue(refreshError, null);
-        isRefreshing = false;
-        await authService.logout();
-        window.dispatchEvent(new CustomEvent("auth:unauthorized"));
-
-        return Promise.reject({
-          ...error,
-          message: "Sua sessão expirou. Faça login novamente.",
-        });
-      }
+      return Promise.reject({
+        ...error,
+        message: "Sua sessão expirou. Faça login novamente.",
+      });
     }
 
     if (status === 403) {

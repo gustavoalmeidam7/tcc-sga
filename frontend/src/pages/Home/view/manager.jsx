@@ -40,24 +40,12 @@ function ManagerView() {
     queryKey: ["travels"],
     queryFn: () => getTravels(15, 0),
     staleTime: 1000 * 60 * 2,
-    retry: (failureCount, error) => {
-      if (error?.response?.status === 401) {
-        return false;
-      }
-      return failureCount < 2;
-    },
   });
 
   const { data: users = [], error: usersError } = useQuery({
     queryKey: ["users"],
     queryFn: () => authService.getAllUsers(),
     staleTime: 1000 * 60 * 5,
-    retry: (failureCount, error) => {
-      if (error?.response?.status === 401) {
-        return false;
-      }
-      return failureCount < 2;
-    },
   });
 
   const { geocodeMap } = useGeocodeQueries(travels);
@@ -70,10 +58,6 @@ function ManagerView() {
 
   useEffect(() => {
     if (travelsError) {
-      if (travelsError.response?.status === 401) {
-        return;
-      }
-
       showErrorToast(travelsError, "Erro ao carregar viagens", {
         defaultMessage: "Não foi possível carregar as viagens.",
       });
@@ -82,10 +66,6 @@ function ManagerView() {
 
   useEffect(() => {
     if (usersError) {
-      if (usersError.response?.status === 401) {
-        return;
-      }
-
       showErrorToast(usersError, "Erro ao carregar usuários", {
         defaultMessage: "Não foi possível carregar a lista de motoristas.",
       });
@@ -140,9 +120,9 @@ function ManagerView() {
         open={isAmbulanciasModalOpen}
         onOpenChange={setIsAmbulanciasModalOpen}
       >
-        <DialogContent className="max-w-2xl">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-foreground">Ambulâncias</DialogTitle>
+            <DialogTitle>Ambulâncias Livres</DialogTitle>
           </DialogHeader>
           <AmbulanciasLivresModal />
         </DialogContent>
