@@ -214,7 +214,8 @@ def logout(session: Session) -> Response:
     response.delete_cookie("Authorization")
     response.delete_cookie("refreshToken")
 
-    SessionRepository.delete_token_by_id(session.str_id)
+    if session is not None:
+        SessionRepository.delete_token_by_id(session.str_id)
 
     return response
 

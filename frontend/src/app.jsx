@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { ActiveTravelProvider } from "@/context/ActiveTravelContext";
 import Footer from "./components/layout/footer/footer";
 import "./index.css";
 import { AppSidebar } from "./components/layout/sidebar";
@@ -98,9 +99,11 @@ export default function App() {
       <ErrorBoundary>
         <ThemeProvider>
           <AuthProvider>
-            <OfflineIndicator />
-            <Toaster position="top-right" richColors closeButton />
-            <AppLayout />
+            <ActiveTravelProvider>
+              <OfflineIndicator />
+              <Toaster position="top-right" richColors closeButton />
+              <AppLayout />
+            </ActiveTravelProvider>
           </AuthProvider>
         </ThemeProvider>
       </ErrorBoundary>

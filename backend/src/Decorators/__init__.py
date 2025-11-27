@@ -54,3 +54,20 @@ async def get_user_auth_session(request: Request, token: TOKEN_SCHEME | None = N
     (user, session) = await __get_auth__(request, token)
 
     return session
+
+async def get_user_auth_session_or_none(request: Request, token: TOKEN_SCHEME | None = None) -> Session | None:
+    """ Pega a sessão atual do usuário autenticado """
+
+    cookies = request.cookies
+    httpOnlyCookies = cookies.get("Authorization")
+
+    if httpOnlyCookies:
+        token = httpOnlyCookies
+    
+    if not token:
+        return None
+    
+    currentSession = SessionService.get_current_session_by_token(token)
+    
+    return currentSession
+

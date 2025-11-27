@@ -1,10 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import authService from "@/services/authService";
-import {
-  setAuthToken,
-  clearAuthToken,
-  getAuthToken,
-} from "@/services/tokenStore";
 import { AuthContext } from "@/hooks/useAuth";
 
 export const AuthProvider = ({ children }) => {
@@ -19,49 +14,66 @@ export const AuthProvider = ({ children }) => {
     setError(null);
   }, []);
 
-  const logout = useCallback(() => {
-    clearAuthToken();
-    setUser(null);
+  const logout = useCallback(async () => {
+    try {
+      await authService.logout();
+    } catch (error) {
+      console.error("Erro ao fazer logout no backend:", error);
+    } finally {
+      setUser(null);
+    }
   }, []);
 
-  const updateUser = useCallback(
-    async (token) => {
-      if (!token) return null;
-
-      try {
-        const userData = await authService.getMe();
-        setUser(userData);
-        setError(null);
-        return userData;
-      } catch (error) {
+  const updateUser = useCallback(async () => {
+    try {
+      const userData = await authService.getMe();
+      setUser(userData);
+      setError(null);
+      return userData;
+    } catch (error) {
+      if (!error.silent) {
         console.error("Erro ao carregar dados do usuário:", error);
-
-        if (error.response?.status === 401 || error.response?.status === 403) {
-          logout();
-          setUser(null);
-        }
-
-        setError("Erro ao carregar dados do usuário");
-        throw error;
       }
-    },
-    [logout]
-  );
+
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        logout();
+        setUser(null);
+      }
+
+      if (!error.silent) {
+        setError("Erro ao carregar dados do usuário");
+      }
+      throw error;
+    }
+  }, [logout]);
 
   useEffect(() => {
     if (hasInitialized.current) return;
 
     const loadUserOnMount = async () => {
       hasInitialized.current = true;
+
+      const isLoginPage = window.location.pathname.includes("/login");
+      if (isLoginPage) {
+        setUser(null);
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
 
       try {
-        const token = getAuthToken();
-        if (token) {
-          await updateUser(token);
-        }
+        await updateUser();
       } catch (error) {
-        console.error("Erro na inicialização:", error);
+        if (
+          error.response?.status === 401 ||
+          error.response?.status === 403 ||
+          error.silent
+        ) {
+          setUser(null);
+        } else {
+          console.error("Erro na inicialização:", error);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -94,21 +106,13 @@ export const AuthProvider = ({ children }) => {
         throw new Error("Email e senha são obrigatórios");
       }
 
-      const response = await authService.login(email, senha);
-      const { access_token } = response;
-
-      if (!access_token) {
-        throw new Error("Token não recebido do servidor");
-      }
-
-      setAuthToken(access_token);
+      await authService.login(email, senha);
 
       const userData = await authService.getMe();
       setUser(userData);
 
       return { success: true, user: userData };
     } catch (error) {
-      clearAuthToken();
       setUser(null);
 
       const errorMessage =
@@ -157,12 +161,9 @@ export const AuthProvider = ({ children }) => {
   );
 
   const refreshUser = useCallback(async () => {
-    const token = getAuthToken();
-    if (!token) return null;
-
     setIsLoading(true);
     try {
-      return await updateUser(token);
+      return await updateUser(true);
     } catch (error) {
       throw error;
     } finally {
@@ -171,20 +172,16 @@ export const AuthProvider = ({ children }) => {
   }, [updateUser]);
 
   const validateToken = useCallback(async () => {
-    const token = getAuthToken();
-    if (!token) return false;
-
     try {
       await authService.getMe();
       return true;
     } catch (error) {
       if (error.response?.status === 401 || error.response?.status === 403) {
-        clearAuthToken();
-        setUser(null);
+        await logout();
       }
       return false;
     }
-  }, []);
+  }, [logout]);
 
   const updateUserContext = useCallback((updatedUserData) => {
     setUser(updatedUserData);
