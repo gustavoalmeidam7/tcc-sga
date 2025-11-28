@@ -107,7 +107,7 @@ def datetime_to_http_datetime(date: datetime) -> str:
     return date.strftime("%a, %d %b %Y %H:%M:%S GMT")
 
 def set_http_only_cookie(response: Response, key: str, value: str, expires: datetime) -> Response:
-    response.set_cookie(key=key, value=value, expires=datetime_to_http_datetime(expires), domain=env.get_env_var_not_none("FRONTEND_DOMAIN", "https://dev.tcc-sga.pages.dev/"), path="/", secure=False ,httponly=True, samesite="strict")
+    response.set_cookie(key=key, value=value, expires=datetime_to_http_datetime(expires), domain=env.get_env_var("FRONTEND_DOMAIN", None), path="/", secure=False ,httponly=True, samesite="none")
     return response
 
 """
