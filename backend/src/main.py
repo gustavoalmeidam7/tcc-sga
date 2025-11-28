@@ -31,9 +31,8 @@ def main() -> None:
 
     Logging.log(f"Tokens para gerente: {[mask_uuid(t.str_id) for t in tokens if not t.usado and t.fator_cargo == 2]}", Level.SENSITIVE)
 
-    Logging.log(f"Frontend domain: {get_env_var_not_none("FRONTEND_DOMAIN", "https://dev.tcc-sga.pages.dev/")}", Level.SENSITIVE)
-
-    asyncio.create_task(delete_expired_tokens())
+    if Debug:
+        asyncio.create_task(delete_expired_tokens())
     
 
 app.add_event_handler("startup", Migration.initialize_db)
