@@ -2,7 +2,7 @@ import asyncio
 from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.Utils.env import get_env_var
+from src.Utils.env import get_env_var, get_env_var_not_none
 
 from src import Controller
 from src.DB import Migration
@@ -31,7 +31,8 @@ def main() -> None:
 
     Logging.log(f"Tokens para gerente: {[mask_uuid(t.str_id) for t in tokens if not t.usado and t.fator_cargo == 2]}", Level.SENSITIVE)
 
-    asyncio.create_task(delete_expired_tokens())
+    if Debug:
+        asyncio.create_task(delete_expired_tokens())
     
 
 app.add_event_handler("startup", Migration.initialize_db)

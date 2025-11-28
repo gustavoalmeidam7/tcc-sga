@@ -3,6 +3,7 @@ from slowapi.util import get_ipaddr
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from src.Utils.env import get_env_var
+from src.Utils import env
 
 from src.Repository import UserRepository
 
@@ -105,6 +106,13 @@ def encode_jwt_token(id: str) -> str:
 def datetime_to_http_datetime(date: datetime) -> str:
     return date.strftime("%a, %d %b %Y %H:%M:%S GMT")
 
+def is_debug() -> bool:
+    return bool(env.get_env_var_not_none("environment", "DEV") == "DEV")
+
+def set_http_only_cookie(response: Response, key: str, value: str, expires: datetime) -> Response:
+    response.set_cookie(key=key, value=value, expires=datetime_to_http_datetime(expires), path="/", secure=not is_debug(), httponly=True, samesite="none")
+    return response
+
 """
     Criar
 """
@@ -130,8 +138,8 @@ def generate_access_token(request: Request, formdata: OAuth2PasswordRequestForm)
         content=TokenResponseSchema.model_validate({"access_token": accessToken, "token_type": "bearer", "expires_at": accessExpires.isoformat()}).model_dump_json(),
         media_type="application/json"
     )
-    response.set_cookie(key="Authorization", value=accessToken, expires=datetime_to_http_datetime(accessExpires), path="/", secure=False ,httponly=True, samesite="strict")
-    response.set_cookie(key="refreshToken", value=refreshToken, expires=datetime_to_http_datetime(refreshExpires), path="/", secure=False ,httponly=True, samesite="strict")
+    response = set_http_only_cookie(response, "Authorization", accessToken, accessExpires)
+    response = set_http_only_cookie(response, "refreshToken", refreshToken, refreshExpires)
 
     return response
 
@@ -154,7 +162,7 @@ def refresh_access_token(request: Request) -> Response:
         content=TokenResponseSchema.model_validate({"access_token": accessToken, "token_type": "bearer", "expires_at": accessExpires.isoformat()}).model_dump_json(),
         media_type="application/json"
     )
-    response.set_cookie(key="Authorization", value=accessToken, expires=datetime_to_http_datetime(accessExpires), path="/", secure=False ,httponly=True, samesite="strict")
+    response = set_http_only_cookie(response, "Authorization", accessToken, accessExpires)
 
     return response
 
