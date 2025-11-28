@@ -3,14 +3,13 @@ import { FileText, Hash, MapPin } from "lucide-react";
 
 const hasPacienteData = (viagem) => {
   return (
-    viagem?.paciente_nome ||
-    viagem?.paciente_cpf ||
-    viagem?.paciente_estado ||
-    viagem?.paciente_observacoes
+    viagem?.cpf_paciente ||
+    viagem?.estado_paciente !== undefined ||
+    viagem?.observacoes
   );
 };
 
-const PatientCardComponent = ({ viagem, loading }) => {
+const PatientCardComponent = ({ viagem, loading, solicitante }) => {
   if (loading) {
     return (
       <div className="rounded-lg border border-border bg-muted/30 p-6 animate-pulse">
@@ -24,6 +23,15 @@ const PatientCardComponent = ({ viagem, loading }) => {
       </div>
     );
   }
+
+  const getEstadoPacienteLabel = (estado) => {
+    const estados = {
+      0: "Cadeirante",
+      1: "Maca",
+      2: "Acamado",
+    };
+    return estados[estado] || "Não informado";
+  };
 
   if (!hasPacienteData(viagem)) {
     return (
@@ -43,18 +51,21 @@ const PatientCardComponent = ({ viagem, loading }) => {
     {
       icon: Hash,
       label: "CPF",
-      value: viagem?.paciente_cpf || "Não informado",
+      value: viagem?.cpf_paciente || "Não informado",
     },
     {
       icon: MapPin,
       label: "Estado",
-      value: viagem?.paciente_estado || "Não informado",
+      value:
+        viagem?.estado_paciente !== undefined
+          ? getEstadoPacienteLabel(viagem.estado_paciente)
+          : "Não informado",
     },
     {
       icon: FileText,
       label: "Observações",
-      value: viagem?.paciente_observacoes || "Não informado",
-      multiline: !!viagem?.paciente_observacoes,
+      value: viagem?.observacoes || "Não informado",
+      multiline: !!viagem?.observacoes,
     },
   ];
 
@@ -69,7 +80,7 @@ const PatientCardComponent = ({ viagem, loading }) => {
             Paciente Transportado
           </p>
           <h3 className="text-lg font-bold text-card-foreground">
-            {viagem?.paciente_nome || "Não informado"}
+            {solicitante?.nome || "Não informado"}
           </h3>
         </div>
       </div>
@@ -78,21 +89,29 @@ const PatientCardComponent = ({ viagem, loading }) => {
         {pacienteFields.map((field, index) => (
           <div
             key={index}
-            className={`flex gap-3 ${field.multiline ? "items-start pt-2" : "items-center"}`}
+            className={`flex gap-3 ${
+              field.multiline ? "items-start pt-2" : "items-center"
+            }`}
           >
             <div
-              className={`flex h-8 w-8 items-center justify-center rounded-md bg-muted/50 ${field.multiline ? "flex-shrink-0" : ""}`}
+              className={`flex h-8 w-8 items-center justify-center rounded-md bg-muted/50 ${
+                field.multiline ? "flex-shrink-0" : ""
+              }`}
             >
               <field.icon className="h-4 w-4 text-muted-foreground" />
             </div>
             <div className="flex-1">
               <p
-                className={`text-xs text-muted-foreground ${field.multiline ? "mb-1" : ""}`}
+                className={`text-xs text-muted-foreground ${
+                  field.multiline ? "mb-1" : ""
+                }`}
               >
                 {field.label}
               </p>
               <p
-                className={`text-sm font-semibold text-card-foreground ${field.multiline ? "leading-relaxed font-normal" : ""}`}
+                className={`text-sm font-semibold text-card-foreground ${
+                  field.multiline ? "leading-relaxed font-normal" : ""
+                }`}
               >
                 {field.value}
               </p>

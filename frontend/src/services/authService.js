@@ -44,7 +44,13 @@ const deleteUser = async () => {
 };
 
 const logout = async () => {
-  return clearAuthToken();
+  const response = await API.post("/token/logout");
+  return response.data;
+};
+
+const refreshToken = async () => {
+  const response = await API.post("/token/refresh-token");
+  return response.data;
 };
 
 const authService = {
@@ -56,6 +62,7 @@ const authService = {
   updateUser,
   deleteUser,
   logout,
+  refreshToken,
 };
 
 export default authService;
