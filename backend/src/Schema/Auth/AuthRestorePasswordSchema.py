@@ -4,5 +4,5 @@ from pydantic import EmailStr
 
 from typing import Annotated
 
-class UserRestorePasswordSchema(BaseModel):
+class AuthRestorePasswordSchema(BaseModel):
     userEmail : Annotated[EmailStr, Field(examples=["ronaldo@mail.com"])]

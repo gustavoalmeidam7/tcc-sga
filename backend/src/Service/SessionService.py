@@ -5,16 +5,24 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from src.Utils.env import get_env_var
 from src.Utils import env
 
-from src.Repository import UserRepository
+from src.Repository import UserRepository, RestorePasswordRepository
 
 from src.Schema.Auth.RevokeSessionSchema import RevokeSessionSchema
 from src.Schema.Auth.UserSessionListSchema import UserSessionListSchema
 
 from src.Schema.Auth.TokenResponseSchema import TokenResponseSchema
+from src.Schema.User.UserResponseFullSchema import UserResponseFullSchema
+from src.Schema.Auth.AuthSetRestorePasswordSchema import AuthSetRestorePasswordSchema
+from src.Schema.Auth.AuthRestorePasswordSchema import AuthRestorePasswordSchema
+from src.Schema.Auth.RestorePasswordResponseSchema import RestorePasswordResponseSchema
 
 from src.Error.User.UserInvalidCredentials import invalidCredentials
+from src.Error.Server.InternalServerError import InternalServerError
+from src.Error.Resource.NotFoundResourceError import NotFoundResource
+from src.Error.Server.TryAgainLater import TryAgainLater
 
 from src.Model.UserSession import Session
+from src.Model.RestorePassword import RestorePassword
 from src.Model.User import User
 
 from src.Repository import SessionRepository
@@ -29,7 +37,16 @@ from src.Error.User.UserRBACError import UserRBACError
 from src.Error.Resource.NotFoundResourceError import NotFoundResource
 from src.Error.User.UserInvalidCredentials import invalidCredentials
 
+from src.Validator.GenericValidator import unmask_uuid
+
 from datetime import datetime, timezone, timedelta
+
+from src.Utils import env
+import httpx
+
+from pydantic import EmailStr
+
+from src.Logging import Logging, Level
 
 TOKEN_SCHEME = Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="token"))]
 
@@ -113,9 +130,86 @@ def set_http_only_cookie(response: Response, key: str, value: str, expires: date
     response.set_cookie(key=key, value=value, expires=datetime_to_http_datetime(expires), path="/", secure=not is_debug(), httponly=True, samesite="none")
     return response
 
+def create_restore_password_code(userEmail: EmailStr) -> tuple[RestorePassword, User]:
+    user = UserRepository.find_by_email(userEmail)
+    if not user:
+        raise NotFoundResource("user", f"O usuário com email {userEmail} não foi encontrado.")
+    
+    RestorePasswordRepository.delete_all_user_restore_codes(user.str_id)
+    
+    restorePassword = RestorePasswordRepository.create_restore_password(RestorePassword(usuario= user))
+
+    return (restorePassword, user)
+
+def append_query_params(base: str, key: list[str], value: list[str]) -> str:
+    last = base
+
+    for (k, v) in zip(key, value):
+        separator = "&" if last.find("?") > 0 else "?"
+        last = "".join([last, separator, k, "=", v])
+
+    return last
+
+
 """
     Criar
 """
+
+async def send_restore_password_email(userRestore: AuthRestorePasswordSchema) -> RestorePasswordResponseSchema:
+    (restoreCode, user) = create_restore_password_code(userRestore.userEmail)
+
+    mailGunApiKey = env.get_env_var("MAILGUN_API_KEY")
+    mailGunSandbox = env.get_env_var("MAILGUN_SANDBOX")
+    urlBase = f"https://api.mailgun.net/v3/{mailGunSandbox}.mailgun.org/messages"
+    mailGunFrom = f"Serviço SGA <postmaster@{mailGunSandbox}.mailgun.org>"
+    frontendBaseUrl = env.get_env_var("FRONTEND_BASE_URL")
+    frontendRestoreRoute = env.get_env_var("FRONTEND_RESTORE_ROUTE")
+
+    if not mailGunApiKey or not mailGunSandbox or not frontendBaseUrl or not frontendRestoreRoute:
+        Logging.log("Chaves para envio de email não foram configuradas!", Level.ERROR)
+        raise InternalServerError()
+    
+    restoreUrl = f"{frontendBaseUrl}{frontendRestoreRoute}/{restoreCode.uuid_id}"
+
+    keys = ["from", "to", "subject", "template", "h:X-Mailgun-Variables"]
+    values = [
+        mailGunFrom,
+        userRestore.userEmail,
+        "SGA Código de recuperação de senha",
+        "password-restore",
+        f"{{\"RESTORE_CODE\": \"{restoreCode.uuid_id}\",\"USERNAME\": \"{user.nome}\", \"RESTORE_LINK\": \"{restoreUrl}\"}}"
+    ]
+
+    url = append_query_params(urlBase, keys, values)
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            url,
+            headers={"api": mailGunApiKey},
+            auth=("api", mailGunApiKey)
+        )
+
+        if response.status_code != status.HTTP_200_OK:
+            raise TryAgainLater("Erro no envio do email! tente novamente mais tarde")
+        
+    return RestorePasswordResponseSchema.model_validate({"userMessage":str(userRestore.userEmail)})
+        
+async def restore_user_password(userRestore: AuthSetRestorePasswordSchema) -> UserResponseFullSchema:
+    restorePassword = RestorePasswordRepository.find_restore_password_by_id(unmask_uuid(userRestore.restoreCode))
+
+    if not restorePassword:
+        raise NotFoundResource("user_restore", "Não foi possível encontrar o usuário para restaurar a senha.")
+    
+    userId = restorePassword.usuario_str_id
+
+    newPassword = get_password_hash(userRestore.newPassword)
+
+    user = UserRepository.update_user_by_id(userId, senha=newPassword)
+
+    if not user:
+        raise InternalServerError()
+    
+    return UserResponseFullSchema.model_validate(user)
 
 def generate_access_token(request: Request, formdata: OAuth2PasswordRequestForm) -> Response:
     userIP = get_ipaddr(request)

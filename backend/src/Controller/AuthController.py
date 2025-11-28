@@ -3,14 +3,17 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from typing import Annotated
 
-from src.Schema.User.UserResponseSchema import UserResponseSchema
-
 from src.Schema.Auth.RevokeSessionSchema import RevokeSessionSchema
 from src.Schema.Auth.UserSessionListSchema import UserSessionListSchema
 from src.Schema.Auth.TokenResponseSchema import TokenResponseSchema
+from src.Schema.User.UserResponseFullSchema import UserResponseFullSchema
+from src.Schema.Auth.RestorePasswordResponseSchema import RestorePasswordResponseSchema
+
+from src.Schema.Auth.AuthRestorePasswordSchema import AuthRestorePasswordSchema
+from src.Schema.Auth.AuthSetRestorePasswordSchema import AuthSetRestorePasswordSchema
 
 from src.Service.SessionService import TOKEN_SCHEME
-from src.Service import SessionService
+from src.Service import SessionService, UserService
 
 from src.Decorators import UserDecorators
 
@@ -114,4 +117,32 @@ async def logout(session: UserDecorators.GET_AUTHENTICATED_SESSION) -> Response:
     """
 
     return SessionService.logout(session)
+
+@AUTH_ROUTER.post("/send-restore-password")
+async def send_restore_password(userRestore: AuthRestorePasswordSchema) -> RestorePasswordResponseSchema:
+    """
+    Envia um email com código único para fazer restore da senha :
+
+    **acesso**: `None` \n
+    **parâmetro**: Body: \n
+        `AuthRestorePasswordSchema` \n
+    **retorno**: devolve: \n
+        `RestorePasswordResponseSchema`
+    """
+     
+    return await SessionService.send_restore_password_email(userRestore)
+
+@AUTH_ROUTER.post("/restore-password")
+async def restore_password(userRestore: AuthSetRestorePasswordSchema) -> UserResponseFullSchema:
+    """
+    Faz a restauração da senha a partir do código enviado por email (Veja o endpoint `/send-restore-password`) :
+
+    **acesso**: `None` \n
+    **parâmetro**: Body: \n
+        `AuthSetRestorePasswordSchema` \n
+    **retorno**: devolve: \n
+        `UserResponseFullSchema`
+    """
+     
+    return await SessionService.restore_user_password(userRestore)
 

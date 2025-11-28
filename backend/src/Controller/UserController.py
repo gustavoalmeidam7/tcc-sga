@@ -7,7 +7,6 @@ from src.Schema.User.UserResponseSchema import UserResponseSchema
 from src.Schema.User.UserUpdateSchema import UserUpdateSchema
 from src.Schema.User.UserUpdateResponseSchema import UserUpdateResponseSchema
 from src.Schema.User.UserResponseFullSchema import UserResponseFullSchema
-from src.Schema.User.UserRestorePasswordSchema import UserRestorePasswordSchema
 
 from src.Decorators.UserDecorators import GET_AUTHENTICATED_USER
 from src.Decorators.DriverDecorator import GET_AUTHENTICATED_DRIVER, GET_AUTHENTICATED_DRIVER_OR_HIGHER
@@ -124,16 +123,3 @@ async def get_user_by_id(user: GET_AUTHENTICATED_DRIVER_OR_HIGHER, userId: UUID)
         raise USER_NOT_FOUND_EXCEPTION
     
     return user
-
-@USER_ROUTER.post("/restore-password", status_code=status.HTTP_204_NO_CONTENT)
-async def restore_password(userRestore: UserRestorePasswordSchema) -> None:
-    """
-    Envia um email com código único para fazer restore da senha :
-
-    **acesso**: `None` \n
-    **parâmetro**: Sem parâmetros \n
-    **retorno**: devolve: \n
-        204 NO CONTENT
-    """
-     
-    await UserService.send_restore_password_email(userRestore)
