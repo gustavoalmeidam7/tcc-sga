@@ -106,8 +106,11 @@ def encode_jwt_token(id: str) -> str:
 def datetime_to_http_datetime(date: datetime) -> str:
     return date.strftime("%a, %d %b %Y %H:%M:%S GMT")
 
+def is_debug() -> bool:
+    return bool(env.get_env_var_not_none("environment", "DEV") == "DEV")
+
 def set_http_only_cookie(response: Response, key: str, value: str, expires: datetime) -> Response:
-    response.set_cookie(key=key, value=value, expires=datetime_to_http_datetime(expires), domain=env.get_env_var("FRONTEND_DOMAIN", None), path="/", secure=False ,httponly=True, samesite="none")
+    response.set_cookie(key=key, value=value, expires=datetime_to_http_datetime(expires), path="/", secure=not is_debug(), httponly=True, samesite="none")
     return response
 
 """
