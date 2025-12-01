@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
-import travelService from '../services/travel';
-import { TravelStatus } from '@/src/lib/travel-status';
+import { useState, useEffect, useCallback, useMemo } from "react";
+import travelService from "../services/travel";
+import { TravelStatus } from "@/src/lib/travel-status";
 
 export const useTravels = () => {
   const [travels, setTravels] = useState([]);
@@ -14,8 +14,8 @@ export const useTravels = () => {
       const data = await travelService.getAssignedTravels(0, 50, false);
       setTravels(data || []);
     } catch (err) {
-      console.error('Erro ao buscar viagens:', err);
-      setError(err.message || 'Erro ao carregar viagens');
+      console.error("Erro ao buscar viagens:", err);
+      setError(err.message || "Erro ao carregar viagens");
       setTravels([]);
     } finally {
       setLoading(false);
@@ -24,6 +24,13 @@ export const useTravels = () => {
 
   useEffect(() => {
     fetchTravels();
+
+    const POLLING_INTERVAL = 30000;
+    const interval = setInterval(() => {
+      fetchTravels();
+    }, POLLING_INTERVAL);
+
+    return () => clearInterval(interval);
   }, [fetchTravels]);
 
   const getTravelStats = useCallback(() => {
@@ -33,20 +40,29 @@ export const useTravels = () => {
     const tomorrow = new Date(hoje);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const viagensAtribuidas = travels.filter(t => !t.cancelada).length;
-    const viagensConcluidasHoje = travels.filter(t => {
+    const viagensAtribuidas = travels.filter((t) => !t.cancelada).length;
+    const viagensConcluidasHoje = travels.filter((t) => {
       if (!t.fim || t.cancelada) return false;
       const fimDate = new Date(t.fim);
-      return fimDate >= hoje && fimDate < tomorrow && t.realizado === TravelStatus.REALIZADO;
+      return (
+        fimDate >= hoje &&
+        fimDate < tomorrow &&
+        t.realizado === TravelStatus.REALIZADO
+      );
     }).length;
 
-    const viagemEmAndamento = travels.find(t => t.realizado === TravelStatus.EM_PROGRESSO && !t.cancelada) || null;
+    const viagemEmAndamento =
+      travels.find(
+        (t) => t.realizado === TravelStatus.EM_PROGRESSO && !t.cancelada
+      ) || null;
 
-    const viagensHoje = travels.filter(t => {
-      if (t.cancelada || t.realizado === TravelStatus.REALIZADO) return false;
-      const inicioDate = new Date(t.inicio);
-      return inicioDate >= hoje && inicioDate < tomorrow;
-    }).sort((a, b) => new Date(a.inicio) - new Date(b.inicio));
+    const viagensHoje = travels
+      .filter((t) => {
+        if (t.cancelada || t.realizado === TravelStatus.REALIZADO) return false;
+        const inicioDate = new Date(t.inicio);
+        return inicioDate >= hoje && inicioDate < tomorrow;
+      })
+      .sort((a, b) => new Date(a.inicio) - new Date(b.inicio));
 
     return {
       viagensAtribuidas,
@@ -56,11 +72,18 @@ export const useTravels = () => {
     };
   }, [travels]);
 
+  const emViagem = useMemo(() => {
+    return travels.some(
+      (t) => t.realizado === TravelStatus.EM_PROGRESSO && !t.cancelada
+    );
+  }, [travels]);
+
   return {
     travels,
     loading,
     error,
     fetchTravels,
     getTravelStats,
+    emViagem,
   };
 };

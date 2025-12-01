@@ -4,7 +4,8 @@ import * as Location from "expo-location";
 export function useLocation(options = {}) {
   const {
     accuracy = Location.Accuracy.High,
-    updateInterval = 5000,
+    updateInterval = 2000,
+    distanceInterval = 10,
     enabled = true,
   } = options;
 
@@ -21,7 +22,7 @@ export function useLocation(options = {}) {
 
     let isMounted = true;
 
-    const requestPermissionsAndGetLocation = async () => {
+    const startLocationTracking = async () => {
       try {
         setLoading(true);
         setError(null);
@@ -31,26 +32,22 @@ export function useLocation(options = {}) {
           throw new Error("Permissão de localização negada");
         }
 
-        const currentLocation = await Location.getCurrentPositionAsync({
-          accuracy,
-        });
-
-        if (isMounted) {
+        const lastKnown = await Location.getLastKnownPositionAsync();
+        if (isMounted && lastKnown) {
           setLocation({
-            latitude: currentLocation.coords.latitude,
-            longitude: currentLocation.coords.longitude,
-            accuracy: currentLocation.coords.accuracy,
-            heading: currentLocation.coords.heading,
-            speed: currentLocation.coords.speed,
+            latitude: lastKnown.coords.latitude,
+            longitude: lastKnown.coords.longitude,
+            accuracy: lastKnown.coords.accuracy,
+            heading: lastKnown.coords.heading,
+            speed: lastKnown.coords.speed,
           });
           setLoading(false);
         }
-
         watchSubscriptionRef.current = await Location.watchPositionAsync(
           {
             accuracy,
             timeInterval: updateInterval,
-            distanceInterval: 10,
+            distanceInterval: distanceInterval,
           },
           (newLocation) => {
             if (isMounted) {
@@ -61,6 +58,7 @@ export function useLocation(options = {}) {
                 heading: newLocation.coords.heading,
                 speed: newLocation.coords.speed,
               });
+              setLoading(false);
             }
           }
         );
@@ -72,7 +70,7 @@ export function useLocation(options = {}) {
       }
     };
 
-    requestPermissionsAndGetLocation();
+    startLocationTracking();
 
     return () => {
       isMounted = false;
@@ -81,7 +79,7 @@ export function useLocation(options = {}) {
         watchSubscriptionRef.current = null;
       }
     };
-  }, [enabled, accuracy, updateInterval]);
+  }, [enabled, accuracy, updateInterval, distanceInterval]);
 
   return { location, error, loading };
 }

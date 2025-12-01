@@ -1,5 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
-import driverService from '../services/driver';
+import { useState, useEffect, useCallback } from "react";
+import {
+  getDriverInfo as fetchDriverInfoRequest,
+  updateDriver as updateDriverRequest,
+} from "../services/driver";
 
 export const useDriver = () => {
   const [driverInfo, setDriverInfo] = useState(null);
@@ -10,11 +13,11 @@ export const useDriver = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await driverService.getDriverInfo();
+      const data = await fetchDriverInfoRequest();
       setDriverInfo(data);
     } catch (err) {
-      console.error('Erro ao buscar informações do motorista:', err);
-      setError(err.message || 'Erro ao carregar informações do motorista');
+      console.error("Erro ao buscar informações do motorista:", err);
+      setError(err.message || "Erro ao carregar informações do motorista");
       setDriverInfo(null);
     } finally {
       setLoading(false);
@@ -29,12 +32,12 @@ export const useDriver = () => {
     try {
       setLoading(true);
       setError(null);
-      const updatedData = await driverService.updateDriver(driverFields);
+      const updatedData = await updateDriverRequest(driverFields);
       setDriverInfo(updatedData);
       return updatedData;
     } catch (err) {
-      console.error('Erro ao atualizar motorista:', err);
-      setError(err.message || 'Erro ao atualizar informações');
+      console.error("Erro ao atualizar motorista:", err);
+      setError(err.message || "Erro ao atualizar informações");
       throw err;
     } finally {
       setLoading(false);

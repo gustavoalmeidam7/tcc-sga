@@ -18,9 +18,19 @@ export const getDriverTravels = async () => {
   }
 };
 
+export const updateDriver = async (driverFields) => {
+  try {
+    const response = await API.patch("/driver/update/", driverFields);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 const driverService = {
   getDriverInfo,
   getDriverTravels,
+  updateDriver,
 };
 
 export default driverService;

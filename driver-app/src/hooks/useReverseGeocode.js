@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from "react";
+import { formatarEndereco } from "../lib/format-utils"; // Importar formatarEndereco
 
-const GEOAPIFY_API_KEY = process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY;
-
-let fallbackToastShown = false;
+const GEOAPIFY_API_KEY = "aebbd6003ace495cb8242038b45cf6ca";
 
 async function fetchWithGeoapify(lat, lon, signal) {
   if (!GEOAPIFY_API_KEY) {
@@ -170,7 +169,7 @@ export function useReverseGeocode(lat, lon, options = {}) {
         }
 
         if (!signal.aborted) {
-          setEndereco(resultado);
+          setEndereco(formatarEndereco(resultado));
         }
       } catch (err) {
         if (err.name !== "AbortError" && !signal.aborted) {
