@@ -66,7 +66,7 @@ export default function ManagerDetalhesAmbulanciaView() {
   const { data: motorista, isLoading: loadingMotorista } = useQuery({
     queryKey: ["user", ambulancia?.motorista_id],
     queryFn: () => authService.getUserById(ambulancia.motorista_id),
-    enabled: !!ambulancia?.motorista_id && !!driverInfo,
+    enabled: !!ambulancia?.motorista_id,
     staleTime: 1000 * 60 * 5,
   });
 

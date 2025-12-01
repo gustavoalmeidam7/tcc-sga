@@ -683,31 +683,6 @@ function DriverView() {
               </CardContent>
             </Card>
           )}
-
-          {isLoadingTravels
-            ? null
-            : viagensAtribuidas.length === 0 && (
-                <Card>
-                  <CardContent className="p-8 md:p-12 text-center">
-                    <div className="flex flex-col items-center gap-3 md:gap-4">
-                      <div className="p-3 md:p-4 bg-muted rounded-full">
-                        <Truck
-                          className="h-8 w-8 md:h-12 md:w-12 text-muted-foreground"
-                          aria-hidden="true"
-                        />
-                      </div>
-                      <div>
-                        <h3 className="text-base md:text-lg font-semibold mb-1">
-                          Nenhuma viagem atribuída
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          Aguarde o gerente atribuir viagens para você.
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
         </div>
 
         <div className="hidden lg:block space-y-6">

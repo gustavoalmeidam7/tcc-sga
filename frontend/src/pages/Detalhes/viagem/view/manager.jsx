@@ -115,7 +115,7 @@ export default function ManagerDetalhesView() {
   const { data: motorista, isLoading: loadingMotorista } = useQuery({
     queryKey: ["user", viagem?.id_motorista],
     queryFn: () => authService.getUserById(viagem.id_motorista),
-    enabled: !!viagem?.id_motorista && !!driverInfo,
+    enabled: !!viagem?.id_motorista,
     staleTime: 1000 * 60 * 5,
   });
 

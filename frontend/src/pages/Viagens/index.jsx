@@ -241,6 +241,20 @@ function Viagens() {
                 destino={viagem.destino}
                 rota={viagem.rota}
                 loading={viagem.loading}
+                allowPinSelection={true}
+                onCoordChange={({ type, coords, endereco }) => {
+                  if (type === "origem") {
+                    viagem.setCoordOrigem(coords);
+                    if (endereco) {
+                      viagem.setOrigem(endereco);
+                    }
+                  } else if (type === "destino") {
+                    viagem.setCoordDestino(coords);
+                    if (endereco) {
+                      viagem.setDestino(endereco);
+                    }
+                  }
+                }}
               />
             </div>
           </motion.div>
