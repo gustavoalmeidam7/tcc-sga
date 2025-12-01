@@ -7,7 +7,6 @@ const API = axios.create({
   baseURL: API_URL,
   headers: {
     "Content-Type": "application/json",
-    "credentials": "include"
   },
   withCredentials: true,
 });
@@ -62,12 +61,19 @@ API.interceptors.response.use(
       const isLoginRequest = originalRequest?.url?.includes("/token");
       const isRefreshRequest = originalRequest?.url?.includes("/refresh-token");
       const isLoginPage = window.location.pathname.includes("/login");
+      const isRecoverPasswordPage =
+        window.location.pathname.includes("/rec_senha");
+      const isPublicPage = isLoginPage || isRecoverPasswordPage;
 
+      // Não tenta refresh em requisições de login ou páginas públicas
       if (isLoginRequest) {
-        return Promise.reject(error);
+        return Promise.reject({
+          ...error,
+          silent: true,
+        });
       }
 
-      if (isLoginPage) {
+      if (isPublicPage) {
         return Promise.reject({
           ...error,
           message: "Não autenticado",
@@ -78,11 +84,11 @@ API.interceptors.response.use(
       if (isRefreshRequest) {
         isRefreshing = false;
         processQueue(error, null);
-        await authService.logout();
         window.dispatchEvent(new CustomEvent("auth:unauthorized"));
         return Promise.reject({
           ...error,
           message: "Sua sessão expirou. Faça login novamente.",
+          silent: true,
         });
       }
 
@@ -117,12 +123,12 @@ API.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         isRefreshing = false;
-        await authService.logout();
         window.dispatchEvent(new CustomEvent("auth:unauthorized"));
 
         return Promise.reject({
           ...error,
           message: "Sua sessão expirou. Faça login novamente.",
+          silent: refreshError.response?.status === 401,
         });
       }
     }

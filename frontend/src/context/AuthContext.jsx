@@ -15,12 +15,13 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const logout = useCallback(async () => {
+    setUser(null);
     try {
       await authService.logout();
     } catch (error) {
-      console.error("Erro ao fazer logout no backend:", error);
-    } finally {
-      setUser(null);
+      if (error.response?.status !== 401) {
+        console.error("Erro ao fazer logout no backend:", error);
+      }
     }
   }, []);
 
@@ -31,21 +32,18 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       return userData;
     } catch (error) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        setUser(null);
+        throw { ...error, silent: true };
+      }
+
       if (!error.silent) {
         console.error("Erro ao carregar dados do usuário:", error);
-      }
-
-      if (error.response?.status === 401 || error.response?.status === 403) {
-        logout();
-        setUser(null);
-      }
-
-      if (!error.silent) {
         setError("Erro ao carregar dados do usuário");
       }
       throw error;
     }
-  }, [logout]);
+  }, []);
 
   useEffect(() => {
     if (hasInitialized.current) return;
@@ -54,7 +52,10 @@ export const AuthProvider = ({ children }) => {
       hasInitialized.current = true;
 
       const isLoginPage = window.location.pathname.includes("/login");
-      if (isLoginPage) {
+      const isRecoverPasswordPage =
+        window.location.pathname.includes("/rec_senha");
+
+      if (isLoginPage || isRecoverPasswordPage) {
         setUser(null);
         setIsLoading(false);
         return;
