@@ -1,7 +1,9 @@
 import axios from "axios";
 import { clearAuthToken, getAuthToken } from "./tokenStore.js";
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
+const API_URL = __DEV__
+  ? "http://127.0.0.1:8000"
+  : "https://tcc-sga.onrender.com";
 
 let onTokenExpiredCallback = null;
 
@@ -54,6 +56,13 @@ API.interceptors.response.use(
     }
 
     if (status === 401) {
+      if (error.config?.url?.includes("/token")) {
+        return Promise.reject({
+          ...error,
+          message: errorMessage || "Credenciais inválidas",
+        });
+      }
+      
       await clearAuthToken();
       if (onTokenExpiredCallback) {
         onTokenExpiredCallback();
@@ -86,6 +95,12 @@ API.interceptors.response.use(
     }
 
     if (status >= 500) {
+      if (
+        error.config?.url?.includes("/me") ||
+        error.config?.url?.includes("/auth")
+      ) {
+        await clearAuthToken();
+      }
       return Promise.reject({
         ...error,
         message: "Erro no servidor. Tente novamente mais tarde.",

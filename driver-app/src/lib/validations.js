@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { unmaskCPF, unmaskPhone } from "@/lib/format-utils";
+import { unmaskCPF, unmaskPhone } from "@/src/lib/format-utils";
 
 export const validarCPF = (cpf) => {
   if (typeof cpf !== "string") return false;

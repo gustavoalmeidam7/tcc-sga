@@ -3,6 +3,7 @@
     "name": "SGA Motorista",
     "slug": "driver-app",
     "version": "1.0.0",
+    "main": "index.js",
     "description": "Aplicativo para motoristas do Sistema de Gestão de Ambulâncias - Gerencie suas viagens e navegação de forma eficiente",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -22,7 +23,11 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Este app precisa de acesso à sua localização para navegação durante as viagens.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "Este app precisa de acesso à sua localização para navegação durante as viagens.",
-        "UIBackgroundModes": ["location"]
+        "UIBackgroundModes": [
+          "location",
+          "location"
+        ],
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -37,7 +42,9 @@
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
-        "ACCESS_BACKGROUND_LOCATION"
+        "ACCESS_BACKGROUND_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
       ],
       "blockedPermissions": [
         "android.permission.RECORD_AUDIO"
@@ -56,12 +63,11 @@
       "translucent": false
     },
     "web": {
-      "output": "static",
-      "favicon": "./assets/images/favicon.png",
+      "output": "single",
+      "favicon": "./assets/images/icon.png",
       "bundler": "metro"
     },
     "plugins": [
-      "expo-router",
       [
         "expo-splash-screen",
         {
@@ -80,19 +86,16 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Este app precisa de acesso à sua localização para navegação durante as viagens."
         }
-      ],
-      "expo-maps"
+      ]
     ],
     "experiments": {
-      "typedRoutes": true,
       "reactCompiler": true
     },
     "extra": {
-      "router": {},
       "eas": {
-        "projectId": "7c89f749-6d46-498b-a0b0-67fc8ad225d8"
+        "projectId": "fec5bd5f-8f8a-4d63-b97e-a2e4ac8c2880"
       }
-    }
+    },
+    "owner": "maikwk33"
   }
 }
-

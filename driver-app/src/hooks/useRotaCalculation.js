@@ -79,7 +79,7 @@ export function useRotaCalculation(coordOrigem, coordDestino, onRotaCalculada) {
       );
 
       if (retryCount < maxRetries) {
-        const delay = 1000 * Math.pow(2, retryCount); // 1s, 2s, 4s
+        const delay = 1000 * Math.pow(2, retryCount);
         await new Promise((resolve) => setTimeout(resolve, delay));
         return calcularRota(origem, destino, retryCount + 1);
       }
