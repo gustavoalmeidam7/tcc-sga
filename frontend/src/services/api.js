@@ -1,5 +1,6 @@
 import axios from "axios";
 import authService from "./authService";
+import { PUBLIC_PATHS } from "@/lib/constants";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -60,12 +61,12 @@ API.interceptors.response.use(
     if (status === 401) {
       const isLoginRequest = originalRequest?.url?.includes("/token");
       const isRefreshRequest = originalRequest?.url?.includes("/refresh-token");
-      const isLoginPage = window.location.pathname.includes("/login");
-      const isRecoverPasswordPage =
-        window.location.pathname.includes("/rec_senha");
-      const isPublicPage = isLoginPage || isRecoverPasswordPage;
 
-      // Não tenta refresh em requisições de login ou páginas públicas
+      const currentPath = window.location.pathname;
+      const isPublicPage = PUBLIC_PATHS.some((path) =>
+        path === "/" ? currentPath === "/" : currentPath.startsWith(path)
+      );
+
       if (isLoginRequest) {
         return Promise.reject({
           ...error,

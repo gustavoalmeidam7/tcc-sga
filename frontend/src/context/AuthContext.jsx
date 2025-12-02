@@ -2,6 +2,8 @@ import React, { useState, useCallback, useEffect, useRef } from "react";
 import authService from "@/services/authService";
 import { AuthContext } from "@/hooks/useAuth";
 
+import { PUBLIC_PATHS } from "@/lib/constants";
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -51,17 +53,19 @@ export const AuthProvider = ({ children }) => {
     const loadUserOnMount = async () => {
       hasInitialized.current = true;
 
-      const isLoginPage = window.location.pathname.includes("/login");
-      const isRecoverPasswordPage =
-        window.location.pathname.includes("/rec_senha");
+      const currentPath = window.location.pathname;
+      const isPublicPage = PUBLIC_PATHS.some((path) =>
+        path === "/" ? currentPath === "/" : currentPath.startsWith(path)
+      );
 
-      if (isLoginPage || isRecoverPasswordPage) {
-        setUser(null);
+      if (isPublicPage) {
         setIsLoading(false);
-        return;
+        if (currentPath === "/") {
+          return;
+        }
+      } else {
+        setIsLoading(true);
       }
-
-      setIsLoading(true);
 
       try {
         await updateUser();
@@ -165,8 +169,6 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(true);
     try {
       return await updateUser(true);
-    } catch (error) {
-      throw error;
     } finally {
       setIsLoading(false);
     }

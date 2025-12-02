@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import {
   createColumnsViagens,
-  columns_motoristas,
+  createColumnsMotoristas,
 } from "../components/columns";
 import { getTravels } from "@/services/travelService";
 import authService from "@/services/authService";
@@ -111,6 +111,11 @@ function ManagerView() {
     [navigate]
   );
 
+  const columns_motoristas_with_nav = useMemo(
+    () => createColumnsMotoristas(navigate),
+    [navigate]
+  );
+
   return (
     <main className="space-y-6 lg:container lg:mx-auto">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -165,7 +170,7 @@ function ManagerView() {
           viagensPendentesTotal={viagensPendentes.length}
           motoristas={enrichedDrivers}
           columnsViagens={columns_viagens_with_nav}
-          columnsMotoristas={columns_motoristas}
+          columnsMotoristas={columns_motoristas_with_nav}
           onVerTodasClick={() => navigate("/agendamentos")}
           isLoadingData={isLoadingData}
         />
@@ -176,7 +181,10 @@ function ManagerView() {
           </section>
 
           <section className="w-full max-w-sm">
-            <RecentActivity />
+            <RecentActivity
+              motoristas={enrichedDrivers}
+              viagensPendentes={viagensPendentes}
+            />
           </section>
         </aside>
       </div>

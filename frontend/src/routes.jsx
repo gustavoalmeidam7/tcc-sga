@@ -4,6 +4,9 @@ import PublicRoute from "./components/PublicRoute";
 import RoleBasedRoute from "./components/RoleBasedRoute";
 import AnimatedPage from "./components/ui/animated-page";
 import { ROLES } from "./lib/roles";
+import { PUBLIC_PATHS } from "./lib/constants";
+
+export { PUBLIC_PATHS };
 
 const LandingPage = lazy(() => import("./pages/LandingPage"));
 const Home = lazy(() => import("./pages/Home"));

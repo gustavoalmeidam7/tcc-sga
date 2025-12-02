@@ -4,15 +4,21 @@ import { getAmbulances, getAmbulanceById } from "@/services/ambulanceService";
 import { getDriverById } from "@/services/driverService";
 
 export function useDriversInfo(motoristas) {
-  const { data: ambulancesResponse } = useQuery({
-    queryKey: ["ambulances"],
-    queryFn: () => getAmbulances(0, 100),
-    staleTime: 1000 * 60 * 5,
-  });
+  const { data: ambulancesResponse, isLoading: isLoadingAmbulances } = useQuery(
+    {
+      queryKey: ["ambulances"],
+      queryFn: () => getAmbulances(0, 100),
+      staleTime: 1000 * 60 * 5,
+      retry: 2,
+    }
+  );
 
-  const ambulances = Array.isArray(ambulancesResponse)
-    ? ambulancesResponse
-    : ambulancesResponse?.ambulancias || [];
+  const ambulances = useMemo(() => {
+    if (Array.isArray(ambulancesResponse)) {
+      return ambulancesResponse;
+    }
+    return ambulancesResponse?.ambulancias || [];
+  }, [ambulancesResponse]);
 
   const ambulanciaPorMotorista = useMemo(() => {
     const mapa = {};
@@ -30,24 +36,28 @@ export function useDriversInfo(motoristas) {
       queryFn: () => getDriverById(motorista.id),
       enabled: !!motorista.id,
       staleTime: 1000 * 60 * 5,
+      retry: 1,
     })),
   });
 
+  const motoristasComAmbulancia = useMemo(() => {
+    return motoristas.filter((m) => {
+      const amb = ambulanciaPorMotorista[m.id];
+      return amb && amb.id;
+    });
+  }, [motoristas, ambulanciaPorMotorista]);
+
   const ambulanceQueries = useQueries({
-    queries: motoristas
-      .filter((m) => {
-        const amb = ambulanciaPorMotorista[m.id];
-        return amb && amb.id;
-      })
-      .map((motorista) => {
-        const amb = ambulanciaPorMotorista[motorista.id];
-        return {
-          queryKey: ["ambulance", amb.id],
-          queryFn: () => getAmbulanceById(amb.id),
-          enabled: !!amb?.id,
-          staleTime: 1000 * 60 * 5,
-        };
-      }),
+    queries: motoristasComAmbulancia.map((motorista) => {
+      const amb = ambulanciaPorMotorista[motorista.id];
+      return {
+        queryKey: ["ambulance", amb.id],
+        queryFn: () => getAmbulanceById(amb.id),
+        enabled: !!amb?.id,
+        staleTime: 1000 * 60 * 5,
+        retry: 1,
+      };
+    }),
   });
 
   const enrichedDrivers = useMemo(() => {
@@ -60,29 +70,28 @@ export function useDriversInfo(motoristas) {
     });
 
     const ambulanceMap = {};
-    let queryIndex = 0;
-    motoristas.forEach((motorista) => {
-      const amb = ambulanciaPorMotorista[motorista.id];
-      if (amb && amb.id) {
-        const query = ambulanceQueries[queryIndex];
-        if (query?.data) {
+    motoristasComAmbulancia.forEach((motorista, index) => {
+      const query = ambulanceQueries[index];
+      if (query?.data) {
+        const amb = ambulanciaPorMotorista[motorista.id];
+        if (amb) {
           ambulanceMap[motorista.id] = query.data;
         }
-        queryIndex++;
       }
     });
 
-    return motoristas.map((motorista, index) => {
+    return motoristas.map((motorista) => {
       const driverInfoData = driverInfoMap[motorista.id];
       const amb = ambulanciaPorMotorista[motorista.id];
+
       const ambulancia =
-        ambulanceMap[motorista.id] || driverInfoData?.ambulancia || null;
+        ambulanceMap[motorista.id] || amb || driverInfoData?.ambulancia || null;
 
       const driverInfo = {
-        id_ambulancia: amb?.id || driverInfoData?.ambulancia?.id || null,
-        em_viagem: driverInfoData?.em_viagem || motorista.em_viagem || false,
-        cnh: motorista.cnh || null,
-        vencimento: motorista.vencimento || null,
+        id_ambulancia: amb?.id || driverInfoData?.id_ambulancia || null,
+        em_viagem: driverInfoData?.em_viagem ?? motorista.em_viagem ?? false,
+        cnh: driverInfoData?.cnh || motorista.cnh || null,
+        vencimento: driverInfoData?.vencimento || motorista.vencimento || null,
       };
 
       return {
@@ -91,14 +100,26 @@ export function useDriversInfo(motoristas) {
         ambulancia,
       };
     });
-  }, [motoristas, ambulanciaPorMotorista, ambulanceQueries, driverQueries]);
+  }, [
+    motoristas,
+    ambulanciaPorMotorista,
+    driverQueries,
+    ambulanceQueries,
+    motoristasComAmbulancia,
+  ]);
 
   const isLoading =
+    isLoadingAmbulances ||
     driverQueries.some((q) => q.isLoading) ||
     ambulanceQueries.some((q) => q.isLoading);
+
+  const hasError =
+    driverQueries.some((q) => q.isError) ||
+    ambulanceQueries.some((q) => q.isError);
 
   return {
     enrichedDrivers,
     isLoading,
+    hasError,
   };
 }
