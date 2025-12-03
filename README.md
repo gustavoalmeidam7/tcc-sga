@@ -59,6 +59,12 @@ Database_Port = postgres_database_Port
 Database_User = postgres_database_User
 ```
 
+Para a utilização da feature de restaurar senha é necessário fazer uma conta gratuita no [Mailgun](https://app.mailgun.com/), gerar uma API KEY e uma sandbox
+```js
+MAILGUN_API_KEY = mailgun_api_key
+MAILGUN_SANDBOX = YOUR_MAILGUN_SANDBOX
+```
+
 Para executar use:
 ```bash
 uvicorn src.main:app

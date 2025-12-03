@@ -1,5 +1,3 @@
-from src.Error.Base.ErrorListClass import ErrorListClass
-
 from fastapi import status
 
 from src.Schema.User.UserCreateSchema import UserCreateSchema
@@ -9,6 +7,9 @@ from src.Schema.User.UserUpdateResponseSchema import UserUpdateResponseSchema
 from src.Schema.User.UserResponseFullSchema import UserResponseFullSchema
 from src.Schema.User.UserUpdateSchema import UserUpdateSchema
 
+from src.Error.Server.InternalServerError import InternalServerError
+from src.Error.Base.ErrorListClass import ErrorListClass
+
 from src.Model.User import User
 
 from src.Validator.UserValidator import UserValidator
@@ -17,8 +18,11 @@ from src.Validator.GenericValidator import unmask_uuid
 from uuid import UUID
 
 from src.Repository import UserRepository
-
 from src.Service import SessionService
+
+"""
+    Helpers
+"""
 
 """
     Criar
@@ -36,6 +40,7 @@ def create(userSchema: UserCreateSchema) -> UserResponseFullSchema:
     createdUser = UserRepository.create(userModel)
 
     return UserResponseFullSchema.model_validate(createdUser)
+
 
 """
     Ler

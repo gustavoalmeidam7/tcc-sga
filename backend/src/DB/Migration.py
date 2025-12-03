@@ -1,7 +1,17 @@
-from src.Model import User, Driver, Travel, UserSession, Ambulance, Equipment, Manager, UpgradeToken
+from src.Model import User, Driver, Travel, UserSession, Ambulance, Equipment, Manager, UpgradeToken, RestorePassword
 from src.DB import db, is_pytest, Proxy
 
-MODELS = [User.User, Driver.Driver, Travel.Travel, UserSession.Session, Ambulance.Ambulance, Equipment.Equipment, Manager.Manager, UpgradeToken.UpgradeToken]
+MODELS = [
+    User.User,
+    Driver.Driver,
+    Travel.Travel,
+    UserSession.Session,
+    Ambulance.Ambulance,
+    Equipment.Equipment,
+    Manager.Manager,
+    UpgradeToken.UpgradeToken,
+    RestorePassword.RestorePassword
+]
 
 def initialize_db() -> Proxy:
     db.connect()
