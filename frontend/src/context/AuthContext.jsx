@@ -2,6 +2,8 @@ import React, { useState, useCallback, useEffect, useRef } from "react";
 import authService from "@/services/authService";
 import { AuthContext } from "@/hooks/useAuth";
 
+import { PUBLIC_PATHS } from "@/lib/constants";
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -15,12 +17,13 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const logout = useCallback(async () => {
+    setUser(null);
     try {
       await authService.logout();
     } catch (error) {
-      console.error("Erro ao fazer logout no backend:", error);
-    } finally {
-      setUser(null);
+      if (error.response?.status !== 401) {
+        console.error("Erro ao fazer logout no backend:", error);
+      }
     }
   }, []);
 
@@ -31,21 +34,18 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       return userData;
     } catch (error) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        setUser(null);
+        throw { ...error, silent: true };
+      }
+
       if (!error.silent) {
         console.error("Erro ao carregar dados do usuário:", error);
-      }
-
-      if (error.response?.status === 401 || error.response?.status === 403) {
-        logout();
-        setUser(null);
-      }
-
-      if (!error.silent) {
         setError("Erro ao carregar dados do usuário");
       }
       throw error;
     }
-  }, [logout]);
+  }, []);
 
   useEffect(() => {
     if (hasInitialized.current) return;
@@ -53,14 +53,19 @@ export const AuthProvider = ({ children }) => {
     const loadUserOnMount = async () => {
       hasInitialized.current = true;
 
-      const isLoginPage = window.location.pathname.includes("/login");
-      if (isLoginPage) {
-        setUser(null);
-        setIsLoading(false);
-        return;
-      }
+      const currentPath = window.location.pathname;
+      const isPublicPage = PUBLIC_PATHS.some((path) =>
+        path === "/" ? currentPath === "/" : currentPath.startsWith(path)
+      );
 
-      setIsLoading(true);
+      if (isPublicPage) {
+        setIsLoading(false);
+        if (currentPath === "/") {
+          return;
+        }
+      } else {
+        setIsLoading(true);
+      }
 
       try {
         await updateUser();
@@ -164,8 +169,6 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(true);
     try {
       return await updateUser(true);
-    } catch (error) {
-      throw error;
     } finally {
       setIsLoading(false);
     }

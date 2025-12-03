@@ -23,7 +23,7 @@ export function useEnrichedTravels(travels, geocodeMap, options = {}) {
     return Array.from(ids);
   }, [travels, getUserIdFromTravel, canFetchUserData]);
 
-  const userQueries = useQueries({
+  const { userMap, isLoadingUsers } = useQueries({
     queries:
       userIds.length > 0 && canFetchUserData
         ? userIds.map((userId) => ({
@@ -32,21 +32,21 @@ export function useEnrichedTravels(travels, geocodeMap, options = {}) {
             staleTime: 1000 * 60 * 5,
           }))
         : [],
+    combine: (results) => {
+      const map = new Map();
+      if (canFetchUserData && userIds.length > 0) {
+        results.forEach((result, index) => {
+          if (result.data) {
+            map.set(userIds[index], result.data);
+          }
+        });
+      }
+      return {
+        userMap: map,
+        isLoadingUsers: results.some((query) => query.isLoading),
+      };
+    },
   });
-
-  const queriesData = canFetchUserData ? userQueries.map((q) => q.data) : [];
-
-  const userMap = useMemo(() => {
-    const map = new Map();
-    if (canFetchUserData) {
-      userIds.forEach((id, index) => {
-        if (queriesData[index]) {
-          map.set(id, queriesData[index]);
-        }
-      });
-    }
-    return map;
-  }, [userIds, JSON.stringify(queriesData), canFetchUserData]);
 
   const enrichedTravels = useMemo(() => {
     if (!travels || travels.length === 0) return [];
@@ -89,10 +89,6 @@ export function useEnrichedTravels(travels, geocodeMap, options = {}) {
         (canFetchUserData && t._solicitante === null)
     );
   }, [enrichedTravels, canFetchUserData]);
-
-  const isLoadingUsers = canFetchUserData
-    ? userQueries.some((query) => query.isLoading)
-    : false;
 
   return {
     enrichedTravels,

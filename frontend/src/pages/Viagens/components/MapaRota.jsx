@@ -1,5 +1,14 @@
-import { useEffect, memo } from "react";
-import { MapContainer, TileLayer, Marker, Polyline, Popup, useMap, LayersControl } from "react-leaflet";
+import { useEffect, memo, useState, useCallback } from "react";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Polyline,
+  Popup,
+  useMap,
+  LayersControl,
+  useMapEvents,
+} from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "leaflet.awesome-markers/dist/leaflet.awesome-markers.css";
@@ -17,22 +26,24 @@ import {
   CardContent,
   CardDescription,
 } from "@/components/ui/card";
-import { MapPin, Loader2 } from "lucide-react";
+import { MapPin, Loader2, Navigation, X } from "lucide-react";
+import { fetchReverseGeocode } from "@/hooks/useReverseGeocode";
+import { formatarEndereco } from "@/lib/format-utils";
 
 delete L.Icon.Default.prototype._getIconUrl;
 
 const origemIcon = L.AwesomeMarkers.icon({
-  icon: 'home',
-  markerColor: 'green',
-  prefix: 'fa',
-  iconColor: 'white'
+  icon: "home",
+  markerColor: "green",
+  prefix: "fa",
+  iconColor: "white",
 });
 
 const destinoIcon = L.AwesomeMarkers.icon({
-  icon: 'hospital',
-  markerColor: 'red',
-  prefix: 'fa',
-  iconColor: 'white'
+  icon: "hospital",
+  markerColor: "red",
+  prefix: "fa",
+  iconColor: "white",
 });
 
 function MapUpdater({ center, zoom, rota, coordOrigem, coordDestino }) {
@@ -45,19 +56,17 @@ function MapUpdater({ center, zoom, rota, coordOrigem, coordDestino }) {
         padding: [50, 50],
         maxZoom: 15,
         animate: true,
-        duration: 1.5
+        duration: 1.5,
       });
-    }
-    else if (coordOrigem && coordDestino) {
+    } else if (coordOrigem && coordDestino) {
       const bounds = L.latLngBounds([coordOrigem, coordDestino]);
       map.fitBounds(bounds, {
         padding: [50, 50],
         maxZoom: 15,
         animate: true,
-        duration: 1.5
+        duration: 1.5,
       });
-    }
-    else if (center) {
+    } else if (center) {
       map.flyTo(center, zoom, { duration: 1.5 });
     }
   }, [center, zoom, map, rota, coordOrigem, coordDestino]);
@@ -65,6 +74,16 @@ function MapUpdater({ center, zoom, rota, coordOrigem, coordDestino }) {
   return null;
 }
 
+function MapClickHandler({ onMapClick, selectingType }) {
+  useMapEvents({
+    click: (e) => {
+      if (selectingType && onMapClick) {
+        onMapClick([e.latlng.lat, e.latlng.lng], selectingType);
+      }
+    },
+  });
+  return null;
+}
 
 function MapaRotaComponent({
   center,
@@ -75,22 +94,124 @@ function MapaRotaComponent({
   destino,
   rota,
   loading,
+  onCoordChange,
+  allowPinSelection = false,
 }) {
+  const [selectingType, setSelectingType] = useState(null);
+  const [tempMarker, setTempMarker] = useState(null);
+
+  const handleMapClick = useCallback(
+    async (coords, type) => {
+      if (!onCoordChange) return;
+
+      setTempMarker(coords);
+
+      try {
+        const endereco = await fetchReverseGeocode({
+          queryKey: ["geocode", coords[0], coords[1]],
+        });
+        const enderecoFormatado = formatarEndereco(endereco);
+
+        if (type === "origem") {
+          onCoordChange({
+            type: "origem",
+            coords,
+            endereco: enderecoFormatado,
+          });
+        } else if (type === "destino") {
+          onCoordChange({
+            type: "destino",
+            coords,
+            endereco: enderecoFormatado,
+          });
+        }
+
+        setSelectingType(null);
+        setTempMarker(null);
+      } catch (error) {
+        console.error("Erro ao buscar endereço:", error);
+        if (type === "origem") {
+          onCoordChange({ type: "origem", coords, endereco: null });
+        } else if (type === "destino") {
+          onCoordChange({ type: "destino", coords, endereco: null });
+        }
+        setSelectingType(null);
+        setTempMarker(null);
+      }
+    },
+    [onCoordChange]
+  );
+
+  const handleToggleSelection = useCallback(
+    (type) => {
+      if (selectingType === type) {
+        setSelectingType(null);
+        setTempMarker(null);
+      } else {
+        setSelectingType(type);
+      }
+    },
+    [selectingType]
+  );
   return (
     <div className="xl:col-span-2">
       <Card className="overflow-hidden border-2 hover:border-primary/50 transition-all py-1">
         <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent p-3 md:p-4 lg:p-2">
-          <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
-            <MapPin className="h-5 w-5 text-primary" />
-            Mapa da Rota
-          </CardTitle>
-          <CardDescription className="text-xs md:text-sm">
-            {loading
-              ? "Calculando rota..."
-              : rota.length > 0
-              ? "Rota calculada"
-              : "Aguardando endereços"}
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
+                <MapPin className="h-5 w-5 text-primary" />
+                Mapa da Rota
+              </CardTitle>
+              <CardDescription className="text-xs md:text-sm">
+                {loading
+                  ? "Calculando rota..."
+                  : rota.length > 0
+                  ? "Rota calculada"
+                  : selectingType
+                  ? `Clique no mapa para definir ${
+                      selectingType === "origem" ? "origem" : "destino"
+                    }`
+                  : "Aguardando endereços"}
+              </CardDescription>
+            </div>
+            {allowPinSelection && onCoordChange && (
+              <div className="flex gap-1">
+                <button
+                  type="button"
+                  onClick={() => handleToggleSelection("origem")}
+                  className={`h-7 w-7 rounded-md flex items-center justify-center transition-colors ${
+                    selectingType === "origem"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                  title="Selecionar origem no mapa"
+                >
+                  {selectingType === "origem" ? (
+                    <X className="h-3.5 w-3.5" />
+                  ) : (
+                    <Navigation className="h-3.5 w-3.5" />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleToggleSelection("destino")}
+                  className={`h-7 w-7 rounded-md flex items-center justify-center transition-colors ${
+                    selectingType === "destino"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                  title="Selecionar destino no mapa"
+                >
+                  {selectingType === "destino" ? (
+                    <X className="h-3.5 w-3.5" />
+                  ) : (
+                    <Navigation className="h-3.5 w-3.5" />
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
         </CardHeader>
         <CardContent className="p-0 relative">
           <div className="relative">
@@ -114,6 +235,13 @@ function MapaRotaComponent({
                 coordOrigem={coordOrigem}
                 coordDestino={coordDestino}
               />
+
+              {allowPinSelection && (
+                <MapClickHandler
+                  onMapClick={handleMapClick}
+                  selectingType={selectingType}
+                />
+              )}
 
               <LayersControl position="topright">
                 <LayersControl.BaseLayer checked name="OpenStreetMap">
@@ -140,7 +268,7 @@ function MapaRotaComponent({
                 <LayersControl.BaseLayer name="Esri Satélite">
                   <TileLayer
                     url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                    attribution='Tiles &copy; Esri'
+                    attribution="Tiles &copy; Esri"
                   />
                 </LayersControl.BaseLayer>
               </LayersControl>
@@ -162,6 +290,21 @@ function MapaRotaComponent({
                     <div className="p-2">
                       <p className="font-bold text-red-600">🏥 Destino</p>
                       <p className="text-xs mt-1">{destino}</p>
+                    </div>
+                  </Popup>
+                </Marker>
+              )}
+
+              {tempMarker && selectingType && (
+                <Marker
+                  position={tempMarker}
+                  icon={selectingType === "origem" ? origemIcon : destinoIcon}
+                >
+                  <Popup>
+                    <div className="p-2">
+                      <p className="text-xs text-muted-foreground">
+                        Carregando endereço...
+                      </p>
                     </div>
                   </Popup>
                 </Marker>

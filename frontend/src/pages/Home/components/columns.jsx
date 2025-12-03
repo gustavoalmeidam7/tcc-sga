@@ -110,7 +110,7 @@ export const createColumnsViagens = (navigate) => [
 
 export const columns_viagens = createColumnsViagens();
 
-export const columns_motoristas = [
+export const createColumnsMotoristas = (navigate) => [
   {
     accessorKey: "nome",
     header: ({ column }) => {
@@ -136,22 +136,6 @@ export const columns_motoristas = [
     cell: ({ row }) => (
       <div className="text-sm text-muted-foreground max-w-[180px] truncate">
         {row.original.email || "N/A"}
-      </div>
-    ),
-  },
-  {
-    accessorKey: "telefone",
-    header: "Telefone",
-    cell: ({ row }) => (
-      <div className="text-sm">{row.original.telefone || "N/A"}</div>
-    ),
-  },
-  {
-    accessorKey: "driverInfo.cnh",
-    header: "CNH",
-    cell: ({ row }) => (
-      <div className="text-sm font-mono">
-        {row.original.driverInfo?.cnh || "N/A"}
       </div>
     ),
   },
@@ -212,7 +196,13 @@ export const columns_motoristas = [
               Copiar ID do Motorista
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Ver detalhes</DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() =>
+                navigate && navigate(`/usuarios/detalhes/${motorista.id}`)
+              }
+            >
+              Ver detalhes
+            </DropdownMenuItem>
             <DropdownMenuItem>Atribuir viagem</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -220,3 +210,5 @@ export const columns_motoristas = [
     },
   },
 ];
+
+export const columns_motoristas = createColumnsMotoristas();

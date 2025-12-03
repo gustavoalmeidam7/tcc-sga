@@ -9,6 +9,7 @@ import "./index.css";
 import { AppSidebar } from "./components/layout/sidebar";
 import { SidebarProvider, SidebarInset } from "./components/ui/sidebar";
 import { appRoutes } from "./routes";
+import { PUBLIC_PATHS } from "@/lib/constants";
 import LoadingSpinner from "@/components/layout/loading";
 import { AnimatePresence } from "framer-motion";
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -38,16 +39,6 @@ function AppRoutes() {
   );
 }
 
-const publicRoutes = [
-  "/",
-  "/login",
-  "/registro",
-  "/rec_senha",
-  "/saiba-mais",
-  "/suporte",
-  "/termos",
-];
-
 function AppLayout() {
   const location = useLocation();
   const { isAuthenticated, isLoading } = useAuth();
@@ -57,7 +48,7 @@ function AppLayout() {
   }
 
   const showSidebar =
-    isAuthenticated || !publicRoutes.includes(location.pathname);
+    isAuthenticated || !PUBLIC_PATHS.includes(location.pathname);
 
   if (showSidebar) {
     return (

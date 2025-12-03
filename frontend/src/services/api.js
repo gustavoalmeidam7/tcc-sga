@@ -1,5 +1,6 @@
 import axios from "axios";
 import authService from "./authService";
+import { PUBLIC_PATHS } from "@/lib/constants";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -7,7 +8,6 @@ const API = axios.create({
   baseURL: API_URL,
   headers: {
     "Content-Type": "application/json",
-    "credentials": "include"
   },
   withCredentials: true,
 });
@@ -61,13 +61,20 @@ API.interceptors.response.use(
     if (status === 401) {
       const isLoginRequest = originalRequest?.url?.includes("/token");
       const isRefreshRequest = originalRequest?.url?.includes("/refresh-token");
-      const isLoginPage = window.location.pathname.includes("/login");
+
+      const currentPath = window.location.pathname;
+      const isPublicPage = PUBLIC_PATHS.some((path) =>
+        path === "/" ? currentPath === "/" : currentPath.startsWith(path)
+      );
 
       if (isLoginRequest) {
-        return Promise.reject(error);
+        return Promise.reject({
+          ...error,
+          silent: true,
+        });
       }
 
-      if (isLoginPage) {
+      if (isPublicPage) {
         return Promise.reject({
           ...error,
           message: "Não autenticado",
@@ -78,11 +85,11 @@ API.interceptors.response.use(
       if (isRefreshRequest) {
         isRefreshing = false;
         processQueue(error, null);
-        await authService.logout();
         window.dispatchEvent(new CustomEvent("auth:unauthorized"));
         return Promise.reject({
           ...error,
           message: "Sua sessão expirou. Faça login novamente.",
+          silent: true,
         });
       }
 
@@ -117,12 +124,12 @@ API.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         isRefreshing = false;
-        await authService.logout();
         window.dispatchEvent(new CustomEvent("auth:unauthorized"));
 
         return Promise.reject({
           ...error,
           message: "Sua sessão expirou. Faça login novamente.",
+          silent: refreshError.response?.status === 401,
         });
       }
     }

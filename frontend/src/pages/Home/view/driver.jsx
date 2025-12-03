@@ -1,5 +1,5 @@
 import { useMemo, memo, useState, useEffect } from "react";
-import { useQuery, useQueries } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +26,7 @@ import {
   TravelStatus,
 } from "@/lib/travel-status";
 import { useNavigate } from "react-router-dom";
-import { fetchReverseGeocode } from "@/hooks/useReverseGeocode";
+import { useGeocodeQueries } from "@/hooks/useGeocodeQueries";
 import { StatsCardSkeleton } from "@/components/ui/stats-skeleton";
 import { startTravel, endTravel } from "@/services/travelService";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -88,50 +88,7 @@ function DriverView() {
     return travelsResponse?.viagens || [];
   }, [travelsResponse]);
 
-  const uniqueCoordinates = useMemo(() => {
-    if (travels.length === 0) return [];
-
-    const coordsMap = new Map();
-    travels.forEach((v) => {
-      if (v.lat_inicio && v.long_inicio) {
-        const key = `${v.lat_inicio.toFixed(5)},${v.long_inicio.toFixed(5)}`;
-        if (!coordsMap.has(key)) {
-          coordsMap.set(key, { lat: v.lat_inicio, long: v.long_inicio });
-        }
-      }
-      if (v.lat_fim && v.long_fim) {
-        const key = `${v.lat_fim.toFixed(5)},${v.long_fim.toFixed(5)}`;
-        if (!coordsMap.has(key)) {
-          coordsMap.set(key, { lat: v.lat_fim, long: v.long_fim });
-        }
-      }
-    });
-    return Array.from(coordsMap.values());
-  }, [travels]);
-
-  const geocodeQueries = useQueries({
-    queries: uniqueCoordinates.map((coord) => ({
-      queryKey: ["geocode", coord.lat, coord.long],
-      queryFn: async ({ queryKey, signal }) => {
-        const [_key, lat, lon] = queryKey;
-        return await fetchReverseGeocode({
-          queryKey: [_key, lat, lon],
-          signal,
-        });
-      },
-      staleTime: 1000 * 60 * 60 * 24,
-      cacheTime: 1000 * 60 * 60 * 24 * 7,
-    })),
-  });
-
-  const geocodeMap = useMemo(() => {
-    const map = new Map();
-    uniqueCoordinates.forEach((coord, index) => {
-      const key = `${coord.lat.toFixed(5)},${coord.long.toFixed(5)}`;
-      map.set(key, geocodeQueries[index]?.data);
-    });
-    return map;
-  }, [uniqueCoordinates, geocodeQueries]);
+  const { geocodeMap } = useGeocodeQueries(travels);
 
   const viagensEnriquecidas = useMemo(() => {
     if (!travels.length) return [];
@@ -142,13 +99,13 @@ function DriverView() {
 
       if (!enderecoInicio) {
         enderecoInicio = geocodeMap.get(
-          `${viagem.lat_inicio.toFixed(5)},${viagem.long_inicio.toFixed(5)}`
+          `${viagem.lat_inicio?.toFixed(5)},${viagem.long_inicio?.toFixed(5)}`
         );
       }
 
       if (!enderecoFim) {
         enderecoFim = geocodeMap.get(
-          `${viagem.lat_fim.toFixed(5)},${viagem.long_fim.toFixed(5)}`
+          `${viagem.lat_fim?.toFixed(5)},${viagem.long_fim?.toFixed(5)}`
         );
       }
 
@@ -219,9 +176,9 @@ function DriverView() {
   }, [todasViagensConcluidas]);
 
   const openGoogleMaps = (viagem) => {
-    const origem = `${viagem.lat_inicio},${viagem.long_inicio}`;
-    const destino = `${viagem.lat_fim},${viagem.long_fim}`;
-    const googleMapsUrl = `https://www.google.com/maps/dir/${origem}/${destino}`;
+    const pacienteLoc = `${viagem.lat_inicio},${viagem.long_inicio}`;
+    const destinoLoc = `${viagem.lat_fim},${viagem.long_fim}`;
+    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destinoLoc}&waypoints=${pacienteLoc}&travelmode=driving&dir_action=navigate`;
 
     const isMobile =
       /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
@@ -229,17 +186,17 @@ function DriverView() {
       );
 
     if (isMobile) {
-      const googleMapsAppUrl = `https://www.google.com/maps/dir/${origem}/${destino}`;
-      window.location.href = googleMapsAppUrl;
+      window.location.href = googleMapsUrl;
     } else {
       window.open(googleMapsUrl, "_blank");
     }
   };
 
   const openWaze = (viagem) => {
-    const origem = `${viagem.lat_inicio},${viagem.long_inicio}`;
-    const destino = `${viagem.lat_fim},${viagem.long_fim}`;
-    const wazeUrl = `https://waze.com/ul?ll=${origem}&navigate=yes&to=ll.${destino}`;
+    const destinoLat = viagem.lat_fim;
+    const destinoLong = viagem.long_fim;
+
+    const wazeUrl = `https://waze.com/ul?ll=${destinoLat},${destinoLong}&navigate=yes`;
 
     const isMobile =
       /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
@@ -247,7 +204,7 @@ function DriverView() {
       );
 
     if (isMobile) {
-      const wazeAppUrl = `waze://?ll=${origem}&navigate=yes&to=ll.${destino}`;
+      const wazeAppUrl = `waze://?ll=${destinoLat},${destinoLong}&navigate=yes`;
       window.location.href = wazeAppUrl;
       setTimeout(() => {
         window.location.href = wazeUrl;
@@ -255,10 +212,6 @@ function DriverView() {
     } else {
       window.open(wazeUrl, "_blank");
     }
-  };
-
-  const openNavigationApp = (viagem) => {
-    openGoogleMaps(viagem);
   };
 
   const openNavigationDialog = (viagem) => {
@@ -498,23 +451,23 @@ function DriverView() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex flex-col sm:flex-row gap-2">
+                    <div className="grid grid-cols-1 sm:flex sm:flex-row gap-2 mt-2">
                       <Button
                         onClick={() =>
                           navigate(`/viagens/detalhes/${viagemEmAndamento.id}`)
                         }
                         variant="outline"
                         size="sm"
-                        className="flex-1 !bg-gray-100 hover:!bg-gray-200 !text-black"
+                        className="w-full sm:w-auto sm:flex-1 justify-start sm:justify-center h-10 sm:h-9 bg-background hover:bg-muted text-foreground border shadow-sm sm:!bg-gray-100 sm:hover:!bg-gray-200 sm:!text-black"
                       >
-                        <Eye className="h-4 w-4 mr-2" />
+                        <Eye className="h-4 w-4 mr-2 sm:text-current text-muted-foreground" />
                         Ver detalhes
                       </Button>
                       <Button
                         onClick={() => openNavigationDialog(viagemEmAndamento)}
                         variant="outline"
                         size="sm"
-                        className="flex-1 bg-blue-50 hover:bg-blue-100 text-foreground border-blue-600 dark:bg-blue-950/20 dark:hover:bg-blue-950/30 dark:text-foreground dark:border-blue-800"
+                        className="w-full sm:w-auto sm:flex-1 justify-start sm:justify-center h-10 sm:h-9 bg-blue-50 hover:bg-blue-100 text-foreground border-blue-600 dark:bg-blue-950/20 dark:hover:bg-blue-950/30 dark:text-foreground dark:border-blue-800"
                       >
                         <Navigation2 className="h-4 w-4 mr-2" />
                         Abrir Navegação
@@ -522,7 +475,7 @@ function DriverView() {
                       <Button
                         onClick={() => openEndTravelDialog(viagemEmAndamento)}
                         size="sm"
-                        className="flex-1 bg-green-600 hover:bg-green-700"
+                        className="w-full sm:w-auto sm:flex-1 justify-start sm:justify-center h-10 sm:h-9 bg-green-600 hover:bg-green-700 text-white sm:col-span-1"
                         disabled={endTravelMutation.isPending}
                       >
                         {endTravelMutation.isPending ? (
@@ -605,16 +558,16 @@ function DriverView() {
                                   </div>
                                 </div>
 
-                                <div className="flex flex-col sm:flex-row gap-2">
+                                <div className="grid grid-cols-1 sm:flex sm:flex-row gap-2 mt-3 pt-3 border-t">
                                   <Button
                                     onClick={() =>
                                       navigate(`/viagens/detalhes/${viagem.id}`)
                                     }
                                     variant="outline"
                                     size="sm"
-                                    className="flex-1"
+                                    className="w-full sm:w-auto sm:flex-1 justify-start sm:justify-center h-10 sm:h-9"
                                   >
-                                    <Eye className="h-4 w-4 mr-2" />
+                                    <Eye className="h-4 w-4 mr-2 sm:text-current text-muted-foreground" />
                                     Ver detalhes
                                   </Button>
                                   {viagem.realizado ===
@@ -622,7 +575,7 @@ function DriverView() {
                                     <Button
                                       onClick={() => handleAcceptTravel(viagem)}
                                       size="sm"
-                                      className="flex-1 bg-green-600 hover:bg-green-700"
+                                      className="w-full sm:w-auto sm:flex-1 justify-start sm:justify-center h-10 sm:h-9 bg-green-600 hover:bg-green-700 text-white"
                                       disabled={startTravelMutation.isPending}
                                     >
                                       {startTravelMutation.isPending ? (
@@ -683,31 +636,6 @@ function DriverView() {
               </CardContent>
             </Card>
           )}
-
-          {isLoadingTravels
-            ? null
-            : viagensAtribuidas.length === 0 && (
-                <Card>
-                  <CardContent className="p-8 md:p-12 text-center">
-                    <div className="flex flex-col items-center gap-3 md:gap-4">
-                      <div className="p-3 md:p-4 bg-muted rounded-full">
-                        <Truck
-                          className="h-8 w-8 md:h-12 md:w-12 text-muted-foreground"
-                          aria-hidden="true"
-                        />
-                      </div>
-                      <div>
-                        <h3 className="text-base md:text-lg font-semibold mb-1">
-                          Nenhuma viagem atribuída
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          Aguarde o gerente atribuir viagens para você.
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
         </div>
 
         <div className="hidden lg:block space-y-6">

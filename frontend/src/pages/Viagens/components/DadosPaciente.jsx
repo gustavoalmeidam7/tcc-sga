@@ -126,14 +126,9 @@ function DadosPacienteComponent({
               </select>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
               <div className="space-y-2">
-                <div className="flex flex-col gap-1">
-                  <Label htmlFor="dataAgendamento">Data *</Label>
-                  <span className="text-xs text-muted-foreground">
-                    Mín: 3 dias úteis de antecedência
-                  </span>
-                </div>
+                <Label htmlFor="dataAgendamento">Data *</Label>
                 <Input
                   id="dataAgendamento"
                   type="date"
@@ -141,6 +136,9 @@ function DadosPacienteComponent({
                   onChange={(e) => setDataAgendamento(e.target.value)}
                   min={dataMinima}
                 />
+                <p className="text-xs text-muted-foreground">
+                  Mín: 3 dias úteis de antecedência
+                </p>
               </div>
 
               <div className="space-y-2">

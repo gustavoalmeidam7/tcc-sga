@@ -53,6 +53,21 @@ const refreshToken = async () => {
   return response.data;
 };
 
+const sendRestorePassword = async (userEmail) => {
+  const response = await API.post("/token/send-restore-password", {
+    userEmail,
+  });
+  return response.data;
+};
+
+const restorePassword = async (restoreCode, newPassword) => {
+  const response = await API.post("/token/restore-password", {
+    restoreCode,
+    newPassword,
+  });
+  return response.data;
+};
+
 const authService = {
   login,
   register,
@@ -63,6 +78,8 @@ const authService = {
   deleteUser,
   logout,
   refreshToken,
+  sendRestorePassword,
+  restorePassword,
 };
 
 export default authService;

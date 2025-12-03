@@ -43,7 +43,7 @@ export function useGeocodeQueries(items, options = {}) {
     return Array.from(coordsMap.values());
   }, [items, getStartCoords, getEndCoords, options]);
 
-  const geocodeQueries = useQueries({
+  const { geocodeMap, isLoading, isSuccess } = useQueries({
     queries: uniqueCoordinates.map((coord) => ({
       queryKey: ["geocode", coord.lat, coord.long],
       queryFn: fetchReverseGeocode,
@@ -51,21 +51,22 @@ export function useGeocodeQueries(items, options = {}) {
       gcTime: 1000 * 60 * 60 * 24 * 7,
       retry: false,
     })),
+    combine: (results) => {
+      const map = new Map();
+      results.forEach((result, index) => {
+        const coord = uniqueCoordinates[index];
+        if (result.data && coord) {
+          const key = `${coord.lat.toFixed(5)},${coord.long.toFixed(5)}`;
+          map.set(key, result.data);
+        }
+      });
+      return {
+        geocodeMap: map,
+        isLoading: results.some((query) => query.isLoading),
+        isSuccess: results.every((query) => query.isSuccess),
+      };
+    },
   });
-
-  const queriesData = geocodeQueries.map((q) => q.data);
-
-  const geocodeMap = useMemo(() => {
-    const map = new Map();
-    uniqueCoordinates.forEach((coord, index) => {
-      const key = `${coord.lat.toFixed(5)},${coord.long.toFixed(5)}`;
-      map.set(key, queriesData[index]);
-    });
-    return map;
-  }, [uniqueCoordinates, JSON.stringify(queriesData)]);
-
-  const isLoading = geocodeQueries.some((query) => query.isLoading);
-  const isSuccess = geocodeQueries.every((query) => query.isSuccess);
 
   return {
     geocodeMap,
