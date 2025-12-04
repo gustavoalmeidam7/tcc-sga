@@ -127,7 +127,10 @@ def is_debug() -> bool:
     return bool(env.get_env_var_not_none("environment", "DEV") == "DEV")
 
 def set_http_only_cookie(response: Response, key: str, value: str, expires: datetime) -> Response:
-    response.set_cookie(key=key, value=value, expires=datetime_to_http_datetime(expires), path="/", secure=not is_debug(), httponly=True, samesite="none")
+    if is_debug():
+        response.set_cookie(key=key, value=value, expires=datetime_to_http_datetime(expires), path="/", secure=False, httponly=True, samesite="lax")
+    else:
+        response.set_cookie(key=key, value=value, expires=datetime_to_http_datetime(expires), path="/", secure=True, httponly=True, samesite="none")
     return response
 
 def create_restore_password_code(userEmail: EmailStr) -> tuple[RestorePassword, User]:

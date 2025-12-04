@@ -13,8 +13,8 @@ class Driver(BaseModel):
     vencimento     : date | DateField       = DateField(null=False)
 
     @property
-    def str_id_ambulancia(self) -> str:
-        return str(self.id_ambulancia)
+    def str_id_ambulancia(self):
+        return self.id_ambulancia
     
     @property
     def fk_id_ambulancia(self) -> ForeignKeyField:

@@ -18,11 +18,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AmbulanceStatus, AmbulanceType } from "@/lib/ambulance";
-import { createAmbulance } from "@/services/ambulanceService";
-import { useAuth } from "@/hooks/useAuth";
-import { useRole } from "@/hooks/use-role";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { formatLicensePlate } from "@/lib/utils";
 
 export function CreateAmbulanceModal({
   open,
@@ -114,12 +112,13 @@ export function CreateAmbulanceModal({
                 type="text"
                 placeholder="Ex: ABC-1234"
                 value={formData.placa}
-                onChange={(e) =>
+                onChange={(e) => {
+                  const formatted = formatLicensePlate(e.target.value);
                   setFormData({
                     ...formData,
-                    placa: e.target.value.toUpperCase(),
-                  })
-                }
+                    placa: formatted,
+                  });
+                }}
                 className="h-10 text-foreground"
                 maxLength={8}
                 required

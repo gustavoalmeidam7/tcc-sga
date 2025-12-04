@@ -146,7 +146,10 @@ def upgrade_user_to_driver(user: User, token: UpgradeToken, driverFields: Driver
 
         if driver is None:
             driverDict = {**driverFields.model_dump()}
-            driverDict.update({"id_ambulancia": unmask_uuid(driverFields.id_ambulancia), "id":userUpdated.id})
+            driverDict.update({
+                "id_ambulancia": unmask_uuid(driverFields.id_ambulancia) if driverFields.id_ambulancia else None,
+                "id": userUpdated.id
+            })
             driver = Driver(**driverDict)
             DriverRepository.create_driver_by_id(driver)
         

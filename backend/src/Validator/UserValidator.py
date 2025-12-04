@@ -1,8 +1,7 @@
 from datetime import datetime
 import re
 import uuid
-
-from pydantic import ValidationError
+from typing import Any
 
 class UserValidationResult:
     def __init__(self, errors: list[dict] = []):
@@ -20,7 +19,7 @@ class UserValidator:
     def __init__(self) -> None:
         self.userValidationResult = UserValidationResult()
 
-    def validate(self, userModel: 'User') -> 'UserValidationResult':
+    def validate(self, userModel: Any) -> 'UserValidationResult':
         self.is_email_unique(userModel.email)
         self.is_phone_number_unique(userModel.telefone)
         self.is_cpf_unique(userModel.cpf)
@@ -77,6 +76,6 @@ def generate_uuid() -> str:
 def validate_password(password: str) -> str:
     """ Valida se a senha é valida para ser usada """
     if len(password) < 8:
-        raise ValidationError("A senha deve conter no mínimo 8 caracteres")
-    
+        raise ValueError("A senha deve conter no mínimo 8 caracteres")
+
     return password

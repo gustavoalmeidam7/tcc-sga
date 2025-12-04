@@ -1,5 +1,3 @@
-from pydantic import ValidationError
-
 from src.Validator.GenericValidator import unmask_uuid
 from typing import Optional
 
@@ -26,6 +24,7 @@ def validate_upgrade_token(upgradeToken: UpgradeToken | None, driverFields: Opti
     if UserRole(upgradeToken.fator_cargo) == UserRole.DRIVER:
         if not driverFields:
             raise UserRBACError()
-        
-        if not AmbulanceRepository.find_ambulance_by_id(unmask_uuid(driverFields.id_ambulancia)):
-            raise NotFoundError("id_ambulancia")
+
+        if driverFields.id_ambulancia is not None:
+            if not AmbulanceRepository.find_ambulance_by_id(unmask_uuid(driverFields.id_ambulancia)):
+                raise NotFoundError("id_ambulancia")
