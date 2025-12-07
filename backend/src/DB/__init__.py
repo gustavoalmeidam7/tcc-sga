@@ -1,12 +1,13 @@
 from peewee import Proxy
+import sys
 from src.DB import postgres, sqlite
 from src.Utils.env import get_env_var
 from src.Utils.singleton import singleton
 
-# Define o proxy que os modelos usarão.
+from src.Logging import Logging, Level
+
 db = Proxy()
 
-# Lógica existente para obter detalhes da conexão.
 class connection(metaclass=singleton):
     def __init__(self):
         self.environment = get_env_var("environment", "DEV")
@@ -17,13 +18,22 @@ class connection(metaclass=singleton):
         self.port =        get_env_var("Database_Port")
         self.user =        get_env_var("Database_User")
 
-# Lógica para criar instâncias de banco de dados.
-databases = {
-    "PROD": postgres.Database(connection()),
-    "DEV" : sqlite.Database(connection())
-}
+is_pytest = any(arg.startswith('pytest') for arg in sys.argv)
 
-# Em tempo de importação, inicializa o proxy com o banco de dados correto baseado no ambiente.
-# O conftest.py irá substituir isso durante os testes.
-selected_db = databases[connection().environment].db
-db.initialize(selected_db)
+selected_db = None
+
+if not is_pytest:
+    databases = {
+        "PROD": postgres.Database(connection()),
+        "DEV" : sqlite.Database(connection())
+    }
+    env = get_env_var("environment", "DEV")
+    if env in databases:
+        selected_db = databases[env].db
+
+    if selected_db is None:
+        raise RuntimeError("Erro a o selecionar banco de dados!")
+
+    db.initialize(selected_db)
+else:
+    Logging.log("***Running in test mode***", Level.DEBUG)

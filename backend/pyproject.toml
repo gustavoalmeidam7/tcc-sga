@@ -9,9 +9,10 @@ dependencies = [
     "dotenv==0.9.9",
     "email-validator==2.2.0",
     "fastapi==0.115.14",
+    "httpx==0.28.1",
     "passlib==1.7.4",
     "peewee==3.18.1",
-    "psycopg-binary==3.2.9",
+    "psycopg2-binary==2.9.11",
     "pyjwt==2.10.1",
     "python-multipart==0.0.20",
     "slowapi==0.1.9",
@@ -20,6 +21,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "faker>=37.8.0",
     "httpx>=0.28.1",
     "pytest>=8.4.1",
 ]

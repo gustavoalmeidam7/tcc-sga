@@ -1,55 +1,106 @@
 from src.Model.User import User
-from src.Utils.singleton import singleton
+from src.Model.Manager import Manager
+from src.Model.Driver import Driver
 
-class UserRepository(metaclass=singleton):
-    def create(self, userModel: User) -> User:
-        """ Cria um usuário """
-        userModel.save(force_insert=True)
-        return userModel
+from src.Schema.User.UserRoleEnum import UserRole
 
+"""
+    Criar
+"""
 
-    def find_by_id(self, id: int) -> User:
-        """ Retorna um usuário salvo no banco pelo ID """
-        return User.get(User.id == id)
+def create(userModel: User) -> User:
+    """ Cria um usuário """
+    userModel.save(force_insert=True)
+    return User.select().where(User.id == userModel.id).first()
+
+def create_role_by_user_id(userId: str, role: UserRole) -> None:
+    """ Cria a coluna auxiliar para o cargo respectivo """
+    if role == UserRole.USER:
+        return
     
-    def find_by_email(self, email: str) -> User | None:
-        return User.select().where(User.email == email).first()
+    if role == UserRole.DRIVER:
+        if Driver.select().where(Driver.id == userId).first() is not None:
+            return
+        Driver.create(id=userId, em_viagem=False)
 
-    def find_by_cpf(self, cpf: str) -> User:
-        return User.get(User.cpf == cpf)
-    
-    def find_all_with_page(self, pageNumber: int= 0, pageSize: int = 25) -> 'list[User]':
-        """ Retorna uma lista de usuários pelo pageNumber que se divide pelo pageSize """
-        return (User.select()
-                    .order_by(User.id.asc())
-                    .paginate(pageNumber, pageSize))
+    if role == UserRole.MANAGER:
+        if Manager.select().where(Manager.id == userId).first() is not None:
+            return
+        Manager.create(id=userId)
+
+"""
+    Ler
+"""
+
+def find_by_id(id: str) -> User | None:
+    """ Retorna um usuário pelo seu ID """
+    return User.select().where(User.id == id).first()
+
+def find_by_email(email: str) -> User | None:
+    """ Retorna um usuário pelo seu email """
+    return User.select().where(User.email == email).first()
+
+def find_by_cpf(cpf: str) -> User:
+    """ Retorna um usuário pelo seu CPF """
+    return User.get(User.cpf == cpf)
+
+def find_all_with_page(pageNumber: int= 0, pageSize: int = 25) -> 'list[User]':
+    """ Retorna uma lista de usuários pelo pageNumber que se divide pelo pageSize """
+    return (User.select()
+                .order_by(User.id.asc())
+                .paginate(pageNumber, pageSize))
+
+def exists_by_id(id: int) -> bool:
+    """ Verifica se um usuário existe pelo seu ID """
+    return User.select().where(User.id == id).exists()
+
+def exists_by_email(email: str) -> bool:
+    """ Verifica se um usuário existe pelo seu e-mail """
+    return User.select().where(User.email == email).exists()
+
+def exists_by_phone_number(phone_number: str) -> bool:
+    """ Verifica se um usuário existe pelo seu número de telefone """
+    return User.select().where(User.telefone == phone_number).exists()
+
+def exists_by_cpf(cpf: str) -> bool:
+    """ Verifica se um usuário existe pelo seu CPF """
+    return User.select().where(User.cpf == cpf).exists()
 
 
-    def update(self, userModel: User) -> None:
-        """ Atualiza um usuário pelo ID """
-        query = User.update(id=userModel.id, username=userModel.username, email=userModel.email).where(User.id == userModel.id)
-        query.execute()
+def count() -> int:
+    """ Retorna a quantidade de usuários cadastrados """
+    return User.select().count()
 
+"""
+    Atualizar
+"""
 
-    def delete_by_id(self, id: int) -> None:
-        User.delete_by_id(id)
+def update_user_by_id_ignore_none(userId: str, **args) -> User | None:
+    """ Atualiza uma viagem ignorando valores nulos """
 
-    def delete_all(self) -> None:
-        User.delete().where(User.select())
+    filteredArgs = [x for x in args if x is not None]
 
+    query = User.update(filteredArgs).where(User.id == userId)
+    query.execute()
 
-    def exists_by_id(self, id: int) -> bool:
-        return User.select().where(User.id == id).exists()
+    return User.select().where(User.id == userId).first()
 
-    def exists_by_email(self, email: str) -> bool:
-        return User.select().where(User.email == email).exists()
+def update_user_by_id(userId: str, **args) -> User | None:
+    """ Atualiza uma viagem """
 
-    def exists_by_phone_number(self, phone_number: str) -> bool:
-        return User.select().where(User.phone_number == phone_number).exists()
+    query = User.update(args).where(User.id == userId)
+    query.execute()
 
-    def exists_by_cpf(self, cpf: str) -> bool:
-        return User.select().where(User.cpf == cpf).exists()
+    return User.select().where(User.id == userId).first()
 
+"""
+    Deletar
+"""
 
-    def count(self) -> int:
-        return User.select().count()
+def delete_by_id(id: str) -> None:
+    """ Excluí um usuário pelo seu ID """
+    User.delete_by_id(id)
+
+def delete_all() -> None:
+    """ Excluí todos usuários cadastrados (usar apenas em testes) """
+    User.select().delete()

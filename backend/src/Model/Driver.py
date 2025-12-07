@@ -1,19 +1,28 @@
-from peewee import AutoField, CharField
+from peewee import ForeignKeyField, BooleanField, CharField, DateField
 from src.Model.BaseModel import BaseModel
 
+from src.Model import User, Ambulance
+
+from datetime import date
+
 class Driver(BaseModel):
-    id             = AutoField(primary_key=True)
-    name           = CharField(max_length=50, null=False)
-    cpf            = CharField(max_length=14, unique=True, null=False)
-    email          = CharField(max_length=35, unique=True, null=False)
-    phone          = CharField(max_length=15, null=False)
-    cnh_number     = CharField(max_length=12, null=False)
+    id             : str  | ForeignKeyField = ForeignKeyField(User.User, primary_key=True, null=False)
+    id_ambulancia  : str  | ForeignKeyField = ForeignKeyField(Ambulance.Ambulance, null=True)
+    em_viagem      : bool | BooleanField    = BooleanField(default=False, null=False)
+    cnh            : str  | CharField       = CharField(max_length=11, null=False)
+    vencimento     : date | DateField       = DateField(null=False)
 
-    def __repr__(self) -> str:
-        return (
-            f"<Driver(id={self.id}, name={self.name}, cpf={self.cpf}, email={self.email}, "
-            f"phone={self.phone}, cnh_number={self.cnh_number})>"
-        )
-
+    @property
+    def str_id_ambulancia(self) -> str:
+        return str(self.id_ambulancia)
+    
+    @property
+    def fk_id_ambulancia(self) -> ForeignKeyField:
+        return ForeignKeyField(self.id_ambulancia)
+    
+    @property
+    def is_ambulancia_none(self) -> bool:
+        return bool(self.id_ambulancia_id == '')
+    
     class Meta:
-        table_name = "driver"
+        table_name = "motorista"

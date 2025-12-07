@@ -1,19 +1,16 @@
-from peewee import AutoField, CharField, IntegerField
+from peewee import CharField, IntegerField
 from src.Model.BaseModel import BaseModel
 
-class Ambulance(BaseModel):
-    id              = AutoField()
-    number_plate    = CharField(max_length=8, null=False)
-    ambulance_model = CharField(max_length=35, null=False)
-    year            = IntegerField(null=False)
-    document_number = CharField(max_length=15, null=False)
+from src.Schema.Ambulance.AmbulanceStatusEnum import AmbulanceStatus
+from src.Schema.Ambulance.AmbulanceTypeEnum import AmbulanceType
 
-    def __repr__(self) -> str:
-        return (
-            f"<Ambulance(id={self.id}, number_plate={self.number_plate}, ambulance_model={self.ambulance_model}, year={self.year}, "
-            f"document_number={self.document_number})>"
-        )
+from src.Validator.UserValidator import generate_uuid
+
+class Ambulance(BaseModel):
+    id     : str             | CharField    = CharField(default=generate_uuid, max_length=32, primary_key=True)
+    status : AmbulanceStatus | IntegerField = IntegerField(null=False)
+    placa  : str             | CharField    = CharField(max_length=8, null=False, unique=True)
+    tipo   : AmbulanceType   | IntegerField = IntegerField(null=False)
     
     class Meta:
         table_name = "ambulance"
-    

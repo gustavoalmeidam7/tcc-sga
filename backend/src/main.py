@@ -1,39 +1,54 @@
-from fastapi import Request
-from fastapi.responses import JSONResponse
-from src.Error.ErrorClass import ErrorClass
-from src.Model import User, Driver, Travel, UserSession
+import asyncio
 from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from fastapi.middleware.cors import CORSMiddleware
-from src.Utils.env import get_env_var
 
-from src.Controller import app
+from src.Utils.env import get_env_var, get_env_var_not_none
 
-from src.DB import db
+from src import Controller
+from src.DB import Migration
+from src.Error import register_error_handlers
 
-origins = [
-    "https://*.tcc-sga.pages.dev",
-    "http://*.tcc-sga.pages.dev",
-]
+from src.Repository.SessionRepository import delete_expired_sessions
+
+from src.Logging import Logging, Level
+from src.Service.ManagerService import generate_manager_token_list
+from src.Validator.GenericValidator import mask_uuid
+
+Debug = get_env_var("environment", "DEV") == "DEV"
+
+app = Controller.initialize_controller()
+register_error_handlers(app)
+
+async def delete_expired_tokens() -> None:
+    while True:
+        await asyncio.sleep(120)
+
+        Logging.log("Deleting expired sessions", Level.DEBUG)
+        delete_expired_sessions()
+
+def main() -> None:
+    tokens = generate_manager_token_list(int(get_env_var("TOKENS", "5") or "5"))
+
+    Logging.log(f"Tokens para gerente: {[mask_uuid(t.str_id) for t in tokens if not t.usado and t.fator_cargo == 2]}", Level.SENSITIVE)
+
+    if Debug:
+        asyncio.create_task(delete_expired_tokens())
+    
+
+app.add_event_handler("startup", Migration.initialize_db)
+app.add_event_handler("startup", Controller.initialize_controller)
+app.add_event_handler("startup", main)
+
+app.add_event_handler("shutdown", Migration.close_db)
+app.add_event_handler("shutdown", Migration.drop_test_db)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origin_regex=r"(https://.*\.tcc-sga\.pages\.dev|http://localhost:5173)",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-if get_env_var("ENVIRONMENT", "dev") != "dev":
+if not Debug:
     app.add_middleware(HTTPSRedirectMiddleware)
-
-@app.exception_handler(ErrorClass)
-def error_handler(request: Request, error: ErrorClass):
-    return JSONResponse(
-        status_code=error.statusCode,
-        content={"Erros": error.errors}
-    )
-
-@app.on_event("startup")
-def main():
-    db.connect()
-    db.create_tables([User.User, Driver.Driver, Travel.Travel, UserSession.Session])

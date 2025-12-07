@@ -1,29 +1,77 @@
 from uuid import UUID
 
-from src.Model.UserSession import Session
+from src.Validator.GenericValidator import validate_uuid, unmask_uuid
 from src.Model.User import User
-
-from src.Utils.singleton import singleton
 
 from src.Model.UserSession import Session
 
 from typing import List
 from uuid import UUID
 
-class SessionRepository(metaclass=singleton):
-    def find_all(self) -> List[Session]:
-        return list(Session.select())
-    
-    def find_all_by_user(self, user: User) -> list[Session]:
-        return list(Session.select().where(Session.user == user.id))
 
-    def find_by_id(self, id: UUID) -> Session | None:
-        """ Procuta sessão pelo id da mesma, se não for encontrada retorna None """
-        return Session.select().where(Session.id == id).first()
+"""
+    Criar
+"""
 
-    def insert_session(self, session: Session) -> Session | None:
-        session = session.save(force_insert=True)
-        return session
+def insert_session(session: Session) -> None:
+    """ Insere uma sessão no banco de dados """
+    session.save(force_insert=True)
+
+"""
+    Ler
+"""
+
+def find_all() -> List[Session]:
+    """ Retorna todas as sessões """
+    return list(Session.select())
+
+def find_all_by_user(user: User) -> list[Session]:
+    """ Retorna todas sessões de um usuário  """
+    return list(Session.select().where(Session.usuario == user.id))
+
+def find_by_id(id: UUID) -> Session | None:
+    """ Procuta sessão pelo id da mesma, se não for encontrada retorna None """
+    return Session.select().where(Session.id == validate_uuid(id)).first()
+
+def find_session_by_session_id(id: str | UUID) -> Session | None:
+    """ Retorna uma sessão pela sessão do mesmo """
+    if type(id) == UUID:
+        id = validate_uuid(id)
     
-    def delete_token_by_id(self, token: UUID) -> None:
-        Session.delete_by_id(token)
+    session = Session.select().where(Session.id == id).first()
+    if session is None:
+        return None
+
+    return session
+
+def find_user_by_session_id(id: str | UUID) -> User | None:
+    """ Retorna o usuário pela sessão do mesmo """
+    id = unmask_uuid(id)
+    
+    userModel = Session.select().where(Session.id == id).first()
+    if userModel is None:
+        return None
+    
+    userModel = userModel.usuario
+    
+    return userModel
+
+"""
+    Atualizar
+"""
+
+"""
+    Deletar
+"""
+
+def delete_token_by_id(token: str) -> None:
+    """ Deleta uma sessão pelo seu ID """
+    Session.delete_by_id(validate_uuid(token))
+
+def delete_all_user_tokens_by_id(id: int) -> None:
+    """ Deleta todas sessões associadas a um usuário pelo seu ID """
+    Session.delete().where(Session.usuario == id).execute()
+
+def delete_expired_sessions() -> None:
+    """ Deleta todas sessões expiradas """
+    Session.delete().where(Session.is_expired == True).execute()
