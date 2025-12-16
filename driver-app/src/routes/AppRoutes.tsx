@@ -4,28 +4,32 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useThemeStyles } from "@/src/hooks/useThemeStyles";
+import { useThemeStyles } from "@/hooks/useThemeStyles";
 
-import Home from "../app/(tabs)/home";
-import Viagens from "../app/(tabs)/viagens";
-import Ambulancias from "../app/(tabs)/ambulancias";
-import Mais from "../app/(tabs)/mais";
+import Home from "../screens/home";
+import Viagens from "../screens/viagens";
+import Ambulancias from "../screens/ambulancias";
 
-import Detalhes from "../app/detalhes";
-import Navegacao from "../app/navegacao";
-import Perfil from "../app/perfil";
-import Termos from "../app/termos";
-import Configuracoes from "../app/configuracoes";
+
+import Mais from "../screens/mais";
+import Detalhes from "../screens/detalhes";
+import Navegacao from "../screens/navegacao";
+import Perfil from "../screens/perfil";
+import Termos from "../screens/termos";
+import Configuracoes from "../screens/configuracoes";
+import Suporte from "../screens/suporte";
+import Sobre from "../screens/sobre";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function TabRoutes() {
   const insets = useSafeAreaInsets();
-  const { isDark, colors, bg } = useThemeStyles();
+  const { isDark, colors } = useThemeStyles();
 
-  const TAB_HEIGHT = 60; 
-  const bottomPadding = Platform.OS === 'android' ? insets.bottom : insets.bottom;
+  const TAB_HEIGHT = 60;
+  const bottomPadding =
+    Platform.OS === "android" ? insets.bottom : insets.bottom;
 
   return (
     <Tab.Navigator
@@ -38,8 +42,7 @@ function TabRoutes() {
           borderTopWidth: 1,
           borderTopColor: isDark ? colors.border : "#E5E7EB",
           height: TAB_HEIGHT + bottomPadding,
-          paddingBottom: bottomPadding > 0 ? bottomPadding : 10,
-          paddingTop: 8,
+          paddingTop: 4,
           elevation: 8,
           shadowOpacity: 0.1,
           shadowColor: isDark ? "#000" : "#000",
@@ -55,7 +58,7 @@ function TabRoutes() {
         name="Home"
         component={Home}
         options={{
-          title: "Painel",
+          title: "Início",
           tabBarIcon: ({ color, size }) => (
             <Feather name="home" size={size} color={color} />
           ),
@@ -65,7 +68,7 @@ function TabRoutes() {
         name="ViagensTab"
         component={Viagens}
         options={{
-          title: "Viagens",
+          title: "Atividade",
           tabBarIcon: ({ color, size }) => (
             <Feather name="map" size={size} color={color} />
           ),
@@ -75,9 +78,13 @@ function TabRoutes() {
         name="Ambulancias"
         component={Ambulancias}
         options={{
-          title: "Ambulâncias",
+          title: "Ambulancia",
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="ambulance" size={size} color={color} />
+            <MaterialCommunityIcons
+              name="ambulance"
+              size={size}
+              color={color}
+            />
           ),
         }}
       />
@@ -87,7 +94,7 @@ function TabRoutes() {
         options={{
           title: "Mais",
           tabBarIcon: ({ color, size }) => (
-            <Feather name="more-horizontal" size={size} color={color} />
+            <Feather name="menu" size={size} color={color} />
           ),
         }}
       />
@@ -100,16 +107,18 @@ export default function AppRoutes() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="MainTabs" component={TabRoutes} />
       <Stack.Screen name="Detalhes" component={Detalhes} />
-      <Stack.Screen 
-        name="Navegacao" 
-        component={Navegacao} 
-        options={{ 
-          gestureEnabled: false
+      <Stack.Screen
+        name="Navegacao"
+        component={Navegacao}
+        options={{
+          gestureEnabled: false,
         }}
       />
       <Stack.Screen name="Perfil" component={Perfil} />
       <Stack.Screen name="Termos" component={Termos} />
       <Stack.Screen name="Configuracoes" component={Configuracoes} />
+      <Stack.Screen name="Suporte" component={Suporte} />
+      <Stack.Screen name="Sobre" component={Sobre} />
     </Stack.Navigator>
   );
 }

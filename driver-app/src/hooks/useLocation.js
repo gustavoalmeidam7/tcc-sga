@@ -75,7 +75,13 @@ export function useLocation(options = {}) {
     return () => {
       isMounted = false;
       if (watchSubscriptionRef.current) {
-        watchSubscriptionRef.current.remove();
+        if (typeof watchSubscriptionRef.current.remove === "function") {
+          watchSubscriptionRef.current.remove();
+        } else if (
+          typeof watchSubscriptionRef.current.removeSubscription === "function"
+        ) {
+          watchSubscriptionRef.current.removeSubscription();
+        }
         watchSubscriptionRef.current = null;
       }
     };

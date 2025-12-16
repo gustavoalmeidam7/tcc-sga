@@ -1,5 +1,5 @@
 import axios from "axios";
-import { clearAuthToken, getAuthToken } from "./tokenStore.js";
+import { getAuthToken } from "./tokenStore.js";
 
 const API_URL = __DEV__
   ? "http://127.0.0.1:8000"
@@ -13,17 +13,26 @@ export const setOnTokenExpired = (callback) => {
 
 const API = axios.create({
   baseURL: API_URL,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
+const AUTH_ROUTES = ["/token/", "/token/refresh-token/", "/token/logout/"];
 API.interceptors.request.use(
   async (config) => {
-    const token = await getAuthToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    const isAuthRoute = AUTH_ROUTES.some((route) =>
+      config.url?.includes(route)
+    );
+
+    if (!isAuthRoute) {
+      const token = await getAuthToken();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
+
     return config;
   },
   (error) => Promise.reject(error)
@@ -41,6 +50,7 @@ API.interceptors.response.use(
     }
 
     const { status, data } = error.response;
+    const originalRequest = error.config;
 
     const backendErrors = data?.Erros;
     let errorMessage = "Erro desconhecido";
@@ -52,7 +62,16 @@ API.interceptors.response.use(
     ) {
       errorMessage = backendErrors.join(", ");
     } else if (data?.detail) {
-      errorMessage = data.detail;
+      if (typeof data.detail === "object") {
+        const details = Array.isArray(data.detail)
+          ? data.detail
+          : [data.detail];
+        errorMessage = details
+          .map((d) => d.msg || JSON.stringify(d))
+          .join(", ");
+      } else {
+        errorMessage = data.detail;
+      }
     }
 
     if (status === 401) {
@@ -62,15 +81,32 @@ API.interceptors.response.use(
           message: errorMessage || "Credenciais inválidas",
         });
       }
-      
-      await clearAuthToken();
-      if (onTokenExpiredCallback) {
-        onTokenExpiredCallback();
+
+      if (originalRequest._retry) {
+        if (onTokenExpiredCallback) {
+          onTokenExpiredCallback();
+        }
+        return Promise.reject({
+          ...error,
+          message: "Sua sessão expirou. Faça login novamente.",
+        });
       }
-      return Promise.reject({
-        ...error,
-        message: "Sua sessão expirou. Faça login novamente.",
-      });
+
+      originalRequest._retry = true;
+
+      try {
+        await API.post("/token/refresh-token/");
+        return API(originalRequest);
+      } catch (refreshError) {
+        console.error("❌ Erro ao fazer refresh do token:", refreshError);
+        if (onTokenExpiredCallback) {
+          onTokenExpiredCallback();
+        }
+        return Promise.reject({
+          ...error,
+          message: "Sua sessão expirou. Faça login novamente.",
+        });
+      }
     }
 
     if (status === 403) {
@@ -99,7 +135,6 @@ API.interceptors.response.use(
         error.config?.url?.includes("/me") ||
         error.config?.url?.includes("/auth")
       ) {
-        await clearAuthToken();
       }
       return Promise.reject({
         ...error,

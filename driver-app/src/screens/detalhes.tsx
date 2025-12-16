@@ -8,32 +8,34 @@ import {
   Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 import { useState, useEffect, useMemo } from "react";
-import { useActiveTravel } from "@/src/contexts/ActiveTravelContext";
-import { useUsers } from "@/src/hooks/useUsers";
-import { useTravels } from "@/src/hooks/useTravels";
-import { useAmbulance } from "@/src/hooks/useAmbulance";
-import travelService from "@/src/services/travel";
-import { formatarDataHora } from "@/src/lib/date-utils";
-import { getTravelStatusLabel, TravelStatus } from "@/src/lib/travel-status";
+import { useActiveTravel } from "@/contexts/ActiveTravelContext";
+import { useUsers } from "@/hooks/useUsers";
+import { useTravels } from "@/hooks/useTravels";
+import { useAmbulance } from "@/hooks/useAmbulance";
+import travelService from "@/services/travel";
+import { formatarDataHora } from "@/lib/date-utils";
+import { getTravelStatusLabel, TravelStatus } from "@/lib/travel-status";
 import {
   validateTravelAcceptance,
   validateAmbulanceForTravel,
-} from "@/src/lib/travel-validation";
+} from "@/lib/travel-validation";
 import {
   formatCPF,
   formatPhone,
   formatarEndereco,
-} from "@/src/lib/format-utils";
-import ConfirmModal from "@/src/components/ConfirmModal";
-import { ThemedCard, ThemedText, ThemedView } from "@/src/components";
-import { useThemeStyles } from "@/src/hooks/useThemeStyles";
+} from "@/lib/format-utils";
+import ConfirmModal from "@/components/ConfirmModal";
+import { ThemedCard, ThemedText, ThemedView } from "@/components";
+import { useThemeStyles } from "@/hooks/useThemeStyles";
+import { RootStackParamList } from "@/types/navigation";
+import { Travel } from "@/types/models";
 
 export default function DetalhesViagem() {
-  const route = useRoute();
-  const navigation = useNavigation();
+  const route = useRoute<RouteProp<RootStackParamList, 'Detalhes'>>();
+  const navigation = useNavigation<any>();
   const { id } = route.params || {};
   const insets = useSafeAreaInsets();
   const { isDark, colors } = useThemeStyles();
@@ -42,9 +44,9 @@ export default function DetalhesViagem() {
   const { travels: todasViagens } = useTravels();
   const { ambulance } = useAmbulance();
 
-  const [viagem, setViagem] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [viagem, setViagem] = useState<Travel | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [showStartConfirm, setShowStartConfirm] = useState(false);
   const [showEndConfirm, setShowEndConfirm] = useState(false);
 
@@ -67,7 +69,7 @@ export default function DetalhesViagem() {
         setError(null);
         const data = await travelService.getTravelById(id);
         setViagem(data);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Erro ao buscar viagem:", err);
         setError(err.message || "Erro ao carregar viagem");
       } finally {
@@ -78,68 +80,70 @@ export default function DetalhesViagem() {
     fetchViagem();
   }, [id]);
 
-  const paciente = useMemo(() => {
-    if (!viagem?.id_paciente) return null;
-    const cached = users.get(viagem.id_paciente);
-    return cached?.user || null;
-  }, [viagem?.id_paciente, users]);
+const paciente = useMemo(() => {
+  if (!viagem?.id_paciente) return null;
+  const cached = users.get(viagem.id_paciente);
+  return cached?.user || null;
+}, [viagem?.id_paciente, users]);
 
-  const statusLabel = viagem ? getTravelStatusLabel(viagem.realizado) : null;
+const statusLabel = viagem ? getTravelStatusLabel(viagem.realizado) : null;
 
-  const handleStartTravel = () => {
-    if (viagem) {
-      const validation = validateTravelAcceptance(
-        viagem,
-        todasViagens,
-        hasActiveTravel()
-      );
+const handleStartTravel = () => {
+  if (viagem) {
+    const hasActive = typeof hasActiveTravel === 'function' ? hasActiveTravel() : hasActiveTravel;
 
-      if (!validation.canAccept) {
-        Alert.alert("Atenção", validation.message);
-        return;
-      }
+    const validation = validateTravelAcceptance(
+      viagem,
+      todasViagens,
+      hasActive
+    );
 
-      const ambulanceValidation = validateAmbulanceForTravel(ambulance);
-      if (!ambulanceValidation.canAccept) {
-        Alert.alert("Bloqueio", ambulanceValidation.message);
-        return;
-      }
+    if (!validation.canAccept) {
+      Alert.alert("Atenção", validation.message);
+      return;
     }
 
-    setShowStartConfirm(true);
-  };
-
-  const confirmStart = async () => {
-    try {
-      setShowStartConfirm(false);
-      await travelService.startTravel(id);
-      const data = await travelService.getTravelById(id);
-      setViagem(data);
-      setActiveTravel(id);
-
-      navigation.navigate("Navegacao", { id });
-    } catch (err) {
-      Alert.alert("Erro", err.message || "Erro ao iniciar viagem");
+    const ambulanceValidation = validateAmbulanceForTravel(ambulance);
+    if (!ambulanceValidation.canAccept) {
+      Alert.alert("Bloqueio", ambulanceValidation.message);
+      return;
     }
-  };
+  }
 
-  const handleEndTravel = () => {
-    setShowEndConfirm(true);
-  };
+  setShowStartConfirm(true);
+};
 
-  const confirmEnd = async () => {
-    try {
-      setShowEndConfirm(false);
-      await travelService.endTravel(id);
-      const data = await travelService.getTravelById(id);
-      setViagem(data);
-      clearActiveTravel();
-      Alert.alert("Sucesso", "Viagem finalizada com sucesso!");
-      navigation.goBack();
-    } catch (err) {
-      Alert.alert("Erro", err.message || "Erro ao finalizar viagem");
-    }
-  };
+const confirmStart = async () => {
+  try {
+    setShowStartConfirm(false);
+    await travelService.startTravel(id);
+    const data = await travelService.getTravelById(id);
+    setViagem(data);
+    setActiveTravel(id);
+
+    navigation.navigate("Navegacao", { id });
+  } catch (err: any) {
+    Alert.alert("Erro", err.message || "Erro ao iniciar viagem");
+  }
+};
+
+const handleEndTravel = () => {
+  setShowEndConfirm(true);
+};
+
+const confirmEnd = async () => {
+  try {
+    setShowEndConfirm(false);
+    await travelService.endTravel(id);
+    const data = await travelService.getTravelById(id);
+    setViagem(data);
+    clearActiveTravel();
+    Alert.alert("Sucesso", "Viagem finalizada com sucesso!");
+    navigation.goBack();
+  } catch (err: any) {
+    Alert.alert("Erro", err.message || "Erro ao finalizar viagem");
+  }
+};
 
   if (loading) {
     return (

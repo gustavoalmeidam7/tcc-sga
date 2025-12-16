@@ -13,15 +13,15 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
-import { useAuth } from "@/src/contexts/AuthContext";
-import { useDriver } from "@/src/hooks/useDriver";
-import { useAmbulance } from "@/src/hooks/useAmbulance";
-import { formatarData } from "@/src/lib/date-utils";
-import { formatCPF, formatPhone } from "@/src/lib/format-utils";
-import authService from "@/src/services/auth";
-import ConfirmModal from "@/src/components/ConfirmModal";
-import { ThemedCard, ThemedText, ThemedView } from "@/src/components";
-import { useThemeStyles } from "@/src/hooks/useThemeStyles";
+import { useAuth } from "@/contexts/AuthContext";
+import { useDriver } from "@/hooks/useDriver";
+import { useAmbulance } from "@/hooks/useAmbulance";
+import { formatarData } from "@/lib/date-utils";
+import { formatCPF, formatPhone } from "@/lib/format-utils";
+import authService from "@/services/auth";
+import ConfirmModal from "@/components/ConfirmModal";
+import { ThemedCard, ThemedText, ThemedView } from "@/components";
+import { useThemeStyles } from "@/hooks/useThemeStyles";
 
 const InfoCard = ({
   icon,
@@ -33,7 +33,7 @@ const InfoCard = ({
   type,
   formData,
   setFormData,
-}) => {
+}: any) => {
   const { isDark, colors } = useThemeStyles();
   return (
     <ThemedCard className="rounded-xl p-4 mb-3">
@@ -101,7 +101,7 @@ const InfoCard = ({
   );
 };
 
-const StatBadge = ({ label, value, icon, color = "bg-light-primary" }) => {
+const StatBadge = ({ label, value, icon, color = "bg-light-primary" }: any) => {
   const { colors } = useThemeStyles();
   const bgColor =
     color === "bg-light-success"
@@ -127,17 +127,18 @@ export default function Perfil() {
     loading: isLoadingDriver,
     fetchDriverInfo,
     updateDriver,
-  } = useDriver();
-  const { ambulance, fetchAmbulance } = useAmbulance();
+  } = useDriver() as any;
+  const { ambulance, fetchAmbulance } = useAmbulance() as any;
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
-  const { isDark, bg, text, colors } = useThemeStyles();
+  const navigation = useNavigation<any>();
+  const { isDark, colors } = useThemeStyles();
 
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [formData, setFormData] = useState({
+
+  const [formData, setFormData] = useState<any>({
     nome: user?.nome || "",
     email: user?.email || "",
     telefone: user?.telefone || "",
@@ -180,7 +181,7 @@ export default function Perfil() {
       await refreshUser();
 
       if (driverInfo) {
-        const driverUpdateData = {};
+        const driverUpdateData: any = {};
 
         if (formData.cnh && formData.cnh !== driverInfo.cnh) {
           driverUpdateData.cnh = formData.cnh;
@@ -221,7 +222,7 @@ export default function Perfil() {
               }
 
               driverUpdateData.vencimento = dateToSend;
-            } catch (dateError) {
+            } catch (dateError: any) {
               Alert.alert(
                 "Erro",
                 dateError.message || "Formato de data inválido. Use DD/MM/AAAA"
@@ -240,7 +241,7 @@ export default function Perfil() {
 
       Alert.alert("Sucesso", "Perfil atualizado com sucesso!");
       setEditMode(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao atualizar perfil:", error);
       const errorMessage =
         error.response?.data?.detail ||
@@ -275,7 +276,7 @@ export default function Perfil() {
     setRefreshing(true);
     try {
       await Promise.all([refreshUser(), fetchDriverInfo(), fetchAmbulance()]);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao atualizar dados:", error);
     } finally {
       setRefreshing(false);
@@ -295,7 +296,7 @@ export default function Perfil() {
           },
         },
       ]);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao deletar conta:", error);
       const errorMessage =
         error.response?.data?.detail ||
@@ -308,11 +309,11 @@ export default function Perfil() {
     }
   };
 
-  const getInitials = (name) => {
+  const getInitials = (name: any) => {
     if (!name) return "??";
     return name
       .split(" ")
-      .map((n) => n[0])
+      .map((n: any) => n[0])
       .slice(0, 2)
       .join("")
       .toUpperCase();
@@ -657,7 +658,7 @@ export default function Perfil() {
 
         <View className="px-5 mb-6">
           <ThemedText variant="primary" className="text-base font-bold mb-3">
-            Ações
+            Zona de Perigo
           </ThemedText>
           <ThemedCard
             className="rounded-xl overflow-hidden"

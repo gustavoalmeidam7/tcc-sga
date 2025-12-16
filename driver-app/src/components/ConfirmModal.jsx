@@ -1,7 +1,14 @@
 import React from "react";
-import { View, Text, TouchableOpacity, Modal, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Modal,
+  StyleSheet,
+  Platform,
+} from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { useThemeStyles } from "@/src/hooks/useThemeStyles";
+import { useThemeStyles } from "@/hooks/useThemeStyles";
 import { ThemedText } from "./ThemedText";
 
 export default function ConfirmModal({
@@ -9,13 +16,13 @@ export default function ConfirmModal({
   title,
   message,
   onConfirm,
-  onCancel,
+  onCancel = () => {},
   confirmText = "Confirmar",
   cancelText = "Cancelar",
   type = "danger",
 }) {
   const { isDark, colors } = useThemeStyles();
-  
+
   if (!visible) return null;
 
   const getIcon = () => {
@@ -46,29 +53,54 @@ export default function ConfirmModal({
   const iconName = getIcon();
 
   return (
-    <Modal transparent visible={visible} animationType="fade" statusBarTranslucent>
-      <View style={[styles.overlay, { backgroundColor: isDark ? "rgba(0, 0, 0, 0.7)" : "rgba(0, 0, 0, 0.5)" }]}>
-        <View style={[styles.container, { backgroundColor: isDark ? colors.card : "white" }]}>
+    <Modal
+      transparent
+      visible={visible}
+      animationType="fade"
+      statusBarTranslucent
+    >
+      <View
+        style={[
+          styles.overlay,
+          {
+            backgroundColor: isDark
+              ? "rgba(0, 0, 0, 0.7)"
+              : "rgba(0, 0, 0, 0.5)",
+          },
+        ]}
+      >
+        <View
+          style={[
+            styles.container,
+            { backgroundColor: isDark ? colors.card : "white" },
+          ]}
+        >
           <View style={styles.content}>
             <View
-              style={[
-                styles.iconContainer,
-                { backgroundColor: `${color}20` },
-              ]}
+              style={[styles.iconContainer, { backgroundColor: `${color}20` }]}
             >
               <Feather name={iconName} size={28} color={color} />
             </View>
-            <ThemedText variant="primary" style={styles.title}>{title}</ThemedText>
-            <ThemedText variant="muted" style={styles.message}>{message}</ThemedText>
+            <ThemedText variant="primary" style={styles.title}>
+              {title}
+            </ThemedText>
+            <ThemedText variant="muted" style={styles.message}>
+              {message}
+            </ThemedText>
           </View>
           <View style={styles.actions}>
             {cancelText ? (
               <TouchableOpacity
-                style={[styles.cancelButton, { backgroundColor: isDark ? colors.input : "#F3F4F6" }]}
+                style={[
+                  styles.cancelButton,
+                  { backgroundColor: isDark ? colors.input : "#F3F4F6" },
+                ]}
                 onPress={onCancel}
                 activeOpacity={0.7}
               >
-                <ThemedText variant="primary" style={styles.cancelText}>{cancelText}</ThemedText>
+                <ThemedText variant="primary" style={styles.cancelText}>
+                  {cancelText}
+                </ThemedText>
               </TouchableOpacity>
             ) : null}
             <TouchableOpacity
@@ -98,14 +130,21 @@ const styles = StyleSheet.create({
     width: "100%",
     maxWidth: 340,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
     elevation: 5,
+    ...Platform.select({
+      web: {
+        boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.25)",
+      },
+      default: {
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+      },
+    }),
   },
   content: {
     alignItems: "center",
@@ -159,4 +198,3 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
-

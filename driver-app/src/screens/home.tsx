@@ -8,21 +8,29 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
-import { useAuth } from "@/src/contexts/AuthContext";
-import { useActiveTravel } from "@/src/contexts/ActiveTravelContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { useActiveTravel } from "@/contexts/ActiveTravelContext";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMemo, useState, useEffect } from "react";
-import { useTravels } from "@/src/hooks/useTravels";
-import { useUsers } from "@/src/hooks/useUsers";
-import { formatarHora } from "@/src/lib/date-utils";
-import { formatarEndereco } from "@/src/lib/format-utils";
-import { TravelStatus } from "@/src/lib/travel-status";
-import travelService from "@/src/services/travel";
-import ConfirmModal from "@/src/components/ConfirmModal";
-import { ThemedCard, ThemedText } from "@/src/components";
-import { useThemeStyles } from "@/src/hooks/useThemeStyles";
+import { useTravels } from "@/hooks/useTravels";
+import { useUsers } from "@/hooks/useUsers";
+import { formatarHora } from "@/lib/date-utils";
+import { formatarEndereco } from "@/lib/format-utils";
+import { TravelStatus } from "@/lib/travel-status";
+import travelService from "@/services/travel";
+import ConfirmModal from "@/components/ConfirmModal";
+import { ThemedCard, ThemedText } from "@/components";
+import { useThemeStyles } from "@/hooks/useThemeStyles";
 
-const StatsCard = ({ icon, title, value, iconColor, bgColor }) => {
+interface StatsCardProps {
+  icon: keyof typeof Feather.glyphMap;
+  title: string;
+  value: number | string;
+  iconColor: string;
+  bgColor: string;
+}
+
+const StatsCard = ({ icon, title, value, iconColor, bgColor }: StatsCardProps) => {
   return (
     <ThemedCard className="rounded-xl p-4 flex-1 items-center justify-center">
       <View
@@ -44,13 +52,21 @@ const StatsCard = ({ icon, title, value, iconColor, bgColor }) => {
   );
 };
 
+interface ViagemEmAndamentoProps {
+  viagem: any;
+  pacienteNome: string | null;
+  onPressDetalhes: () => void;
+  onFinalizarViagem?: () => void;
+  onIrParaNavegacao?: () => void;
+}
+
 const ViagemEmAndamento = ({
   viagem,
   pacienteNome,
   onPressDetalhes,
   onFinalizarViagem,
   onIrParaNavegacao,
-}) => (
+}: ViagemEmAndamentoProps) => (
   <TouchableOpacity
     className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-3xl p-6 shadow-xl mt-6"
     style={{ backgroundColor: "#2563EB" }}
@@ -132,12 +148,19 @@ const ViagemEmAndamento = ({
   </TouchableOpacity>
 );
 
+interface ViagensHojeProps {
+  viagens: any[];
+  getUserName: (id: string) => string;
+  onPressViagem: (id: string) => void;
+  onIrParaNavegacao?: (id: string) => void;
+}
+
 const ViagensHoje = ({
   viagens,
   getUserName,
   onPressViagem,
   onIrParaNavegacao,
-}) => {
+}: ViagensHojeProps) => {
   const { isDark } = useThemeStyles();
   return (
     <View className="mt-6">
@@ -223,7 +246,13 @@ const ViagensHoje = ({
   );
 };
 
-const EmptyState = ({ icon, title, description }) => {
+interface EmptyStateProps {
+  icon: keyof typeof MaterialCommunityIcons.glyphMap;
+  title: string;
+  description: string;
+}
+
+const EmptyState = ({ icon, title, description }: EmptyStateProps) => {
   const { isDark, bg } = useThemeStyles();
   return (
     <ThemedCard className="rounded-3xl p-8 items-center mt-6">
@@ -251,7 +280,7 @@ export default function Home() {
   const { user } = useAuth();
   const { setActiveTravel } = useActiveTravel();
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const { isDark, bg } = useThemeStyles();
   const [refreshing, setRefreshing] = useState(false);
   const [showEndConfirm, setShowEndConfirm] = useState(false);
@@ -274,11 +303,11 @@ export default function Home() {
   }, [viagemEmAndamento, setActiveTravel]);
 
   const pacienteIds = useMemo(() => {
-    const ids = new Set();
+    const ids = new Set<string>();
     if (viagemEmAndamento?.id_paciente) {
       ids.add(viagemEmAndamento.id_paciente);
     }
-    viagensHoje.forEach((v) => {
+    viagensHoje.forEach((v: any) => {
       if (v.id_paciente) {
         ids.add(v.id_paciente);
       }
@@ -293,11 +322,11 @@ export default function Home() {
     return getUserName(viagemEmAndamento.id_paciente);
   }, [viagemEmAndamento, getUserName]);
 
-  const handlePressDetalhes = (viagemId) => {
+  const handlePressDetalhes = (viagemId: string) => {
     navigation.navigate("Detalhes", { id: viagemId });
   };
 
-  const handleIrParaNavegacao = (viagemId) => {
+  const handleIrParaNavegacao = (viagemId: string) => {
     navigation.navigate("Navegacao", { id: viagemId });
   };
 
@@ -314,11 +343,12 @@ export default function Home() {
 
   const confirmEndTravel = async () => {
     setShowEndConfirm(false);
+    if (!viagemEmAndamento) return;
     try {
       setRefreshing(true);
       await travelService.endTravel(viagemEmAndamento.id);
       await fetchTravels();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Erro ao finalizar viagem:", err);
       setErrorMessage(
         err?.message || "Não foi possível finalizar a viagem. Tente novamente."

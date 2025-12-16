@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import authService from "../services/auth";
-import { formatarDateParaBackend } from "@/src/lib/date-utils";
+import { formatarDateParaBackend } from "@/lib/date-utils";
 
 const isWithinBusinessDays = (cachedDate, businessDays = 7) => {
   const now = new Date();

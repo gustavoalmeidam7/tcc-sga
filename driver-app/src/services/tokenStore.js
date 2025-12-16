@@ -2,8 +2,6 @@ import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
 import { Buffer } from "buffer";
 
-global.Buffer = Buffer;
-
 const isWeb = Platform.OS === "web";
 
 export const isTokenExpired = (token) => {
@@ -29,7 +27,7 @@ export const isTokenExpired = (token) => {
 
 export const getAuthToken = async () => {
   let token;
-  
+
   if (isWeb) {
     token = localStorage.getItem("authToken");
   } else {

@@ -17,14 +17,14 @@ import { ThemedView, ThemedText } from "../components";
 import { useThemeStyles } from "../hooks/useThemeStyles";
 
 export default function Login() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const {
     login,
     isAuthLoading: authLoading,
     error: authError,
     clearError,
   } = useAuth();
-  const { isDark, bg, text, colors } = useThemeStyles();
+  const { isDark, colors } = useThemeStyles();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,7 +34,7 @@ export default function Login() {
     try {
       if (authError) clearError();
       await login(email, password);
-    } catch (err) {
+    } catch (err: any) {
       console.warn("Erro no login:", err?.message || err);
     }
   };

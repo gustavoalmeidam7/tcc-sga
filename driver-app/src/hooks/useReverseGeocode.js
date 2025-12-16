@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { formatarEndereco } from "../lib/format-utils"; // Importar formatarEndereco
+import { formatarEndereco } from "../lib/format-utils";
 
 const GEOAPIFY_API_KEY = "aebbd6003ace495cb8242038b45cf6ca";
 

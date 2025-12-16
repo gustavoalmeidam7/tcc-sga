@@ -4,13 +4,22 @@ import React, {
   useState,
   useCallback,
   useEffect,
+  ReactNode,
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const ActiveTravelContext = createContext(null);
+interface ActiveTravelContextData {
+  activeTravelId: string | null;
+  setActiveTravel: (id: string | number | null) => void;
+  clearActiveTravel: () => void;
+  hasActiveTravel: () => boolean;
+  loading: boolean;
+}
 
-export function ActiveTravelProvider({ children }) {
-  const [activeTravelId, setActiveTravelId] = useState(null);
+const ActiveTravelContext = createContext<ActiveTravelContextData | null>(null);
+
+export function ActiveTravelProvider({ children }: { children: ReactNode }) {
+  const [activeTravelId, setActiveTravelId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -47,7 +56,7 @@ export function ActiveTravelProvider({ children }) {
     }
   }, [activeTravelId, loading]);
 
-  const setActiveTravel = useCallback((travelId) => {
+  const setActiveTravel = useCallback((travelId: string | number | null) => {
     setActiveTravelId(travelId ? String(travelId) : null);
   }, []);
 

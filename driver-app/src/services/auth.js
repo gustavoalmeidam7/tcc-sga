@@ -1,12 +1,11 @@
 import API from "./api.js";
-import { clearAuthToken } from "./tokenStore.js";
 
 const login = async (email, senha) => {
   const formData = new URLSearchParams();
   formData.append("username", email);
   formData.append("password", senha);
 
-  const response = await API.post("/token", formData, {
+  const response = await API.post("/token/", formData, {
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
     },
@@ -35,7 +34,8 @@ const deleteUser = async () => {
 };
 
 const logout = async () => {
-  return clearAuthToken();
+  const response = await API.post("/token/logout/");
+  return response.data;
 };
 
 const authService = {

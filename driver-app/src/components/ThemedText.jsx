@@ -1,6 +1,6 @@
 import React from "react";
 import { Text } from "react-native";
-import { useThemeStyles } from "@/src/hooks/useThemeStyles";
+import { useThemeStyles } from "@/hooks/useThemeStyles";
 
 export const ThemedText = ({
   children,

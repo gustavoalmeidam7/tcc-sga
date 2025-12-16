@@ -1,16 +1,24 @@
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext, ReactNode } from "react";
 import { useColorScheme as useRNColorScheme } from "react-native";
 import { usePreferences } from "./PreferencesContext";
-import { getThemeColors } from "@/src/lib/theme-utils";
+import { getThemeColors } from "@/lib/theme-utils";
+import { ThemeColors } from "@/hooks/useThemeStyles";
 
-const ThemeContext = createContext({
+interface ThemeContextData {
+  theme: "light" | "dark";
+  isDark: boolean;
+  colorScheme: "light" | "dark";
+  colors: ThemeColors | {};
+}
+
+const ThemeContext = createContext<ThemeContextData>({
   theme: "light",
   isDark: false,
   colorScheme: "light",
   colors: {},
 });
 
-export const ThemeProvider = ({ children }) => {
+export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const { preferences } = usePreferences();
   const systemColorScheme = useRNColorScheme();
 
@@ -29,3 +37,4 @@ export const ThemeProvider = ({ children }) => {
 };
 
 export const useTheme = () => useContext(ThemeContext);
+

@@ -10,19 +10,27 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useDriver } from "@/src/hooks/useDriver";
-import { useTravels } from "@/src/hooks/useTravels";
-import { useAmbulance } from "@/src/hooks/useAmbulance";
+import { useDriver } from "@/hooks/useDriver";
+import { useTravels } from "@/hooks/useTravels";
+import { useAmbulance } from "@/hooks/useAmbulance";
 import { useState } from "react";
 import {
   getAmbulanceStatusLabel,
   getAmbulanceTypeLabel,
   getAmbulanceStatusColor,
   AmbulanceStatus,
-} from "@/src/lib/ambulance";
-import ConfirmModal from "@/src/components/ConfirmModal";
-import { ThemedCard, ThemedText, ThemedView } from "@/src/components";
-import { useThemeStyles } from "@/src/hooks/useThemeStyles";
+} from "@/lib/ambulance";
+import ConfirmModal from "@/components/ConfirmModal";
+import { ThemedCard, ThemedText, ThemedView } from "@/components";
+import { useThemeStyles } from "@/hooks/useThemeStyles";
+
+interface InfoCardProps {
+  icon: keyof typeof Feather.glyphMap;
+  label: string;
+  value: string;
+  iconColor?: string;
+  bgColor?: string;
+}
 
 const InfoCard = ({
   icon,
@@ -30,7 +38,7 @@ const InfoCard = ({
   value,
   iconColor = "#3B82F6",
   bgColor = "#EFF6FF",
-}) => {
+}: InfoCardProps) => {
   const { isDark, colors } = useThemeStyles();
   return (
     <ThemedCard className="rounded-2xl p-5 mb-3">
@@ -57,7 +65,12 @@ const InfoCard = ({
   );
 };
 
-const StatusCard = ({ status, emViagem }) => {
+interface StatusCardProps {
+  status: typeof AmbulanceStatus[keyof typeof AmbulanceStatus];
+  emViagem: boolean;
+}
+
+const StatusCard = ({ status, emViagem }: StatusCardProps) => {
   const displayStatus =
     status !== AmbulanceStatus.MAINTENANCE && emViagem
       ? AmbulanceStatus.IN_USE
@@ -108,26 +121,29 @@ const StatusCard = ({ status, emViagem }) => {
 
 export default function Ambulancias() {
   const insets = useSafeAreaInsets();
-  const { isDark, bg, text, colors } = useThemeStyles();
+  const { isDark, bg, colors } = useThemeStyles();
   const [refreshing, setRefreshing] = useState(false);
   const [showMaintenanceConfirm, setShowMaintenanceConfirm] = useState(false);
+  
   const {
     driverInfo,
     loading: driverLoading,
     error: driverError,
     fetchDriverInfo,
-  } = useDriver();
+  } = useDriver() as any;
+  
   const {
     ambulance,
     loading: ambulanceLoading,
     error: ambulanceError,
     fetchAmbulance,
     updateAmbulanceStatus,
-  } = useAmbulance();
+  } = useAmbulance() as any;
+  
   const { getTravelStats } = useTravels();
 
   const { viagemEmAndamento } = getTravelStats();
-  const emViagem = viagemEmAndamento ? true : false;
+  const emViagem = !!viagemEmAndamento;
   const loading = driverLoading || ambulanceLoading;
 
   const onRefresh = async () => {
@@ -148,7 +164,7 @@ export default function Ambulancias() {
         AmbulanceStatus.MAINTENANCE,
         ambulance.tipo
       );
-    } catch (err) {
+    } catch (err: any) {
       Alert.alert(
         "Erro",
         err.message || "Erro ao atualizar status da ambulância"
@@ -214,7 +230,7 @@ export default function Ambulancias() {
           </View>
         </ThemedView>
 
-        <View className="px-5 pb-6">
+        <View className="px-5 pt-6 pb-6">
           {(driverError || ambulanceError) && (
             <View className="mx-5 mb-4 bg-red-100 p-4 rounded-xl">
               <Text className="text-red-600 font-semibold">
@@ -403,7 +419,7 @@ export default function Ambulancias() {
                 </ThemedText>
                 {ambulance.equipamentos && ambulance.equipamentos.length > 0 ? (
                   <ThemedCard className="rounded-2xl p-5">
-                    {ambulance.equipamentos.map((equipamento, index) => (
+                    {ambulance.equipamentos.map((equipamento: any, index: any) => (
                       <View
                         key={index}
                         className={`pb-4 ${index < ambulance.equipamentos.length - 1 ? `border-b ${isDark ? "border-dark-border" : "border-gray-200"} mb-4` : ""}`}

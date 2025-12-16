@@ -8,14 +8,14 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
-import { useAuth } from "@/src/contexts/AuthContext";
+import { useAuth } from "../contexts/AuthContext";
 import { useNavigation } from "@react-navigation/native";
-import ConfirmModal from "@/src/components/ConfirmModal";
-import { useThemeStyles } from "@/src/hooks/useThemeStyles";
+import ConfirmModal from "../components/ConfirmModal";
+import { useThemeStyles } from "../hooks/useThemeStyles";
 
 export default function MoreScreen() {
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const { user, logout } = useAuth();
   const { isDark, bg, text, border, colors } = useThemeStyles();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -24,16 +24,25 @@ export default function MoreScreen() {
     setShowLogoutConfirm(true);
   };
 
-  const menuItems = [
+  interface MenuItem {
+    icon: keyof typeof Feather.glyphMap;
+    title: string;
+    subtitle: string;
+    action?: () => void;
+  }
+
+  const menuItems: MenuItem[] = [
     {
       icon: "help-circle",
       title: "Suporte",
       subtitle: "Central de ajuda e atendimento",
+      action: () => navigation.navigate("Suporte"),
     },
     {
       icon: "info",
       title: "Sobre o App",
       subtitle: "Versão 1.0.0 - Informações do sistema",
+      action: () => navigation.navigate("Sobre"),
     },
     {
       icon: "file-text",

@@ -8,8 +8,8 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
-import { ThemedCard, ThemedText, ThemedView } from "@/src/components";
-import { useThemeStyles } from "@/src/hooks/useThemeStyles";
+import { ThemedCard, ThemedText, ThemedView } from "@/components";
+import { useThemeStyles } from "@/hooks/useThemeStyles";
 
 export default function Termos() {
   const insets = useSafeAreaInsets();

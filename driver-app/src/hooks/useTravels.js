@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import travelService from "../services/travel";
-import { TravelStatus } from "@/src/lib/travel-status";
+import { TravelStatus } from "@/lib/travel-status";
 
 export const useTravels = () => {
-  const [travels, setTravels] = useState([]);
+  const [travels, setTravels] = useState(/** @type {any[]} */ ([]));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 

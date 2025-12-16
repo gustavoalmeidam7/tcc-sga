@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from "react";
-import { RouteCacheService } from "@/src/services/routeCache";
+import { RouteCacheService } from "@/services/routeCache";
 
 const GEOAPIFY_API_KEY = "aebbd6003ace495cb8242038b45cf6ca";
 
@@ -127,12 +127,6 @@ export function useGeoapifyRouting(
         }));
 
         const properties = route.properties || {};
-        const distanciaKm = properties.distance
-          ? (properties.distance / 1000).toFixed(1)
-          : null;
-        const duracaoMin = properties.time
-          ? Math.ceil(properties.time / 60)
-          : null;
 
         const instructions =
           properties.legs?.[0]?.steps?.map((step) => {
@@ -147,14 +141,28 @@ export function useGeoapifyRouting(
 
             return {
               instruction: instrucaoTexto,
+              streetName: step.name || step.way_name || "",
               distance: step.distance,
               duration: step.duration,
             };
           }) || [];
 
+        const distanciaTotalSteps = instructions.reduce(
+          (acc, step) => acc + (step.distance || 0),
+          0
+        );
+        const distanciaMetros =
+          distanciaTotalSteps > 0
+            ? distanciaTotalSteps
+            : properties.distance || 0;
+
+        const duracaoMin = properties.time
+          ? Math.ceil(properties.time / 60)
+          : null;
+
         const resultado = {
           coordinates,
-          distancia: distanciaKm,
+          distancia: distanciaMetros,
           duracao: duracaoMin,
           instructions,
           geometry: geometry.coordinates,
@@ -211,10 +219,10 @@ export function useGeoapifyRouting(
       let shouldRecalculate = false;
       if (!lastKey || lastKey !== coordsKey) {
         if (lastKey) {
-          const [lastOrigLat, lastOrigLon] = lastKey.split(',');
+          const [lastOrigLat, lastOrigLon] = lastKey.split(",");
           const distance = Math.sqrt(
             Math.pow(coordOrigem[0] - parseFloat(lastOrigLat), 2) +
-            Math.pow(coordOrigem[1] - parseFloat(lastOrigLon), 2)
+              Math.pow(coordOrigem[1] - parseFloat(lastOrigLon), 2)
           );
           shouldRecalculate = isFirstCallRef.current || distance > 0.0005;
         } else {
@@ -225,7 +233,11 @@ export function useGeoapifyRouting(
       if (shouldRecalculate) {
         lastCoordsRef.current = coordsKey;
 
-        const delay = isFirstCallRef.current ? 0 : (updateInterval !== null ? updateInterval : 10000);
+        const delay = isFirstCallRef.current
+          ? 0
+          : updateInterval !== null
+            ? updateInterval
+            : 10000;
 
         const executeCalculation = async () => {
           const resultado = await calcularRota(coordOrigem, coordDestino);

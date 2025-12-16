@@ -8,18 +8,19 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Travel } from "@/types/models";
 import { useNavigation } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
-import { useTravels } from "@/src/hooks/useTravels";
-import { useUsers } from "@/src/hooks/useUsers";
-import { formatarHora } from "@/src/lib/date-utils";
-import { formatarEndereco } from "@/src/lib/format-utils";
-import { TravelStatus, getTravelStatusLabel } from "@/src/lib/travel-status";
+import { useTravels } from "@/hooks/useTravels";
+import { useUsers } from "@/hooks/useUsers";
+import { formatarHora } from "@/lib/date-utils";
+import { formatarEndereco } from "@/lib/format-utils";
+import { TravelStatus, getTravelStatusLabel } from "@/lib/travel-status";
 import { useMemo, useState, useCallback } from "react";
-import { ThemedCard, ThemedText, ThemedView } from "@/src/components";
-import { useThemeStyles } from "@/src/hooks/useThemeStyles";
+import { ThemedCard, ThemedText, ThemedView } from "@/components";
+import { useThemeStyles } from "@/hooks/useThemeStyles";
 
-const getStatusStyles = (status) => {
+const getStatusStyles = (status: number) => {
   switch (status) {
     case TravelStatus.REALIZADO:
       return {
@@ -42,7 +43,13 @@ const getStatusStyles = (status) => {
   }
 };
 
-const ViagemCard = ({ viagem, pacienteNome, onPress }) => {
+interface ViagemCardProps {
+  viagem: Travel;
+  pacienteNome: string | null;
+  onPress: () => void;
+}
+
+const ViagemCard = ({ viagem, pacienteNome, onPress }: ViagemCardProps) => {
   const { isDark, colors } = useThemeStyles();
   const statusLabel = getTravelStatusLabel(viagem.realizado);
   const styles = getStatusStyles(viagem.realizado);
@@ -170,20 +177,20 @@ const ViagemCard = ({ viagem, pacienteNome, onPress }) => {
 
 export default function Viagens() {
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const { isDark, colors } = useThemeStyles();
 
   const [refreshing, setRefreshing] = useState(false);
   const { travels, loading, error, fetchTravels } = useTravels();
 
   const pacienteIds = useMemo(() => {
-    return travels.map((t) => t.id_paciente).filter(Boolean);
+    return travels.map((t: Travel) => t.id_paciente).filter(Boolean);
   }, [travels]);
 
   const { getUserName } = useUsers(pacienteIds);
 
   const handlePressViagem = useCallback(
-    (id) => {
+    (id: number) => {
       navigation.navigate("Detalhes", { id });
     },
     [navigation]
@@ -196,7 +203,7 @@ export default function Viagens() {
   };
 
   const renderViagem = useCallback(
-    ({ item: viagem }) => {
+    ({ item: viagem }: { item: Travel }) => {
       const pacienteNome = viagem.id_paciente
         ? getUserName(viagem.id_paciente)
         : null;
@@ -317,7 +324,7 @@ export default function Viagens() {
 
       <FlatList
         data={travels}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => String(item.id)}
         renderItem={renderViagem}
         contentContainerStyle={{
           padding: 20,
