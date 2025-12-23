@@ -1,5 +1,4 @@
 from uuid import UUID, uuid4
-from pydantic import ValidationError
 
 def validate_uuid(uuid: str | UUID) -> UUID:
     """ Recebe um possível uuid e retorna ele corretamente validado """
@@ -9,7 +8,7 @@ def validate_uuid(uuid: str | UUID) -> UUID:
     uuidResponse = mask_uuid(str(uuid))
 
     if uuidResponse is None:
-        raise ValidationError("Erro a o validar UUID")
+        raise ValueError("UUID inválido")
     
     return uuidResponse
 

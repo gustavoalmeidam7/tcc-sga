@@ -145,12 +145,7 @@ export const vencimentoCNHSchema = z.string().refine(validarDataVencimento, {
   message: "A CNH não pode estar vencida.",
 });
 
-export const ambulanciaIdSchema = z.string().min(1, {
-  message: "ID da ambulância é obrigatório.",
-});
-
 export const motoristaSchema = z.object({
   cnh: cnhSchema,
   vencimento: vencimentoCNHSchema,
-  id_ambulancia: ambulanciaIdSchema,
 });
