@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { useMutation } from "@tanstack/react-query";
 import { upgradeAccount, getUpgradeTokenInfo } from "@/services/managerService";
 import { showErrorToast, showSuccessToast } from "@/lib/error-utils";
-import { Crown, Loader2, Truck, Sparkles } from "lucide-react";
+import { Crown, Loader2, Truck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { motoristaSchema } from "@/lib/validations/validations";
 
@@ -23,7 +23,6 @@ export function UpgradeAccountModal({ open, onOpenChange }) {
   const [driverFields, setDriverFields] = useState({
     cnh: "",
     vencimento: "",
-    id_ambulancia: "",
   });
   const [fieldErrors, setFieldErrors] = useState({});
   const { refreshUser } = useAuth();
@@ -36,15 +35,6 @@ export function UpgradeAccountModal({ open, onOpenChange }) {
     return numbers.slice(0, 11);
   };
 
-  const generateUUID = () => {
-    return crypto.randomUUID();
-  };
-
-  const handleGenerateAmbulanciaId = () => {
-    const uuid = generateUUID();
-    setDriverFields({ ...driverFields, id_ambulancia: uuid });
-    setFieldErrors({ ...fieldErrors, id_ambulancia: undefined });
-  };
 
   const handleCNHChange = (e) => {
     const formatted = formatCNH(e.target.value);
@@ -57,10 +47,6 @@ export function UpgradeAccountModal({ open, onOpenChange }) {
     setFieldErrors({ ...fieldErrors, vencimento: undefined });
   };
 
-  const handleAmbulanciaChange = (e) => {
-    setDriverFields({ ...driverFields, id_ambulancia: e.target.value });
-    setFieldErrors({ ...fieldErrors, id_ambulancia: undefined });
-  };
 
   const checkTokenMutation = useMutation({
     mutationFn: getUpgradeTokenInfo,
@@ -149,7 +135,7 @@ export function UpgradeAccountModal({ open, onOpenChange }) {
     if (!upgradeMutation.isPending && !checkTokenMutation.isPending) {
       setToken("");
       setTokenInfo(null);
-      setDriverFields({ cnh: "", vencimento: "", id_ambulancia: "" });
+      setDriverFields({ cnh: "", vencimento: "" });
       setFieldErrors({});
       onOpenChange(false);
     }
@@ -256,39 +242,6 @@ export function UpgradeAccountModal({ open, onOpenChange }) {
                 </p>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="ambulancia">ID da Ambulância *</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="ambulancia"
-                    value={driverFields.id_ambulancia}
-                    onChange={handleAmbulanciaChange}
-                    placeholder="ID da ambulância"
-                    disabled={upgradeMutation.isPending}
-                    className={
-                      fieldErrors.id_ambulancia ? "border-destructive" : ""
-                    }
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    onClick={handleGenerateAmbulanciaId}
-                    disabled={upgradeMutation.isPending}
-                    title="Gerar UUID"
-                  >
-                    <Sparkles className="h-4 w-4" />
-                  </Button>
-                </div>
-                {fieldErrors.id_ambulancia && (
-                  <p className="text-xs text-destructive">
-                    {fieldErrors.id_ambulancia}
-                  </p>
-                )}
-                <p className="text-xs text-muted-foreground">
-                  Clique no botão para gerar um UUID automaticamente
-                </p>
-              </div>
             </div>
           )}
 
